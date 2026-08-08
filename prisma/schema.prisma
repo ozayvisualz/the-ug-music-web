@@ -1,0 +1,680 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  LISTENER
+  ARTIST
+  ADMIN
+}
+
+enum SubscriptionPlan {
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+}
+
+enum TransactionType {
+  DEPOSIT
+  PURCHASE
+  SUBSCRIPTION
+  TIP
+  MERCH
+  TICKET
+  WITHDRAWAL
+  PAYOUT
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum AdType {
+  AUDIO
+  BANNER
+  VIDEO
+}
+
+enum RevenueSource {
+  STREAMING
+  DOWNLOAD
+  TIP
+  MERCH
+  TICKET
+  SUBSCRIPTION
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  phone         String?   @unique
+  image         String?
+  password      String?
+  role          UserRole  @default(LISTENER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts        Account[]
+  sessions        Session[]
+  streams         Stream[]
+  downloads       Download[]
+  tips            Tip[]           @relation("TipFromUser")
+  playlists       Playlist[]
+  likes           Like[]
+  follows         Follow[]
+  comments        Comment[]
+  orders          Order[]
+  tickets         TicketPurchase[]
+  subscriptions   Subscription[]
+  notificationPrefs NotificationPref?
+  artist          Artist?
+  ads             Ad[]
+  copyrightClaims CopyrightClaim[]
+  invoices        Invoice[]
+  referrals       Referral[]      @relation("ReferrerUser")
+  supportTickets  SupportTicket[]
+  referredIn      Referral[]      @relation("ReferredUser")
+  auditLogs       AuditLog[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Artist {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  bio            String?
+  genre          String?
+  location       String?
+  verified       Boolean  @default(false)
+  featured       Boolean  @default(false)
+  totalStreams   Int      @default(0)
+  totalDownloads Int      @default(0)
+  totalEarnings  Int      @default(0)
+  labelId        String?
+  createdAt      DateTime @default(now())
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label          Label?        @relation(fields: [labelId], references: [id])
+  songs          Song[]
+  albums         Album[]
+  paymentMethods PaymentMethod[]
+  wallet         ArtistWallet?
+  products       Product[]
+  events         Event[]
+  contracts      Contract[]
+  royaltyRecords RoyaltyRecord[]
+  invoices       Invoice[]
+  promotions     Promotion[]
+}
+
+model ArtistWallet {
+  id                String @id @default(cuid())
+  artistId          String @unique
+  availableBalance  Int    @default(0)
+  pendingBalance    Int    @default(0)
+  lifetimeEarnings  Int    @default(0)
+  totalWithdrawn    Int    @default(0)
+  updatedAt         DateTime @updatedAt
+
+  artist        Artist          @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  payouts       Payout[]
+  revenueRecords RevenueRecord[]
+}
+
+model PaymentMethod {
+  id           String @id @default(cuid())
+  artistId     String
+  type         String
+  accountName  String
+  accountNumber String
+  provider     String
+  isDefault    Boolean @default(false)
+  createdAt    DateTime @default(now())
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+}
+
+model Song {
+  id          String   @id @default(cuid())
+  artistId    String
+  albumId     String?
+  title       String
+  genre       String?
+  description String?
+  duration    Int      @default(0)
+  fileUrl     String?
+  hlsUrl      String?
+  coverUrl    String?
+  price       Int      @default(1000)
+  playCount   Int      @default(0)
+  downloadCount Int    @default(0)
+  approved    Boolean  @default(false)
+  published   Boolean  @default(false)
+  story       String?
+  releaseDate String?
+  songwriters String?
+  producer    String?
+  beatProducer String?
+  videoUrl    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  artist    Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  album     Album?    @relation(fields: [albumId], references: [id])
+  streams   Stream[]
+  downloads Download[]
+  likes     Like[]
+  comments  Comment[]
+  playlistSongs PlaylistSong[]
+  tips      Tip[]     @relation("TipForSong")
+  copyrightClaims CopyrightClaim[]
+}
+
+model Album {
+  id          String   @id @default(cuid())
+  artistId    String
+  title       String
+  description String?
+  coverUrl    String?
+  genre       String?
+  price       Int      @default(10000)
+  releaseDate DateTime?
+  approved    Boolean  @default(false)
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  songs  Song[]
+}
+
+model Stream {
+  id              String   @id @default(cuid())
+  songId          String
+  userId          String
+  durationListened Int     @default(0)
+  isPremium       Boolean  @default(false)
+  adServed        Boolean  @default(false)
+  adId            String?
+  revenueEligible Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ad   Ad?  @relation(fields: [adId], references: [id])
+}
+
+model Download {
+  id             String   @id @default(cuid())
+  songId         String
+  userId         String
+  amountPaid     Int
+  artistShare    Int
+  platformShare  Int
+  transactionRef String?
+  createdAt      DateTime @default(now())
+
+  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Playlist {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  coverUrl  String?
+  isPublic  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  songs PlaylistSong[]
+}
+
+model PlaylistSong {
+  id         String   @id @default(cuid())
+  playlistId String
+  songId     String
+  position   Int
+  addedAt    DateTime @default(now())
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  song     Song     @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, songId])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  songId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, songId])
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  artistId    String
+  createdAt   DateTime @default(now())
+
+  follower User @relation(fields: [followerId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, artistId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  userId    String
+  songId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+}
+
+model Tip {
+  id            String   @id @default(cuid())
+  fromUserId    String
+  toArtistId    String?
+  songId        String?
+  amount        Int
+  artistShare   Int
+  platformShare Int
+  message       String?
+  createdAt     DateTime @default(now())
+
+  fromUser User   @relation("TipFromUser", fields: [fromUserId], references: [id])
+  song     Song?  @relation("TipForSong", fields: [songId], references: [id])
+}
+
+model Transaction {
+  id              String            @id @default(cuid())
+  userId          String
+  type            TransactionType
+  status          TransactionStatus @default(PENDING)
+  amount          Int
+  reference       String            @unique
+  paymentMethod   String?
+  metadata        String?
+  createdAt       DateTime          @default(now())
+  completedAt     DateTime?
+}
+
+model Subscription {
+  id          String           @id @default(cuid())
+  userId      String
+  plan        SubscriptionPlan
+  status      TransactionStatus @default(PENDING)
+  amountPaid  Int
+  startDate   DateTime
+  endDate     DateTime
+  autoRenew   Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RevenueRecord {
+  id            String        @id @default(cuid())
+  artistId      String
+  walletId      String?
+  source        RevenueSource
+  sourceRefId   String?
+  grossAmount   Int
+  artistShare   Int
+  platformShare Int
+  status        PayoutStatus  @default(PENDING)
+  createdAt     DateTime      @default(now())
+  paidOutAt     DateTime?
+
+  wallet ArtistWallet? @relation(fields: [walletId], references: [id])
+}
+
+model Payout {
+  id          String       @id @default(cuid())
+  walletId    String
+  artistId    String
+  amount      Int
+  method      String
+  reference   String?
+  status      PayoutStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  processedAt DateTime?
+  month       Int          @default(1)
+  year        Int          @default(2025)
+
+  wallet ArtistWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+}
+
+model Ad {
+  id            String   @id @default(cuid())
+  advertiserId  String
+  title         String
+  type          AdType
+  mediaUrl      String
+  targetUrl     String?
+  budget        Int      @default(0)
+  costPerMille  Int      @default(5000)
+  impressions   Int      @default(0)
+  clicks        Int      @default(0)
+  active        Boolean  @default(true)
+  startDate     DateTime
+  endDate       DateTime?
+  createdAt     DateTime @default(now())
+
+  advertiser User @relation(fields: [advertiserId], references: [id])
+  streams    Stream[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  artistId    String
+  title       String
+  description String?
+  price       Int
+  imageUrl    String?
+  category    String?
+  stock       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+}
+
+model Order {
+  id          String           @id @default(cuid())
+  userId      String
+  totalAmount Int
+  status      TransactionStatus @default(PENDING)
+  metadata    String?
+  createdAt   DateTime         @default(now())
+
+  user  User         @relation(fields: [userId], references: [id])
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        String @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Int
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  artistId    String
+  title       String
+  description String?
+  venue       String
+  location    String
+  date        DateTime
+  imageUrl    String?
+  ticketPrice Int
+  totalTickets Int     @default(0)
+  soldTickets  Int     @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  artist   Artist           @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  purchases TicketPurchase[]
+}
+
+model TicketPurchase {
+  id        String           @id @default(cuid())
+  eventId   String
+  userId    String
+  quantity  Int
+  amount    Int
+  reference String?
+  status    TransactionStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+}
+
+model NotificationPref {
+  id          String @id @default(cuid())
+  userId      String @unique
+  emailAlerts Boolean @default(true)
+  pushAlerts  Boolean @default(true)
+  marketing   Boolean @default(false)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RevenueConfig {
+  id           String       @id @default(cuid())
+  source       RevenueSource @unique
+  artistPct    Int
+  platformPct  Int
+  updatedAt    DateTime     @updatedAt
+}
+
+// === BUSINESS OPERATIONS ===
+
+model Contract {
+  id          String    @id @default(cuid())
+  artistId    String
+  title       String
+  type        String
+  startDate   DateTime
+  endDate     DateTime?
+  revenueSplit Int
+  fileUrl     String?
+  status      String    @default("draft")
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  artist         Artist          @relation(fields: [artistId], references: [id])
+  royaltyRecords RoyaltyRecord[]
+}
+
+model RoyaltyRecord {
+  id          String    @id @default(cuid())
+  artistId    String
+  contractId  String?
+  source      String    // streaming, download, subscription, ad, sponsored, tip
+  period      String    // "2025-01" format
+  streamCount Int       @default(0)
+  downloadCount Int     @default(0)
+  grossRevenue  Int     @default(0)
+  artistShare   Int     @default(0)
+  platformShare Int     @default(0)
+  taxAmount     Int     @default(0)
+  netPayout     Int     @default(0)
+  status        String  @default("pending") // pending, paid, disputed
+  paidAt        DateTime?
+  createdAt     DateTime @default(now())
+
+  artist    Artist    @relation(fields: [artistId], references: [id])
+  contract  Contract? @relation(fields: [contractId], references: [id])
+}
+
+model CopyrightClaim {
+  id            String   @id @default(cuid())
+  songId        String?
+  claimantId    String
+  type          String   // "ownership", "infringement", "takedown"
+  description   String
+  status        String   @default("pending") // pending, approved, rejected, disputed
+  resolvedAt    DateTime?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  song     Song? @relation(fields: [songId], references: [id])
+  claimant User  @relation(fields: [claimantId], references: [id])
+}
+
+model Label {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  logoUrl   String?
+  address   String?
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+
+  artists Artist[]
+}
+
+model Publisher {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  address   String?
+  rightsPct Int      @default(50)
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  userId      String?
+  artistId    String?
+  type        String   // "subscription", "advertisement", "promotion", "sponsorship"
+  amount      Int
+  taxAmount   Int      @default(0)
+  totalAmount Int
+  status      String   @default("pending") // pending, paid, overdue, cancelled
+  dueDate     DateTime
+  paidAt      DateTime?
+  reference   String   @unique
+  createdAt   DateTime @default(now())
+
+  user   User?   @relation(fields: [userId], references: [id])
+  artist Artist? @relation(fields: [artistId], references: [id])
+}
+
+model TaxRule {
+  id        String   @id @default(cuid())
+  region    String   @unique // "UG", "KE", "TZ", "global"
+  name      String
+  rate      Decimal  // e.g., 0.18 for 18% VAT
+  appliesTo String   // "all", "subscriptions", "downloads", "payouts"
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Promotion {
+  id          String   @id @default(cuid())
+  artistId    String
+  type        String   // "banner", "trending", "editor_pick", "playlist_feature", "sponsored"
+  title       String
+  amount      Int
+  status      String   @default("pending") // pending, active, completed, cancelled
+  startDate   DateTime
+  endDate     DateTime?
+  createdAt   DateTime @default(now())
+
+  artist Artist @relation(fields: [artistId], references: [id])
+}
+
+model Referral {
+  id            String   @id @default(cuid())
+  referrerId    String
+  referredId    String?
+  code          String   @unique
+  clicks        Int      @default(0)
+  signups       Int      @default(0)
+  commissionsEarned Int  @default(0)
+  commissionsPaid   Int  @default(0)
+  status        String   @default("active")
+  createdAt     DateTime @default(now())
+
+  referrer User  @relation("ReferrerUser", fields: [referrerId], references: [id])
+  referred User? @relation("ReferredUser", fields: [referredId], references: [id])
+}
+
+model SupportTicket {
+  id          String   @id @default(cuid())
+  userId      String
+  subject     String
+  category    String
+  priority    String   @default("normal")
+  status      String   @default("open")
+  messages    String   @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String   // "login", "approve_song", "verify_artist", "payout", "role_change", "settings_update"
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}

@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ugmusic-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ugmusic
+      POSTGRES_PASSWORD: ugmusic_secret
+      POSTGRES_DB: ugmusic
+    ports:
+      - "15432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  minio:
+    image: minio/minio:latest
+    container_name: ugmusic-storage
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ugmusic_admin
+      MINIO_ROOT_PASSWORD: ugmusic_minio_secret
+    ports:
+      - "9500:9000"
+      - "9501:9001"
+    volumes:
+      - miniodata:/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: ugmusic-cache
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+
+volumes:
+  pgdata:
+  miniodata:

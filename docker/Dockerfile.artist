@@ -1,0 +1,21 @@
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY artist-portal/package*.json ./
+RUN npm ci --legacy-peer-deps
+COPY artist-portal/ .
+COPY shared/ ./shared/
+COPY prisma/ ./prisma/
+COPY src/server/ ./src/server/
+COPY src/lib/db.ts ./src/lib/db.ts
+COPY src/lib/auth.ts ./src/lib/auth.ts
+RUN npm run build
+
+FROM node:20-alpine AS production
+WORKDIR /app
+RUN apk add --no-cache curl
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./
+COPY artist-portal/.env.production ./.env
+EXPOSE 3002
+CMD ["npm", "start"]

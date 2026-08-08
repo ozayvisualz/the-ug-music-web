@@ -1,0 +1,168 @@
+import { db } from "../db";
+
+interface StreamParams {
+  songId: string;
+  userId: string;
+  durationListened: number;
+  deviceType?: string;
+  quality?: "low" | "medium" | "high";
+  ipAddress?: string;
+  userAgent?: string;
+}
+
+interface StreamResult {
+  streamId: string;
+  eligible: boolean;
+  reason: string;
+}
+
+/**
+ * Minimum seconds a user must listen for a stream to count as revenue-eligible.
+ * Configurable — streams shorter than this do not pay the artist.
+ */
+const MIN_LISTEN_SECONDS = 30;
+
+/**
+ * Maximum streams per user per song per hour to prevent fraud.
+ */
+const MAX_STREAMS_PER_USER_SONG_HOUR = 3;
+
+/**
+ * Streaming Engine — production-grade music streaming service.
+ * Handles stream creation, fraud detection, revenue eligibility, and analytics.
+ */
+export const StreamingEngine = {
+  /**
+   * Record a new stream event. Validates against fraud rules,
+   * determines revenue eligibility, and updates song play counts.
+   */
+  async recordStream(params: StreamParams): Promise<StreamResult> {
+    const { songId, userId, durationListened, deviceType, quality, ipAddress, userAgent } = params;
+
+    // 1. Validate song exists
+    const song = await db.song.findUnique({ where: { id: songId } });
+    if (!song) return { streamId: "", eligible: false, reason: "Song not found" };
+
+    // 2. Check for suspicious activity — too many streams from same user for same song
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    const recentCount = await db.stream.count({
+      where: { songId, userId, createdAt: { gte: oneHourAgo } },
+    });
+
+    if (recentCount >= MAX_STREAMS_PER_USER_SONG_HOUR) {
+      // Track but mark as fraud
+      const stream = await db.stream.create({
+        data: {
+          songId,
+          userId,
+          durationListened: 0,
+          revenueEligible: false,
+          isPremium: false,
+          adServed: false,
+        },
+      });
+      return { streamId: stream.id, eligible: false, reason: "Rate limited — suspicious activity" };
+    }
+
+    // 3. Determine revenue eligibility
+    const revenueEligible = durationListened >= MIN_LISTEN_SECONDS;
+
+    // 4. Check if user has premium subscription
+    const premium = await db.subscription.findFirst({
+      where: { userId, status: "COMPLETED", endDate: { gte: new Date() } },
+    });
+
+    // 5. Create stream record
+    const stream = await db.stream.create({
+      data: {
+        songId,
+        userId,
+        durationListened,
+        revenueEligible,
+        isPremium: !!premium,
+        adServed: !premium, // Show ads for free users
+      },
+    });
+
+    // 6. Update song play count
+    if (revenueEligible) {
+      await db.song.update({
+        where: { id: songId },
+        data: { playCount: { increment: 1 } },
+      });
+
+      // Update artist total streams
+      await db.artist.update({
+        where: { id: song.artistId },
+        data: { totalStreams: { increment: 1 } },
+      });
+    }
+
+    return {
+      streamId: stream.id,
+      eligible: revenueEligible,
+      reason: revenueEligible ? "Revenue eligible" : `Below ${MIN_LISTEN_SECONDS}s threshold`,
+    };
+  },
+
+  /**
+   * Get streaming analytics for an artist within a date range.
+   */
+  async getArtistStreamAnalytics(artistId: string, days: number) {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const [total, eligible, unique] = await Promise.all([
+      db.stream.count({ where: { song: { artistId }, createdAt: { gte: since } } }),
+      db.stream.count({ where: { song: { artistId }, revenueEligible: true, createdAt: { gte: since } } }),
+      db.stream.groupBy({ by: ["userId"], where: { song: { artistId }, createdAt: { gte: since } } }).then((r) => r.length),
+    ]);
+
+    const byDay = await db.$queryRawUnsafe<Array<{ date: string; count: bigint }>>(
+      `SELECT DATE("createdAt") as date, COUNT(*)::int as count FROM "Stream" WHERE "songId" IN (SELECT id FROM "Song" WHERE "artistId" = $1) AND "createdAt" >= $2 GROUP BY DATE("createdAt") ORDER BY date`,
+      artistId, since
+    );
+
+    return { total, eligible, uniqueListeners: unique, byDay: byDay.map((d) => ({ date: d.date, count: Number(d.count) })) };
+  },
+
+  /**
+   * Get global streaming analytics for admin.
+   */
+  async getGlobalStreamAnalytics(days: number) {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const [total, eligible, todayTotal] = await Promise.all([
+      db.stream.count({ where: { createdAt: { gte: since } } }),
+      db.stream.count({ where: { revenueEligible: true, createdAt: { gte: since } } }),
+      db.stream.count({ where: { createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } } }),
+    ]);
+
+    return { total, eligible, today: todayTotal, days };
+  },
+
+  /**
+   * Resume stream — get last play position for a song.
+   */
+  async getResumePosition(userId: string, songId: string): Promise<number> {
+    const lastStream = await db.stream.findFirst({
+      where: { userId, songId },
+      orderBy: { createdAt: "desc" },
+      select: { durationListened: true },
+    });
+    return lastStream?.durationListened || 0;
+  },
+
+  /**
+   * Get user listening history.
+   */
+  async getListeningHistory(userId: string, limit = 20) {
+    return db.stream.findMany({
+      where: { userId },
+      include: { song: { include: { artist: { include: { user: { select: { name: true } } } } } } },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    });
+  },
+};

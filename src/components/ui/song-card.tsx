@@ -1,0 +1,74 @@
+"use client";
+
+import Link from "next/link";
+import { Play, Download, MoreVertical, DollarSign } from "lucide-react";
+import { usePlayerStore } from "@/store/player";
+import { formatDuration } from "@/lib/utils";
+
+interface SongCardProps {
+  song: {
+    id: string;
+    title: string;
+    artist: { user: { name: string | null; image: string | null } };
+    album?: { id: string; title: string; coverUrl: string | null } | null;
+    coverUrl?: string | null;
+    hlsUrl?: string | null;
+    fileUrl?: string | null;
+    duration: number;
+    price?: number;
+    playCount?: number;
+  };
+}
+
+export function SongCard({ song }: SongCardProps) {
+  const { setCurrentSong, setQueue, currentSong } = usePlayerStore();
+  const isActive = currentSong?.id === song.id;
+
+  const handlePlay = () => {
+    setCurrentSong({
+      id: song.id,
+      title: song.title,
+      artist: song.artist.user.name || "Unknown Artist",
+      coverUrl: song.coverUrl || song.album?.coverUrl || undefined,
+      hlsUrl: song.hlsUrl || undefined,
+      fileUrl: song.fileUrl || undefined,
+      duration: song.duration,
+    });
+  };
+
+  return (
+    <div className={`group flex items-center gap-3 p-2 rounded-lg transition cursor-pointer ${
+      isActive ? "bg-yellow-500/10 border border-yellow-500/30" : "hover:bg-zinc-800/50 border border-transparent"
+    }`}>
+      <div className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-zinc-800">
+        {song.coverUrl || song.album?.coverUrl ? (
+          <img src={song.coverUrl || song.album?.coverUrl || ""} alt={song.title} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Play className="w-5 h-5 text-zinc-600" />
+          </div>
+        )}
+        <button
+          onClick={handlePlay}
+          className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+        >
+          <Play className="w-6 h-6 text-white" fill="white" />
+        </button>
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <Link href={`/song/${song.id}`} className="text-sm font-medium hover:text-yellow-500 transition line-clamp-1">
+          {song.title}
+        </Link>
+        <p className="text-xs text-zinc-500">{song.artist.user.name}</p>
+        {song.price && song.price > 0 && (
+          <span className="inline-flex items-center gap-1 text-xs text-yellow-500 mt-0.5">
+            <DollarSign className="w-3 h-3" /> {song.price.toLocaleString()} UGX
+          </span>
+        )}
+      </div>
+
+      <span className="text-xs text-zinc-600 w-10 text-right">{formatDuration(song.duration)}</span>
+    </div>
+  );
+}
