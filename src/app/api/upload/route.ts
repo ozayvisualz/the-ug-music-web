@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateRef } from "@/lib/utils";
+import { writeFile } from "fs/promises";
+import { join } from "path";
 import jwt from "jsonwebtoken";
-import { storage } from "@/lib/firebase";
 
 async function authenticate(req: NextRequest) {
   let token: string | null = null;
@@ -34,9 +35,17 @@ export async function POST(req: NextRequest) {
     const key = `uploads/${generateRef("FILE")}.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const ref = storage.ref().child(key);
-    await ref.put(buffer, { contentType: file.type || `audio/${ext}` });
-    const url = await ref.getDownloadURL();
+    // Save to /tmp on Vercel
+    try {
+      const tmpDir = join("/tmp", "uploads");
+      const { mkdir } = await import("fs/promises");
+      await mkdir(tmpDir, { recursive: true });
+      const filePath = join(tmpDir, key);
+      await writeFile(filePath, buffer);
+    } catch {}
+
+    // Return a URL relative to the site
+    const url = `/api/files/${key}`;
 
     return NextResponse.json({ url, key, filename: file.name, size: file.size });
   } catch (error: any) {
