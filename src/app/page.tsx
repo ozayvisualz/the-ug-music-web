@@ -3,7 +3,7 @@
 import { trpc } from "@/trpc/client";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Navbar } from "@/components/layout/navbar";
-import { Player } from "@/components/layout/player";
+import { WebPlayer } from "@/components/layout/player";
 import { SongCard } from "@/components/ui/song-card";
 import { ArtistCard } from "@/components/ui/artist-card";
 import { AlbumCard } from "@/components/ui/album-card";
@@ -95,7 +95,7 @@ export default function HomePage() {
           </div>
         </main>
       </div>
-      <Player />
+      <WebPlayer />
     </div>
   );
 }

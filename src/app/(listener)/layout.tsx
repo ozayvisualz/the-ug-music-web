@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/layout/sidebar";
-import { Player } from "@/components/layout/player";
+import { WebPlayer } from "@/components/layout/player";
 import Link from "next/link";
 import { Music2, Search, Menu, Home, Compass } from "lucide-react";
 
@@ -77,7 +77,7 @@ export default function ListenerLayout({ children }: { children: React.ReactNode
 
         <main className="flex-1 overflow-y-auto pb-24">{children}</main>
       </div>
-      <Player />
+      <WebPlayer />
     </div>
   );
 }

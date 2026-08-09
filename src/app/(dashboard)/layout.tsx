@@ -2,7 +2,7 @@
 
 import { Sidebar } from "@/components/layout/sidebar";
 import { Navbar } from "@/components/layout/navbar";
-import { Player } from "@/components/layout/player";
+import { WebPlayer } from "@/components/layout/player";
 import { useState } from "react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -25,7 +25,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {children}
         </main>
       </div>
-      <Player />
+      <WebPlayer />
     </div>
   );
 }
