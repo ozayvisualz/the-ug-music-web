@@ -32,13 +32,19 @@ export const artistRouter = router({
       });
       if (!artist) throw new Error("Artist profile not found");
 
-      return ctx.db.song.create({
-        data: {
-          ...input,
-          artistId: artist.id,
-          published: true,
-        },
-      });
+      try {
+        return await ctx.db.song.create({
+          data: {
+            title: input.title,
+            duration: input.duration,
+            fileUrl: input.fileUrl,
+            artistId: artist.id,
+            published: true,
+          },
+        });
+      } catch (e: any) {
+        throw new Error(`DB ERROR: ${e?.message || JSON.stringify(e)}`);
+      }
     }),
 
   uploadAlbum: artistProcedure
