@@ -54,7 +54,8 @@ export async function POST(req: NextRequest) {
       value: token,
       options: { path: "/", maxAge: 2592000, httpOnly: false, sameSite: "lax", domain: ".theugmusic.com" },
     }]);
-  } catch {
+  } catch (error: any) {
+    console.error("Login error:", error?.message || error);
     return redirectTo("https://theugmusic.com/login?error=server");
   }
 }
