@@ -2,27 +2,31 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth, signOut } from "@/lib/client-auth";
 import {
   Home, Search, Library, Music2, Radio, Heart,
-  Download, Settings, LogOut, User, PlusCircle,
-  DollarSign, ShoppingBag, Ticket, TrendingUp, Shield,
+  Download, Settings, LogOut, Compass, Disc3, Mic2, Sparkles, TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth, signOut } from "@/lib/client-auth";
 
 const navItems = [
   { href: "/", icon: Home, label: "Home" },
+  { href: "/discover", icon: Compass, label: "Discover" },
   { href: "/search", icon: Search, label: "Search" },
   { href: "/dashboard/library", icon: Library, label: "Your Library" },
-  { href: "/dashboard/playlists", icon: Music2, label: "Playlists" },
-  { href: "/dashboard/downloads", icon: Download, label: "Downloads" },
-  { href: "/dashboard/liked", icon: Heart, label: "Liked Songs" },
 ];
 
 const discoverItems = [
   { href: "/trending", icon: TrendingUp, label: "Trending" },
-  { href: "/store", icon: ShoppingBag, label: "Store" },
-  { href: "/tickets", icon: Ticket, label: "Events" },
+  { href: "/discover", icon: Sparkles, label: "New Releases" },
+  { href: "/discover", icon: Disc3, label: "Genres" },
+  { href: "/search?q=Artist", icon: Mic2, label: "Artists" },
+];
+
+const libraryItems = [
+  { href: "/dashboard/playlists", icon: Music2, label: "Playlists" },
+  { href: "/dashboard/liked", icon: Heart, label: "Liked Songs" },
+  { href: "/dashboard/downloads", icon: Download, label: "Downloads" },
 ];
 
 export function Sidebar() {
@@ -45,18 +49,8 @@ export function Sidebar() {
         <div className="mb-4">
           <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Menu</p>
           {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition",
-                pathname === item.href
-                  ? "bg-zinc-800 text-white"
-                  : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-              )}
-            >
-              <item.icon className="w-5 h-5" />
-              {item.label}
+            <Link key={item.href} href={item.href} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition", pathname === item.href ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50")}>
+              <item.icon className="w-5 h-5" />{item.label}
             </Link>
           ))}
         </div>
@@ -64,78 +58,45 @@ export function Sidebar() {
         <div className="mb-4">
           <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Discover</p>
           {discoverItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition",
-                pathname === item.href
-                  ? "bg-zinc-800 text-white"
-                  : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-              )}
-            >
-              <item.icon className="w-5 h-5" />
-              {item.label}
+            <Link key={item.href} href={item.href} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition", pathname === item.href ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50")}>
+              <item.icon className="w-5 h-5" />{item.label}
             </Link>
           ))}
         </div>
 
         {user && (
           <div className="mb-4">
-            <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Account</p>
-            <Link href="/dashboard" className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition",
-                pathname === "/dashboard" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-              )}>
-              <User className="w-5 h-5" /> Profile
-            </Link>
-            <Link href="/dashboard/subscriptions" className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition",
-                pathname === "/dashboard/subscriptions" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-              )}>
-              <DollarSign className="w-5 h-5" /> Premium
-            </Link>
-            <Link href="/dashboard/settings" className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition",
-                pathname === "/dashboard/settings" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-              )}>
-              <Settings className="w-5 h-5" /> Settings
-            </Link>
-
-            {role === "ARTIST" && (
-              <>
-                <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 mt-3">Artist</p>
-                <Link href="/artist/dashboard" className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition",
-                    pathname?.startsWith("/artist") ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                  )}>
-                  <PlusCircle className="w-5 h-5" /> Dashboard
-                </Link>
-                <Link href="/artist/upload" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition">
-                  <Music2 className="w-5 h-5" /> Upload Music
-                </Link>
-              </>
-            )}
-
-            {role === "ADMIN" && (
-              <>
-                <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 mt-3">Admin</p>
-                <Link href="/admin/dashboard" className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition",
-                    pathname?.startsWith("/admin") ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-                  )}>
-                  <Shield className="w-5 h-5" /> Admin Panel
-                </Link>
-              </>
-            )}
+            <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Your Library</p>
+            {libraryItems.map((item) => (
+              <Link key={item.href} href={item.href} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition", pathname === item.href ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50")}>
+                <item.icon className="w-5 h-5" />{item.label}
+              </Link>
+            ))}
           </div>
+        )}
+
+        {role === "ADMIN" && (
+          <Link href="/admin/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition text-zinc-400 hover:text-white hover:bg-zinc-800/50">
+            <Shield className="w-5 h-5 text-yellow-500" />Admin Panel
+          </Link>
+        )}
+        {role === "ARTIST" && (
+          <Link href="/artist/dashboard" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition text-zinc-400 hover:text-white hover:bg-zinc-800/50">
+            <Mic2 className="w-5 h-5 text-yellow-500" />Artist Portal
+          </Link>
+        )}
+
+        {user && (
+          <Link href="/dashboard/settings" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition text-zinc-400 hover:text-white hover:bg-zinc-800/50">
+            <Settings className="w-5 h-5" />Settings
+          </Link>
         )}
       </nav>
 
       {user ? (
         <div className="p-3 border-t border-zinc-800">
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center text-sm font-semibold text-yellow-500">
+            <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-sm font-semibold text-yellow-500">
               {user?.name?.charAt(0) || "U"}
             </div>
             <div className="flex-1 min-w-0">
@@ -149,7 +110,7 @@ export function Sidebar() {
         </div>
       ) : (
         <div className="p-3 border-t border-zinc-800">
-          <Link href="/login" className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-yellow-500 text-black font-semibold text-sm hover:bg-yellow-400 transition">
+          <Link href="/login" className="block text-center py-2.5 rounded-lg bg-yellow-500 text-black text-sm font-semibold hover:bg-yellow-400 transition">
             Sign In
           </Link>
         </div>
