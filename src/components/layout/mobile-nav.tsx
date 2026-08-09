@@ -16,9 +16,23 @@ export function MobileNav() {
   useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
 
   useEffect(() => {
-    const onStart = (e: TouchEvent) => { if (window.scrollY===0) startY.current = e.touches[0].clientY; };
-    const onMove = (e: TouchEvent) => { if (window.scrollY===0 && startY.current>0) { const d = e.touches[0].clientY - startY.current; if (d>0) setPullDist(Math.min(d, 80)); } };
-    const onEnd = () => { if (pullDist>50) { setRefreshing(true); router.refresh(); setTimeout(() => { setRefreshing(false); setPullDist(0); }, 1000); } else setPullDist(0); startY.current=0; };
+    let tracking = false;
+    const onStart = (e: TouchEvent) => {
+      if (window.scrollY <= 0) { startY.current = e.touches[0].clientY; tracking = true; }
+      else tracking = false;
+    };
+    const onMove = (e: TouchEvent) => {
+      if (!tracking) return;
+      const d = e.touches[0].clientY - startY.current;
+      if (d > 0) setPullDist(Math.min(d, 80));
+      else { setPullDist(0); tracking = false; }
+    };
+    const onEnd = () => {
+      tracking = false;
+      if (pullDist > 50) { setRefreshing(true); router.refresh(); setTimeout(() => { setRefreshing(false); setPullDist(0); }, 1000); }
+      else setPullDist(0);
+      startY.current = 0;
+    };
     document.addEventListener("touchstart", onStart, { passive:true });
     document.addEventListener("touchmove", onMove, { passive:true });
     document.addEventListener("touchend", onEnd);
