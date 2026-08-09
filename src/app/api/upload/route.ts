@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateRef } from "@/lib/utils";
 import jwt from "jsonwebtoken";
+import firebase from "firebase/compat/app";
+import "firebase/compat/storage";
 
 async function authenticate(req: NextRequest) {
   let token: string | null = null;
@@ -20,6 +22,17 @@ async function authenticate(req: NextRequest) {
   return null;
 }
 
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCG3Vmenmhg6nUByLiHl6AQNqWvdRBFLzM",
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "the-ug-music.firebaseapp.com",
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "the-ug-music",
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "the-ug-music.firebasestorage.app",
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "593376166812",
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:593376166812:web:502089953e711e8a25be59",
+  });
+}
+
 export async function POST(req: NextRequest) {
   const session = await authenticate(req);
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -36,15 +49,12 @@ export async function POST(req: NextRequest) {
     const ext = file.name.split(".").pop() || "mp3";
     const key = `uploads/${generateRef("FILE")}.${ext}`;
 
-    // Upload via Firebase compat SDK
-    const fb = require("firebase/compat/app");
-    const sf = fb.storage();
-    const uploadRef = sf.ref().child(key);
-    await uploadRef.put(buffer, { contentType: file.type || `audio/${ext}` });
-    const url = await uploadRef.getDownloadURL();
+    const storageRef = firebase.storage().ref().child(key);
+    await storageRef.put(buffer, { contentType: file.type || `audio/${ext}` });
+    const url = await storageRef.getDownloadURL();
 
     return NextResponse.json({ url, key, filename: file.name, size: file.size });
   } catch (error: any) {
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    return NextResponse.json({ error: "Upload failed", detail: error?.message || String(error) }, { status: 500 });
   }
 }
