@@ -11,7 +11,7 @@ export interface AuthUser {
 
 export async function signUpWithEmail(email: string, password: string, name: string) {
   const cred = await auth.createUserWithEmailAndPassword(email, password);
-  if (cred.user) await cred.user.updateProfile({ displayName: name });
+  await cred.user!.updateProfile({ displayName: name });
   return mapUser(cred.user!);
 }
 
