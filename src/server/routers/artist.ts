@@ -1,5 +1,10 @@
 import { z } from "zod";
 import { artistProcedure, router } from "../trpc";
+import { randomBytes } from "crypto";
+
+function generateSignature(): string {
+  return `TUG-${Date.now().toString(36)}-${randomBytes(4).toString('hex')}`.toUpperCase();
+}
 
 export const artistRouter = router({
   uploadSong: artistProcedure
@@ -34,6 +39,7 @@ export const artistRouter = router({
           ...input,
           artistId: artist.id,
           published: true,
+          signature: generateSignature(),
         },
       });
     }),
