@@ -2,6 +2,7 @@
 
 import { trpc } from "@/trpc/client";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useEffect } from "react";
 import {
   Users, Mic2, Music2, Play, Download, Crown,
@@ -19,10 +20,20 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const role = user?.role;
 
-  const { data: dashboard } = trpc.admin.getDashboardFull.useQuery();
+  const { data: dashboard, error: dashErr } = trpc.admin.getDashboardFull.useQuery();
   const { data: pendingSongs } = trpc.admin.getPendingSongs.useQuery();
   const { data: pendingPayouts } = trpc.admin.getPayouts.useQuery();
   const playSong = usePlaySong();
+
+  if (dashErr) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
+        <p className="text-red-400 text-sm">Dashboard data failed to load. Make sure you are logged in as admin.</p>
+        <p className="text-zinc-500 text-xs">{dashErr.message}</p>
+        <Link href="/login" className="px-4 py-2 bg-yellow-500 text-black rounded-lg text-sm">Go to Login</Link>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (!loading && !user) router.push("/login");
