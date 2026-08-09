@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useAuth, signOut } from "@/lib/client-auth";
 import {
   Home, Search, Library, Music2, Radio, Heart,
   Download, Settings, LogOut, User, PlusCircle,
@@ -27,8 +27,8 @@ const discoverItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { data: session } = useSession();
-  const role = (session?.user as any)?.role;
+  const { user } = useAuth();
+  const role = user?.role;
 
   return (
     <aside className="hidden lg:flex flex-col w-64 h-full bg-zinc-900/80 border-r border-zinc-800 backdrop-blur-sm">
@@ -80,7 +80,7 @@ export function Sidebar() {
           ))}
         </div>
 
-        {session && (
+        {user && (
           <div className="mb-4">
             <p className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Account</p>
             <Link href="/dashboard" className={cn(
@@ -132,15 +132,15 @@ export function Sidebar() {
         )}
       </nav>
 
-      {session ? (
+      {user ? (
         <div className="p-3 border-t border-zinc-800">
           <div className="flex items-center gap-3 px-3 py-2">
             <div className="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center text-sm font-semibold text-yellow-500">
-              {session.user?.name?.charAt(0) || "U"}
+              {user?.name?.charAt(0) || "U"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{session.user?.name}</p>
-              <p className="text-xs text-zinc-500 truncate">{session.user?.email}</p>
+              <p className="text-sm font-medium truncate">{user?.name}</p>
+              <p className="text-xs text-zinc-500 truncate">{user?.email}</p>
             </div>
             <button onClick={() => signOut()} className="p-1.5 hover:bg-zinc-800 rounded-lg transition">
               <LogOut className="w-4 h-4 text-zinc-500" />
