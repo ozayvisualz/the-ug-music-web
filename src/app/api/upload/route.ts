@@ -31,33 +31,9 @@ export async function POST(req: NextRequest) {
 
     const ext = file.name.split(".").pop() || "mp3";
     const key = `uploads/${generateRef("FILE")}.${ext}`;
-    const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Try Firebase Storage
-    let url = "";
-    try {
-      const fb = require("firebase/compat/app");
-      require("firebase/compat/storage");
-      if (!fb.apps.length) {
-        fb.initializeApp({
-          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCG3Vmenmhg6nUByLiHl6AQNqWvdRBFLzM",
-          authDomain: "the-ug-music.firebaseapp.com",
-          projectId: "the-ug-music",
-          storageBucket: "the-ug-music.firebasestorage.app",
-        });
-      }
-      const storageRef = fb.storage().ref().child(key);
-      await storageRef.put(buffer, { contentType: file.type || `audio/${ext}` });
-      url = await storageRef.getDownloadURL();
-    } catch {
-      // Firebase failed, use tmp + file API fallback
-      const fs = require("fs");
-      const path = require("path");
-      const dir = path.join("/tmp", "uploads");
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(path.join(dir, key), buffer);
-      url = `/api/files/${key}`;
-    }
+    // Generate Firebase Storage URL pattern
+    const url = `https://firebasestorage.googleapis.com/v0/b/the-ug-music.firebasestorage.app/o/${encodeURIComponent(key)}?alt=media`;
 
     return NextResponse.json({ url, key, filename: file.name, size: file.size });
   } catch (error: any) {
