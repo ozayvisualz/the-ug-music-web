@@ -66,8 +66,9 @@ export default function UploadMusicPage() {
     const formData = new FormData();
     formData.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: formData, credentials: "include" });
-    if (!res.ok) throw new Error("Upload failed");
-    return res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || data.detail || "Upload failed");
+    return data;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
