@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Music2, Search, Home, Compass, Disc3, Sparkles, Crown, Radio } from "lucide-react";
+import { Menu, X, Music2, Search, Home, Compass, Sparkles, Crown, Radio } from "lucide-react";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
-  if (open) document.body.style.overflow = "hidden";
-  else document.body.style.overflow = "";
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
 
   const items = [
     { href: "/", icon: <Home className="w-5 h-5" />, label: "Home" },
