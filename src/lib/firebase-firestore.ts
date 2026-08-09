@@ -1,19 +1,7 @@
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  serverTimestamp,
-  doc,
-  updateDoc,
-  getDocs,
-  Timestamp,
-} from "firebase/firestore";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
 import { db } from "./firebase";
 
-// Notifications
 export interface AppNotification {
   id?: string;
   userId: string;
@@ -22,33 +10,30 @@ export interface AppNotification {
   body: string;
   read: boolean;
   data?: Record<string, string>;
-  createdAt: Timestamp | null;
+  createdAt: firebase.firestore.Timestamp | null;
 }
 
 export function subscribeNotifications(userId: string, callback: (notifs: AppNotification[]) => void) {
-  const q = query(
-    collection(db, "notifications"),
-    where("userId", "==", userId),
-    orderBy("createdAt", "desc")
-  );
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => ({ id: d.id, ...d.data() } as AppNotification)));
-  });
+  return db.collection("notifications")
+    .where("userId", "==", userId)
+    .orderBy("createdAt", "desc")
+    .onSnapshot((snap) => {
+      callback(snap.docs.map((d) => ({ id: d.id, ...d.data() } as AppNotification)));
+    });
 }
 
 export async function sendNotification(notif: Omit<AppNotification, "id" | "createdAt">) {
-  return addDoc(collection(db, "notifications"), {
+  return db.collection("notifications").add({
     ...notif,
     read: false,
-    createdAt: serverTimestamp(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
   });
 }
 
 export async function markNotificationRead(id: string) {
-  return updateDoc(doc(db, "notifications", id), { read: true });
+  return db.collection("notifications").doc(id).update({ read: true });
 }
 
-// Support Chat
 export interface ChatMessage {
   id?: string;
   ticketId: string;
@@ -56,41 +41,37 @@ export interface ChatMessage {
   author: string;
   message: string;
   isStaff: boolean;
-  createdAt: Timestamp | null;
+  createdAt: firebase.firestore.Timestamp | null;
 }
 
 export function subscribeTicketChat(ticketId: string, callback: (msgs: ChatMessage[]) => void) {
-  const q = query(
-    collection(db, "ticket_chats"),
-    where("ticketId", "==", ticketId),
-    orderBy("createdAt", "asc")
-  );
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => ({ id: d.id, ...d.data() } as ChatMessage)));
-  });
+  return db.collection("ticket_chats")
+    .where("ticketId", "==", ticketId)
+    .orderBy("createdAt", "asc")
+    .onSnapshot((snap) => {
+      callback(snap.docs.map((d) => ({ id: d.id, ...d.data() } as ChatMessage)));
+    });
 }
 
 export async function sendChatMessage(msg: Omit<ChatMessage, "id" | "createdAt">) {
-  return addDoc(collection(db, "ticket_chats"), {
+  return db.collection("ticket_chats").add({
     ...msg,
-    createdAt: serverTimestamp(),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
   });
 }
 
-// Analytics Events
 export async function trackEvent(name: string, data?: Record<string, any>) {
   try {
-    await addDoc(collection(db, "analytics_events"), {
+    await db.collection("analytics_events").add({
       name,
       data: data || {},
-      timestamp: serverTimestamp(),
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
     });
   } catch {}
 }
 
-// Real-time Stream Counts
 export function subscribeStreamCounts(callback: (data: Record<string, number>) => void) {
-  return onSnapshot(collection(db, "stream_counts"), (snap) => {
+  return db.collection("stream_counts").onSnapshot((snap) => {
     const counts: Record<string, number> = {};
     snap.docs.forEach((d) => {
       const data = d.data();
@@ -100,17 +81,16 @@ export function subscribeStreamCounts(callback: (data: Record<string, number>) =
   });
 }
 
-// Presence
 export async function setUserOnline(userId: string) {
-  return updateDoc(doc(db, "presence", userId), {
+  return db.collection("presence").doc(userId).set({
     online: true,
-    lastSeen: serverTimestamp(),
-  });
+    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true });
 }
 
 export async function setUserOffline(userId: string) {
-  return updateDoc(doc(db, "presence", userId), {
+  return db.collection("presence").doc(userId).set({
     online: false,
-    lastSeen: serverTimestamp(),
-  });
+    lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+  }, { merge: true });
 }

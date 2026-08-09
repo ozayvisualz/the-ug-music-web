@@ -1,13 +1,5 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut as fbSignOut,
-  onAuthStateChanged,
-  updateProfile,
-  GoogleAuthProvider,
-  signInWithPopup,
-  User as FBUser,
-} from "firebase/auth";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
 import { auth } from "./firebase";
 
 export interface AuthUser {
@@ -18,31 +10,31 @@ export interface AuthUser {
 }
 
 export async function signUpWithEmail(email: string, password: string, name: string) {
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
-  await updateProfile(cred.user, { displayName: name });
-  return mapUser(cred.user);
+  const cred = await auth.createUserWithEmailAndPassword(email, password);
+  if (cred.user) await cred.user.updateProfile({ displayName: name });
+  return mapUser(cred.user!);
 }
 
 export async function signInWithEmail(email: string, password: string) {
-  const cred = await signInWithEmailAndPassword(auth, email, password);
-  return mapUser(cred.user);
+  const cred = await auth.signInWithEmailAndPassword(email, password);
+  return mapUser(cred.user!);
 }
 
 export async function signInWithGoogle() {
-  const provider = new GoogleAuthProvider();
-  const cred = await signInWithPopup(auth, provider);
-  return mapUser(cred.user);
+  const provider = new firebase.auth.GoogleAuthProvider();
+  const cred = await auth.signInWithPopup(provider);
+  return mapUser(cred.user!);
 }
 
 export async function logOut() {
-  return fbSignOut(auth);
+  return auth.signOut();
 }
 
 export function onAuthChange(callback: (user: AuthUser | null) => void) {
-  return onAuthStateChanged(auth, (user) => callback(user ? mapUser(user) : null));
+  return auth.onAuthStateChanged((user) => callback(user ? mapUser(user) : null));
 }
 
-function mapUser(user: FBUser): AuthUser {
+function mapUser(user: firebase.User): AuthUser {
   return {
     uid: user.uid,
     email: user.email,
