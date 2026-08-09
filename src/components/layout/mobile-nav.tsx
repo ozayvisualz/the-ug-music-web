@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, Music2, Search, Home, Compass, Sparkles, Crown, Radio, Disc3, RefreshCw } from "lucide-react";
+import { Menu, X, Music2, Search, Home, Compass, Sparkles, Crown, Radio, Disc3, RefreshCw, LogOut, User } from "lucide-react";
+import { useAuth, signOut as authSignOut } from "@/lib/client-auth";
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -12,6 +13,7 @@ export function MobileNav() {
   const startY = useRef(0);
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useAuth();
 
   useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
 
@@ -76,7 +78,17 @@ export function MobileNav() {
                 <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition ${pathname === item.href ? "bg-zinc-800 text-white font-semibold" : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"}`}>{item.icon}{item.label}</Link>
               ))}
               <div className="border-t border-zinc-800 my-2" />
-              <Link href="/login" onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition"><Disc3 className="w-5 h-5" />Sign In</Link>
+              {user ? (
+                <>
+                  <div className="flex items-center gap-3 px-4 py-3">
+                    <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-sm font-bold text-yellow-500">{user.name?.charAt(0)||'U'}</div>
+                    <div className="flex-1"><p className="text-sm font-semibold text-white">{user.name}</p><p className="text-xs text-zinc-500">{user.email}</p></div>
+                  </div>
+                  <button onClick={() => { authSignOut(); setOpen(false); }} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-red-400 hover:bg-red-500/10 transition w-full"><LogOut className="w-5 h-5" />Sign Out</button>
+                </>
+              ) : (
+                <Link href="/login" onClick={() => setOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition"><User className="w-5 h-5" />Sign In</Link>
+              )}
             </nav>
           </div>
         </div>
