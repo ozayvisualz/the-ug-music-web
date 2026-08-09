@@ -35,7 +35,10 @@ export default function UploadMusicPage() {
       toast.success("Song uploaded successfully!");
       router.push("/artist/dashboard");
     },
-    onError: (e) => toast.error(e.message),
+    onError: (e) => {
+      console.error("Upload error:", JSON.stringify(e, null, 2));
+      toast.error(typeof e.message === "string" ? e.message : JSON.stringify(e));
+    },
   });
 
   const onDropAudio = useCallback((accepted: File[]) => {
@@ -112,7 +115,9 @@ export default function UploadMusicPage() {
         lyrics: form.lyrics || undefined,
       });
     } catch (e: any) {
-      toast.error(e.message || "Upload failed");
+      console.error("Submit error:", JSON.stringify(e, null, 2));
+      const msg = e?.shape?.message || e?.message || JSON.stringify(e);
+      toast.error(typeof msg === "string" ? msg : "Upload failed");
     } finally {
       setUploading(false);
     }

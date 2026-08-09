@@ -8,26 +8,24 @@ function generateSignature(): string {
 
 export const artistRouter = router({
   uploadSong: artistProcedure
-    .input(
-      z.object({
-        title: z.string().min(1),
-        genre: z.string().optional(),
-        description: z.string().optional(),
-        duration: z.number(),
-        fileUrl: z.string(),
-        hlsUrl: z.string().optional(),
-        coverUrl: z.string().optional(),
-        albumId: z.string().optional(),
-        price: z.number().min(0).default(1000),
-        story: z.string().optional(),
-        releaseDate: z.string().optional(),
-        songwriters: z.string().optional(),
-        producer: z.string().optional(),
-        beatProducer: z.string().optional(),
-        videoUrl: z.string().optional(),
-        lyrics: z.string().optional(),
-      })
-    )
+    .input(z.object({
+      title: z.any(),
+      genre: z.any(),
+      description: z.any(),
+      duration: z.any(),
+      fileUrl: z.any(),
+      hlsUrl: z.any(),
+      coverUrl: z.any(),
+      albumId: z.any(),
+      price: z.any(),
+      story: z.any(),
+      releaseDate: z.any(),
+      songwriters: z.any(),
+      producer: z.any(),
+      beatProducer: z.any(),
+      videoUrl: z.any(),
+      lyrics: z.any(),
+    }))
     .mutation(async ({ input, ctx }) => {
       const artist = await ctx.db.artist.findUnique({
         where: { userId: (ctx.session!.user as any).id },
