@@ -8,7 +8,12 @@ import { trpc } from "./client";
 
 function getAuthToken() {
   if (typeof window === "undefined") return null;
-  return localStorage.getItem("auth-token") || null;
+  // Check localStorage first
+  const stored = localStorage.getItem("auth-token");
+  if (stored) return stored;
+  // Check cookies
+  const match = document.cookie.match(/(?:^|;\s*)auth-token=([^;]*)/);
+  return match ? match[1] : null;
 }
 
 export function TRPCProvider({ children }: { children: ReactNode }) {
