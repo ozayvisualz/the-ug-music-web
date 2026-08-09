@@ -65,7 +65,7 @@ export default function UploadMusicPage() {
   const uploadFile = async (file: File): Promise<{ url: string; key: string; hlsUrl?: string }> => {
     const formData = new FormData();
     formData.append("file", file);
-    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const res = await fetch("/api/upload", { method: "POST", body: formData, credentials: "include" });
     if (!res.ok) throw new Error("Upload failed");
     return res.json();
   };
