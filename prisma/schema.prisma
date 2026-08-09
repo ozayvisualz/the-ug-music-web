@@ -91,6 +91,7 @@ model User {
   invoices        Invoice[]
   referrals       Referral[]      @relation("ReferrerUser")
   supportTickets  SupportTicket[]
+  playbackSessions PlaybackSession[]
   referredIn      Referral[]      @relation("ReferredUser")
   auditLogs       AuditLog[]
 }
