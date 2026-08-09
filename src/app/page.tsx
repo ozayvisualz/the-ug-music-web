@@ -8,13 +8,15 @@ import { SongCard } from "@/components/ui/song-card";
 import { ArtistCard } from "@/components/ui/artist-card";
 import { AlbumCard } from "@/components/ui/album-card";
 import { useState } from "react";
-import { TrendingUp, Sparkles, Flame } from "lucide-react";
+import { TrendingUp, Sparkles, Flame, Music, Mic2, Disc3, Radio } from "lucide-react";
+import Link from "next/link";
 
 export default function HomePage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { data: trending } = trpc.music.getTrending.useQuery({ limit: 10 });
   const { data: newReleases } = trpc.music.getNewReleases.useQuery({ limit: 10 });
   const { data: featuredArtists } = trpc.music.getArtists.useQuery({ limit: 8 });
+  const { data: albums } = trpc.music.getAlbums.useQuery({ limit: 10 });
 
   return (
     <div className="h-screen flex flex-col">
@@ -25,77 +27,69 @@ export default function HomePage() {
           <div className="fixed inset-0 z-20 lg:hidden" onClick={() => setSidebarOpen(false)}>
             <div className="absolute inset-0 bg-black/60" />
             <div className="absolute left-0 top-14 bottom-20 w-64 bg-zinc-900 border-r border-zinc-800 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="lg:hidden">
-                <Sidebar />
-              </div>
+              <div className="lg:hidden"><Sidebar /></div>
             </div>
           </div>
         )}
         <main className="flex-1 overflow-y-auto pb-24">
-          <div className="max-w-7xl mx-auto px-4 py-6 space-y-10">
-            {/* Hero Banner */}
-            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-yellow-500/20 via-yellow-500/5 to-zinc-900 p-8 md:p-12">
+          <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+            {/* Hero */}
+            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-yellow-500/20 via-yellow-500/5 to-zinc-900 p-6 md:p-10">
               <div className="relative z-10">
-                <h1 className="text-3xl md:text-4xl font-bold mb-2">TheUgMusic</h1>
-                <p className="text-zinc-400 max-w-md">
-                  Stream and download the best Ugandan music. Support local artists with every play.
-                </p>
-                <div className="flex gap-3 mt-6">
-                  <button className="px-6 py-2.5 rounded-full bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition text-sm">
-                    Start Listening
-                  </button>
-                  <button className="px-6 py-2.5 rounded-full bg-zinc-800 text-white font-semibold hover:bg-zinc-700 transition text-sm">
-                    Explore Artists
-                  </button>
+                <h1 className="text-2xl md:text-4xl font-bold mb-2">Discover Ugandan Music</h1>
+                <p className="text-zinc-400 max-w-md text-sm md:text-base">Stream the best Ugandan songs, follow your favorite artists, and discover new music every day.</p>
+                <div className="flex gap-3 mt-4">
+                  <Link href="/search" className="px-5 py-2.5 rounded-full bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition text-sm">Start Listening</Link>
+                  <Link href="/trending" className="px-5 py-2.5 rounded-full bg-zinc-800 text-white font-semibold hover:bg-zinc-700 transition text-sm">Top Charts</Link>
                 </div>
               </div>
-              <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-yellow-500/10 to-transparent" />
+            </div>
+
+            {/* Quick Browse */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { label: "Trending", icon: <Flame className="w-5 h-5" />, href: "/trending", color: "bg-red-500/10 text-red-400" },
+                { label: "New Songs", icon: <Sparkles className="w-5 h-5" />, href: "/search", color: "bg-emerald-500/10 text-emerald-400" },
+                { label: "Artists", icon: <Mic2 className="w-5 h-5" />, href: "/search", color: "bg-blue-500/10 text-blue-400" },
+                { label: "Radio", icon: <Radio className="w-5 h-5" />, href: "/search", color: "bg-purple-500/10 text-purple-400" },
+              ].map((item) => (
+                <Link key={item.label} href={item.href} className={`${item.color} rounded-xl p-4 hover:opacity-80 transition`}>
+                  {item.icon}
+                  <p className="text-sm font-semibold mt-3">{item.label}</p>
+                </Link>
+              ))}
             </div>
 
             {/* Trending */}
             <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Flame className="w-5 h-5 text-yellow-500" />
-                <h2 className="text-xl font-bold">Trending Now</h2>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2"><Flame className="w-5 h-5 text-yellow-500" /><h2 className="text-lg font-bold">Trending Now</h2></div>
+                <Link href="/trending" className="text-xs text-yellow-500 hover:text-yellow-400">See All</Link>
               </div>
               <div className="space-y-1">
-                {trending?.slice(0, 5).map((song: any) => (
-                  <SongCard key={song.id} song={song} />
-                ))}
+                {trending?.length ? trending.slice(0, 5).map((song: any) => <SongCard key={song.id} song={song} />) : <p className="text-zinc-600 text-sm py-8 text-center">No trending songs yet. Artists, upload your music!</p>}
               </div>
             </section>
 
             {/* New Releases */}
             <section>
-              <div className="flex items-center gap-2 mb-4">
-                <Sparkles className="w-5 h-5 text-yellow-500" />
-                <h2 className="text-xl font-bold">New Releases</h2>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2"><Sparkles className="w-5 h-5 text-yellow-500" /><h2 className="text-lg font-bold">New Releases</h2></div>
+                <Link href="/search" className="text-xs text-yellow-500 hover:text-yellow-400">See All</Link>
               </div>
-              <div className="space-y-1">
-                {newReleases?.slice(0, 8).map((song: any) => (
-                  <SongCard key={song.id} song={song} />
-                ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {newReleases?.length ? newReleases.slice(0, 6).map((song: any) => <SongCard key={song.id} song={song} />) : <p className="text-zinc-600 text-sm py-8 col-span-2 text-center">No new releases yet.</p>}
               </div>
             </section>
 
-            {/* Featured Artists */}
+            {/* Artists */}
             <section>
-              <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-5 h-5 text-yellow-500" />
-                <h2 className="text-xl font-bold">Top Artists</h2>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2"><Mic2 className="w-5 h-5 text-yellow-500" /><h2 className="text-lg font-bold">Top Artists</h2></div>
+                <Link href="/search" className="text-xs text-yellow-500 hover:text-yellow-400">See All</Link>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {featuredArtists?.map((artist: any) => (
-                  <ArtistCard key={artist.id} artist={artist} />
-                ))}
-              </div>
-            </section>
-
-            {/* Albums */}
-            <section>
-              <h2 className="text-xl font-bold mb-4">Popular Albums</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {/* Albums populated via trpc */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {featuredArtists?.length ? featuredArtists.map((artist: any) => <ArtistCard key={artist.id} artist={artist} />) : <p className="text-zinc-600 text-sm py-8 col-span-4 text-center">No artists yet.</p>}
               </div>
             </section>
           </div>

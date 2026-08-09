@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
     if (dest === "/dashboard") {
       if (user.role === "ADMIN") dest = "/admin/dashboard";
       else if (user.role === "ARTIST") dest = "/artist/dashboard";
+      else dest = "/";
     }
 
     const res = NextResponse.redirect(`https://theugmusic.com${dest}`, 303);
