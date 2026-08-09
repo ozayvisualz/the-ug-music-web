@@ -5,7 +5,7 @@ import { formatUGX, formatNumber } from "@/lib/utils";
 import { useState } from "react";
 
 export default function AdminEventsPage() {
-  const { data: events } = trpc.tickets.getEvents.useQuery();
+  const { data: events } = trpc.tickets.getEvents.useQuery({ limit: 50 });
   const [search, setSearch] = useState("");
 
   const filtered = events?.filter((e: any) =>
