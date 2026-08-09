@@ -1,6 +1,6 @@
 {
-  "buildCommand": "prisma generate && next build",
-  "installCommand": "npm install",
+  "buildCommand": "npm install firebase@latest && prisma generate && next build",
+  "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs",
   "outputDirectory": ".next"
 }
