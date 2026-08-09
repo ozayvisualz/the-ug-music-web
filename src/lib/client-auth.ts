@@ -50,6 +50,6 @@ export function useAuth() {
 export function signOut() {
   localStorage.removeItem("auth-token");
   localStorage.removeItem("auth-user");
-  document.cookie = "auth-token=; path=/; max-age=0";
-  window.location.href = "/admin/login";
+  document.cookie = "auth-token=; path=/; max-age=0; domain=.theugmusic.com";
+  window.location.href = "/login";
 }
