@@ -57,7 +57,7 @@ export const artistRouter = router({
           title: z.string().min(1),
           genre: z.string().optional(),
           duration: z.number(),
-          fileUrl: z.string(),
+        fileUrl: z.string().min(1),
           hlsUrl: z.string().optional(),
           coverUrl: z.string().optional(),
           price: z.number().default(1000),
