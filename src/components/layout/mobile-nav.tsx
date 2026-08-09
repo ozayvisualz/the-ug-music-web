@@ -15,7 +15,11 @@ export function MobileNav() {
   const router = useRouter();
   const { user } = useAuth();
 
-  useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; return () => { document.body.style.overflow = ""; }; }, [open]);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { if (typeof document !== "undefined") document.body.style.overflow = ""; };
+  }, [open]);
 
   useEffect(() => {
     let tracking = false;
