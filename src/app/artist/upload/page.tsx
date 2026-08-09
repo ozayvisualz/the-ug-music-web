@@ -254,6 +254,18 @@ export default function UploadMusicPage() {
         </div>
 
         <div className="flex gap-3 justify-end">
+          <button type="button" onClick={() => {
+            setUploading(true);
+            uploadSongMut.mutateAsync({
+              title: form.title || "Test Song",
+              duration: 180,
+              fileUrl: "https://theugmusic.com/uploads/test-song.mp3",
+            }).catch((e: any) => {
+              toast.error("TEST ERR: " + (JSON.stringify(e?.message || JSON.stringify(e))));
+            }).finally(() => setUploading(false));
+          }} className="px-4 py-2 rounded-xl border border-red-700 hover:bg-red-800/20 text-red-400 transition text-xs">
+            Skip Upload & Test
+          </button>
           <button type="button" onClick={() => router.back()} className="px-6 py-2.5 rounded-xl border border-zinc-700 hover:bg-zinc-800 transition text-sm">
             Cancel
           </button>
