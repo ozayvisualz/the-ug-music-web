@@ -91,9 +91,9 @@ export default function AdminDashboardPage() {
       {/* Revenue Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <RevenueCard label="Revenue Today" value={formatUGX(rev?.today || 0)} icon={<DollarSign className="w-5 h-5 text-yellow-500" />} />
-        <RevenueCard label="Platform Revenue" value={formatUGX(rev?.platform || 0)} icon={<Banknote className="w-5 h-5 text-emerald-500" />} />
-        <RevenueCard label="Artist Share" value={formatUGX(rev?.artist || 0)} icon={<TrendingUp className="w-5 h-5 text-blue-400" />} />
-        <RevenueCard label="Total (30d)" value={formatUGX(rev?.thisMonth || 0)} icon={<DollarSign className="w-5 h-5 text-purple-400" />} />
+        <RevenueCard label="Artist Available" value={formatUGX(dashboard?.wallets?.available || 0)} icon={<Banknote className="w-5 h-5 text-emerald-500" />} />
+        <RevenueCard label="Pending Payouts" value={formatUGX(dashboard?.wallets?.pending || 0)} icon={<TrendingUp className="w-5 h-5 text-blue-400" />} />
+        <RevenueCard label="Lifetime Earnings" value={formatUGX(dashboard?.wallets?.lifetime || 0)} icon={<DollarSign className="w-5 h-5 text-purple-400" />} />
       </div>
 
       {/* Top Content */}

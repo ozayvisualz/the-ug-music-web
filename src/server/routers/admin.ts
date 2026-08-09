@@ -213,12 +213,19 @@ export const adminRouter = router({
     const pendingPayouts = await ctx.db.payout.count({ where: { status: "PENDING" } });
     const premiumUsers = await ctx.db.subscription.count({ where: { status: "ACTIVE" } });
     const freeUsers = totalUsers - premiumUsers;
+    const walletTotal = await ctx.db.artistWallet.aggregate({ _sum: { availableBalance: true, pendingBalance: true, lifetimeEarnings: true, totalWithdrawn: true } });
 
     return {
       stats: { totalUsers, totalArtists, totalSongs, pendingSongs, pendingPayouts, premiumUsers, freeUsers },
       streams: { today: streamsToday, thisWeek: stats.streams, thisMonth: stats.streams },
       downloads: { today: downloadsToday },
       revenue: { today: revenueToday._sum.grossAmount || 0, thisMonth: revenue._sum.grossAmount || 0, platform: revenue._sum.platformShare || 0, artist: revenue._sum.artistShare || 0 },
+      wallets: {
+        available: walletTotal._sum.availableBalance || 0,
+        pending: walletTotal._sum.pendingBalance || 0,
+        lifetime: walletTotal._sum.lifetimeEarnings || 0,
+        withdrawn: walletTotal._sum.totalWithdrawn || 0,
+      },
       topSongs: topSongs.map((s: any) => ({ id: s.id, title: s.title, artist: s.artist?.user?.name || "Unknown", playCount: s.playCount, fileUrl: s.fileUrl, hlsUrl: s.hlsUrl, duration: s.duration })),
       topArtists: topArtists.map((a: any) => ({ id: a.id, name: a.user?.name || "Unknown", totalStreams: a.totalStreams, verified: a.verified })),
       topGenres,
