@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     );
 
     const res = NextResponse.redirect(new URL(redirectTo, baseUrl));
-    res.cookies.set("auth-token", token, { path: "/", maxAge: 2592000, httpOnly: false, sameSite: "lax" });
+    res.cookies.set("auth-token", token, { path: "/", maxAge: 2592000, httpOnly: false, sameSite: "lax", domain: ".theugmusic.com" });
     return res;
   } catch {
     const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
