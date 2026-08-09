@@ -92,7 +92,7 @@ export default function UploadMusicPage() {
         audioEl.onerror = () => resolve();
       });
 
-      const duration = Math.round(audioEl.duration || 0);
+      const duration = Math.round(audioEl.duration) || 180;
 
       await uploadSongMut.mutateAsync({
         title: form.title,
