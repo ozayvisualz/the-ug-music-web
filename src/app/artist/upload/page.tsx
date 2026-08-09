@@ -22,6 +22,7 @@ export default function UploadMusicPage() {
     producer: "",
     beatProducer: "",
     videoUrl: "",
+    lyrics: "",
   });
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -107,6 +108,7 @@ export default function UploadMusicPage() {
         producer: form.producer || undefined,
         beatProducer: form.beatProducer || undefined,
         videoUrl: form.videoUrl || undefined,
+        lyrics: form.lyrics || undefined,
       });
     } catch (e: any) {
       toast.error(e.message || "Upload failed");
@@ -233,6 +235,12 @@ export default function UploadMusicPage() {
             <input type="text" value={form.videoUrl} onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
               className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500 transition"
               placeholder="YouTube link (optional)" />
+          </div>
+          <div className="md:col-span-2">
+            <label className="block text-sm text-zinc-400 mb-1.5">Lyrics (optional)</label>
+            <textarea value={form.lyrics} onChange={(e) => setForm({ ...form, lyrics: e.target.value })}
+              rows={4} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500 transition resize-none"
+              placeholder="Add song lyrics..." />
           </div>
         </div>
 

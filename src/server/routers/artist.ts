@@ -20,6 +20,7 @@ export const artistRouter = router({
         producer: z.string().optional(),
         beatProducer: z.string().optional(),
         videoUrl: z.string().optional(),
+        lyrics: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
