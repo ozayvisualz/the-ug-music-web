@@ -25,6 +25,7 @@
     "@trpc/server": "^11.0.0-rc.648",
     "bcryptjs": "^2.4.3",
     "hls.js": "^1.5.17",
+    "firebase": "^12.5.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.468.0",
     "minio": "^8.0.3",
