@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
     res.cookies.set("auth-token", token, { path: "/", maxAge: 2592000, httpOnly: false, sameSite: "lax", domain: ".theugmusic.com" });
     return res;
   } catch {
-    return NextResponse.redirect(new URL("/login?error=server", req.nextUrl.origin));
+    const base = process.env.AUTH_URL || req.nextUrl.origin || "https://theugmusic.com";
+    return NextResponse.redirect(new URL("/login?error=server", base));
   }
 }
