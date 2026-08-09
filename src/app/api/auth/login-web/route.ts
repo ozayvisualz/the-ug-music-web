@@ -33,7 +33,13 @@ export async function POST(req: NextRequest) {
       { expiresIn: "30d" }
     );
 
-    const res = NextResponse.redirect(`https://theugmusic.com${redirectTo}`, 303);
+    let dest = redirectTo;
+    if (dest === "/dashboard") {
+      if (user.role === "ADMIN") dest = "/admin/dashboard";
+      else if (user.role === "ARTIST") dest = "/artist/dashboard";
+    }
+
+    const res = NextResponse.redirect(`https://theugmusic.com${dest}`, 303);
     res.cookies.set("auth-token", token, {
       path: "/", maxAge: 2592000, httpOnly: false,
       sameSite: "lax" as any, domain: ".theugmusic.com",
