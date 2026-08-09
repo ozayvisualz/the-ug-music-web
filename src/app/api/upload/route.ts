@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateRef } from "@/lib/utils";
-import { writeFile } from "fs/promises";
-import { join } from "path";
 import jwt from "jsonwebtoken";
 
 async function authenticate(req: NextRequest) {
@@ -35,17 +33,31 @@ export async function POST(req: NextRequest) {
     const key = `uploads/${generateRef("FILE")}.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // Save to /tmp on Vercel
+    // Try Firebase Storage
+    let url = "";
     try {
-      const tmpDir = join("/tmp", "uploads");
-      const { mkdir } = await import("fs/promises");
-      await mkdir(tmpDir, { recursive: true });
-      const filePath = join(tmpDir, key);
-      await writeFile(filePath, buffer);
-    } catch {}
-
-    // Return a URL relative to the site
-    const url = `/api/files/${key}`;
+      const fb = require("firebase/compat/app");
+      require("firebase/compat/storage");
+      if (!fb.apps.length) {
+        fb.initializeApp({
+          apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyCG3Vmenmhg6nUByLiHl6AQNqWvdRBFLzM",
+          authDomain: "the-ug-music.firebaseapp.com",
+          projectId: "the-ug-music",
+          storageBucket: "the-ug-music.firebasestorage.app",
+        });
+      }
+      const storageRef = fb.storage().ref().child(key);
+      await storageRef.put(buffer, { contentType: file.type || `audio/${ext}` });
+      url = await storageRef.getDownloadURL();
+    } catch {
+      // Firebase failed, use tmp + file API fallback
+      const fs = require("fs");
+      const path = require("path");
+      const dir = path.join("/tmp", "uploads");
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, key), buffer);
+      url = `/api/files/${key}`;
+    }
 
     return NextResponse.json({ url, key, filename: file.name, size: file.size });
   } catch (error: any) {
