@@ -5,7 +5,8 @@ import { useState } from "react";
 
 export default function AdminRolesPage() {
   const [search, setSearch] = useState("");
-  const { data: users } = trpc.admin.getUsers.useQuery({ limit: 50 });
+  const { data: userData } = trpc.admin.getUsers.useQuery({ limit: 50 });
+  const users = userData?.users || [];
   const utils = trpc.useUtils();
   const promoteMut = trpc.admin.promoteUser.useMutation({ onSuccess: () => utils.admin.getUsers.invalidate() });
 
