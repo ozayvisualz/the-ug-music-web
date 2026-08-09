@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
       { expiresIn: "30d" }
     );
 
-    const res = NextResponse.redirect(new URL(redirectTo, req.nextUrl.origin));
+    const res = NextResponse.redirect(new URL(redirectTo, req.nextUrl.origin), 302);
     res.cookies.set("auth-token", token, { path: "/", maxAge: 2592000, httpOnly: false, sameSite: "lax", domain: ".theugmusic.com" });
     return res;
   } catch {
