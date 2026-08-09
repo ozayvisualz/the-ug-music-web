@@ -1,10 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import {
-  Play, Pause, SkipBack, SkipForward, Shuffle, Repeat,
-  Heart, ListMusic, Volume2, X, Music2,
-} from "lucide-react";
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Play, Pause, SkipBack, SkipForward, X, Music2 } from "lucide-react";
 
 interface Track {
   id: string; title: string; artist: string; url: string; duration: number; coverUrl?: string;
@@ -13,8 +10,9 @@ interface Track {
 let globalAudio: HTMLAudioElement | null = null;
 let globalTrack: Track | null = null;
 let listeners: Set<() => void> = new Set();
+let syncInterval: any = null;
 
-export function useWebPlayer() {
+export function useWebPlayer(userId?: string) {
   const [, forceUpdate] = useState({});
   const [pos, setPos] = useState(0);
 
@@ -27,20 +25,57 @@ export function useWebPlayer() {
     return () => { listeners.delete(cb); clearInterval(interval); };
   }, []);
 
-  const play = (track: Track) => {
+  // Auto-sync every 5 seconds
+  useEffect(() => {
+    if (!userId) return;
+    syncInterval = setInterval(() => {
+      if (globalAudio && globalTrack) {
+        fetch("/api/trpc/sync.updatePosition?batch=1", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ "0": { json: { position: Math.round(globalAudio.currentTime), isPlaying: !globalAudio.paused } } }),
+          credentials: "include",
+        }).catch(() => {});
+      }
+    }, 5000);
+    return () => clearInterval(syncInterval);
+  }, [userId]);
+
+  const play = useCallback((track: Track) => {
     if (globalAudio) { globalAudio.pause(); }
     const audio = new Audio(track.url);
     audio.play().catch(() => {});
     globalAudio = audio; globalTrack = track;
+    setPos(0);
     listeners.forEach(cb => cb());
     audio.onended = () => { globalAudio = null; globalTrack = null; listeners.forEach(cb => cb()); };
     audio.onerror = () => { globalAudio = null; globalTrack = null; listeners.forEach(cb => cb()); };
-  };
+    // Save session
+    if (userId) {
+      fetch("/api/trpc/sync.saveSession?batch=1", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ "0": { json: { songId: track.id, position: 0, isPlaying: true, platform: "web" } } }),
+        credentials: "include",
+      }).catch(() => {});
+    }
+  }, [userId]);
 
   const pause = () => { globalAudio?.pause(); };
   const resume = () => { globalAudio?.play().catch(() => {}); };
-  const togglePlay = () => { if (globalAudio?.paused) resume(); else pause(); listeners.forEach(cb => cb()); };
-  const stop = () => { globalAudio?.pause(); globalAudio = null; globalTrack = null; listeners.forEach(cb => cb()); };
+  const togglePlay = useCallback(() => {
+    if (globalAudio?.paused) resume(); else pause();
+    listeners.forEach(cb => cb());
+  }, []);
+  const stop = useCallback(() => {
+    globalAudio?.pause(); globalAudio = null; globalTrack = null;
+    listeners.forEach(cb => cb());
+    if (userId) {
+      fetch("/api/trpc/sync.deleteSession?batch=1", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ "0": {} }), credentials: "include",
+      }).catch(() => {});
+    }
+  }, [userId]);
   const seek = (t: number) => { if (globalAudio) { globalAudio.currentTime = t; setPos(t); } };
 
   return { track: globalTrack, isPlaying: !!globalAudio && !globalAudio.paused, position: pos, play, pause, resume, togglePlay, stop, seek };
@@ -58,7 +93,6 @@ export function WebPlayer() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0B0B0D] border-t border-zinc-800">
-      {/* Seek bar */}
       <div className="h-1 bg-zinc-800 cursor-pointer group" onClick={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const pct = ((e.clientX - rect.left) / rect.width) * 100;

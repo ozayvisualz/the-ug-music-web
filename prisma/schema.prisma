@@ -495,7 +495,27 @@ model TicketPurchase {
   createdAt DateTime         @default(now())
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+}
+
+model PlaybackSession {
+  id        String   @id @default(cuid())
+  userId    String
+  songId    String?
+  position  Float    @default(0)
+  isPlaying Boolean  @default(false)
+  queue     String   @default("[]")
+  repeat    Int      @default(0)
+  shuffle   Boolean  @default(false)
+  volume    Float    @default(1)
+  speed     Float    @default(1)
+  deviceId  String?
+  platform  String?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  song Song? @relation(fields: [songId], references: [id])
 }
 
 model NotificationPref {

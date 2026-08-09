@@ -12,6 +12,7 @@ import { ticketsRouter } from "./tickets";
 import { streamingRouter } from "./streaming";
 import { businessRouter } from "./business";
 import { radioRouter } from "./radio";
+import { syncRouter } from "./sync";
 
 export const appRouter = router({
   auth: authRouter,
@@ -27,6 +28,7 @@ export const appRouter = router({
   streaming: streamingRouter,
   business: businessRouter,
   radio: radioRouter,
+  sync: syncRouter,
 });
 
 export type AppRouter = typeof appRouter;
