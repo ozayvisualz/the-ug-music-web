@@ -1,62 +1,41 @@
 "use client";
 
-import { useParams } from "next/navigation";
 import { trpc } from "@/trpc/client";
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import { SongCard } from "@/components/ui/song-card";
-import { Disc3, Play, Clock, DollarSign, Loader2 } from "lucide-react";
-import { formatUGX } from "@/lib/utils";
+import { Disc3, Play, Clock, Calendar } from "lucide-react";
 
 export default function AlbumPage() {
-  const { id } = useParams<{ id: string }>();
-  const { data: album, isLoading } = trpc.music.getAlbumById.useQuery(id);
+  const params = useParams<{ id: string }>();
+  const { data: album, isLoading } = trpc.music.getAlbumById.useQuery(params.id);
 
-  if (isLoading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-yellow-500" /></div>;
+  if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" /></div>;
   if (!album) return <div className="text-center py-20 text-zinc-500">Album not found</div>;
+
+  const songs = album.songs || [];
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-      <div className="flex flex-col md:flex-row gap-6">
-        <div className="w-full md:w-64 aspect-square rounded-2xl overflow-hidden bg-zinc-800 flex-shrink-0">
-          {album.coverUrl ? (
-            <img src={album.coverUrl} alt={album.title} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center"><Disc3 className="w-16 h-16 text-zinc-700" /></div>
-          )}
-        </div>
-        <div className="flex-1 space-y-3">
-          <p className="text-xs text-zinc-500 uppercase tracking-wider">Album</p>
-          <h1 className="text-3xl font-bold">{album.title}</h1>
-          <Link href={`/artist/${album.artistId}`} className="text-zinc-400 hover:text-yellow-500 transition">
-            {album.artist?.user?.name}
-          </Link>
-          <div className="flex items-center gap-4 text-sm text-zinc-500">
-            <span>{album.songs?.length || 0} songs</span>
-            {album.genre && <span>{album.genre}</span>}
-            {album.releaseDate && <span>{new Date(album.releaseDate).toLocaleDateString()}</span>}
-          </div>
-          <div className="flex items-center gap-3 pt-2">
-            <button className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition">
-              <Play className="w-4 h-4" fill="currentColor" /> Play All
-            </button>
-            {album.price > 0 && (
-              <button className="flex items-center gap-2 px-6 py-2.5 rounded-full border border-zinc-700 hover:bg-zinc-800 transition">
-                <DollarSign className="w-4 h-4" /> Buy Album {formatUGX(album.price)}
-              </button>
-            )}
-          </div>
-          {album.description && <p className="text-sm text-zinc-400">{album.description}</p>}
+      <div className="flex items-end gap-6">
+        <div className="w-48 h-48 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-6xl flex-shrink-0">💿</div>
+        <div>
+          <p className="text-xs font-bold text-zinc-500 uppercase">Album</p>
+          <h1 className="text-3xl font-bold mt-1">{album.title}</h1>
+          <p className="text-sm text-zinc-400 mt-1">{album.artist?.user?.name || "Unknown"} · {album.genre} · {songs.length} songs</p>
+          {album.releaseDate && <p className="text-xs text-zinc-500 mt-1"><Calendar className="w-3 h-3 inline mr-1"/>{new Date(album.releaseDate).toLocaleDateString()}</p>}
+          <button className="px-5 py-2 mt-4 rounded-full bg-yellow-500 text-black font-semibold text-sm hover:bg-yellow-400"><Play className="w-4 h-4 inline mr-1"/>Play All</button>
         </div>
       </div>
-
-      <section>
-        <h2 className="text-lg font-bold mb-3">Tracklist</h2>
-        <div className="space-y-1">
-          {album.songs?.map((song: any, i: number) => (
-            <SongCard key={song.id} song={song} />
-          ))}
-        </div>
-      </section>
+      <div className="space-y-1">
+        {songs.map((s: any, i: number) => (
+          <Link key={s.id} href={`/song/${s.id}`} className="flex items-center gap-4 p-3 hover:bg-zinc-800/50 rounded-xl transition">
+            <span className="text-xs text-zinc-600 w-6 text-center">{i + 1}</span>
+            <div className="flex-1 min-w-0"><p className="text-sm font-semibold">{s.title}</p></div>
+            <span className="text-xs text-zinc-600">{Math.floor((s.duration||0)/60)}:{(s.duration||0)%60}</span>
+          </Link>
+        ))}
+        {songs.length===0&&<p className="text-zinc-600 text-sm py-8 text-center">No songs</p>}
+      </div>
     </div>
   );
 }
