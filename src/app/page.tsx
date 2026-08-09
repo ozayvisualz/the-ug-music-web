@@ -2,17 +2,14 @@
 
 import { trpc } from "@/trpc/client";
 import { Sidebar } from "@/components/layout/sidebar";
-import { Navbar } from "@/components/layout/navbar";
 import { WebPlayer } from "@/components/layout/player";
 import { SongCard } from "@/components/ui/song-card";
 import { ArtistCard } from "@/components/ui/artist-card";
 import { AlbumCard } from "@/components/ui/album-card";
-import { useState } from "react";
 import { TrendingUp, Sparkles, Flame, Music, Mic2, Disc3, Radio } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const { data: trending } = trpc.music.getTrending.useQuery({ limit: 10 });
   const { data: newReleases } = trpc.music.getNewReleases.useQuery({ limit: 10 });
   const { data: featuredArtists } = trpc.music.getArtists.useQuery({ limit: 8 });
@@ -20,18 +17,8 @@ export default function HomePage() {
 
   return (
     <div className="h-screen flex flex-col">
-      <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
-        {sidebarOpen && (
-          <div className="fixed inset-0 z-20 lg:hidden" onClick={() => setSidebarOpen(false)}>
-            <div className="absolute inset-0 bg-black/60" />
-            <div className="absolute left-0 top-14 bottom-20 w-64 bg-zinc-900 border-r border-zinc-800 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="lg:hidden"><Sidebar /></div>
-            </div>
-          </div>
-        )}
-        <main className="flex-1 overflow-y-auto pb-24">
+        <Sidebar /> className="flex-1 overflow-y-auto pb-24">
           <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
             {/* Hero */}
             <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-yellow-500/20 via-yellow-500/5 to-zinc-900 p-6 md:p-10">
