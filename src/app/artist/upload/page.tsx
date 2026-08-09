@@ -80,6 +80,7 @@ export default function UploadMusicPage() {
     setUploading(true);
 
     try {
+      toast.loading("Step 1: Uploading files...");
       let coverUrl = "";
       if (coverFile) {
         const cover = await uploadFile(coverFile);
@@ -87,6 +88,7 @@ export default function UploadMusicPage() {
       }
 
       const audio = await uploadFile(audioFile);
+      toast.loading("Step 2: Extracting duration...");
 
       const audioEl = document.createElement("audio");
       audioEl.src = URL.createObjectURL(audioFile);
@@ -96,6 +98,7 @@ export default function UploadMusicPage() {
       });
 
       const duration = Math.round(audioEl.duration) || 180;
+      toast.loading("Step 3: Creating song record...");
 
       await uploadSongMut.mutateAsync({
         title: form.title,
