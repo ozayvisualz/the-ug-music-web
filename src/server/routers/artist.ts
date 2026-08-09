@@ -39,7 +39,6 @@ export const artistRouter = router({
           ...input,
           artistId: artist.id,
           published: true,
-          signature: generateSignature(),
         },
       });
     }),
