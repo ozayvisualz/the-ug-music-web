@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { db } from "@/lib/db";
+import bcryptjs from "bcryptjs";
 
 function redirectTo(url: string, cookies?: { name: string; value: string; options?: any }[]) {
   const res = new NextResponse(null, {
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       return redirectTo(`${origin}/login?error=invalid`);
     }
 
-    const isValid = await bcrypt.compare(password, user.password);
+    const isValid = bcryptjs.compareSync(password, user.password || "");
     if (!isValid) {
       return redirectTo(`${origin}/login?error=invalid`);
     }
