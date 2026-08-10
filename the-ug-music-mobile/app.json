@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "TheUgMusic",
+    "slug": "the-ug-music",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#09090B",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.theugmusic.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#09090B"
+      },
+      "package": "com.theugmusic.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
