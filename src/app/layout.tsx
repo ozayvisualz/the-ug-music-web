@@ -13,11 +13,18 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "TheUgMusic - Stream & Download Ugandan Songs",
   description: "Discover, stream and download the best Ugandan music. Support local artists.",
+  manifest: "/manifest.json",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "UgMusic" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      </head>
       <body className="bg-zinc-950 text-white antialiased font-sans min-h-screen overflow-x-hidden">
         <Providers>
           <MobileNav />

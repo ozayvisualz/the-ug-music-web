@@ -1,0 +1,13 @@
+{
+  "name": "TheUgMusic",
+  "short_name": "UgMusic",
+  "description": "Stream & Download Ugandan Music",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090B",
+  "theme_color": "#EAB308",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
