@@ -1,13 +1,13 @@
 "use client";
 
 import { trpc } from "@/trpc/client";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, Image, Loader2, Check, ShieldCheck } from "lucide-react";
 import { GENRES } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { auth, storage } from "@/lib/firebase";
+import { uploadFileAction } from "./actions";
 
 type Step = "form" | "confirm" | "uploading" | "done";
 
@@ -36,8 +36,6 @@ export default function UploadMusicPage() {
   const [coverProgress, setCoverProgress] = useState(0);
   const [uploadingAudio, setUploadingAudio] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
-  const fbAuthed = useRef(false);
-
   const uploadSongMut = trpc.artist.uploadSong.useMutation({
     onSuccess: () => {
       setStep("done");
@@ -73,42 +71,14 @@ export default function UploadMusicPage() {
     maxFiles: 1,
   });
 
-  const ensureFirebaseAuth = async () => {
-    if (fbAuthed.current || auth.currentUser) {
-      fbAuthed.current = true;
-      return;
-    }
-    const res = await fetch("/api/auth/firebase-token", { credentials: "include" });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Auth failed — please log in again");
-    await auth.signInWithCustomToken(data.token);
-    fbAuthed.current = true;
-  };
-
-  const uploadToFirebase = (file: File, folder: string, onProgress: (p: number) => void): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const ext = file.name.split(".").pop() || "bin";
-      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-      const path = `${folder}/${id}.${ext}`;
-      const task = storage.ref().child(path).put(file);
-
-      task.on(
-        "state_changed",
-        (snap: any) => {
-          const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-          onProgress(pct);
-        },
-        (err: any) => reject(err),
-        async () => {
-          try {
-            const url = await task.snapshot!.ref.getDownloadURL();
-            resolve(url);
-          } catch (e) {
-            reject(e);
-          }
-        }
-      );
-    });
+  const uploadFile = async (file: File, onProgress: (p: number) => void): Promise<string> => {
+    onProgress(5);
+    const fd = new FormData();
+    fd.append("file", file);
+    const result = await uploadFileAction(fd);
+    if (result.error) throw new Error(result.error);
+    onProgress(100);
+    return result.url;
   };
 
   const handlePublish = () => {
@@ -123,8 +93,6 @@ export default function UploadMusicPage() {
     setCoverProgress(0);
 
     try {
-      await ensureFirebaseAuth();
-
       const audioEl = document.createElement("audio");
       audioEl.src = URL.createObjectURL(audioFile!);
       await new Promise<void>((resolve) => {
@@ -134,13 +102,13 @@ export default function UploadMusicPage() {
       const duration = Math.round(audioEl.duration) || 180;
 
       setUploadingAudio(true);
-      const fileUrl = await uploadToFirebase(audioFile!, "songs", setAudioProgress);
+      const fileUrl = await uploadFile(audioFile!, setAudioProgress);
       setUploadingAudio(false);
 
       let coverUrl = "";
       if (coverFile) {
         setUploadingCover(true);
-        coverUrl = await uploadToFirebase(coverFile!, "covers", setCoverProgress);
+        coverUrl = await uploadFile(coverFile!, setCoverProgress);
         setUploadingCover(false);
       }
 
