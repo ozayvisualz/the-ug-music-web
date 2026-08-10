@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { artistProcedure, publicProcedure, router } from "../trpc";
+import { artistProcedure, router } from "../trpc";
 import { randomBytes } from "crypto";
 
 function generateSignature(): string {
@@ -7,62 +7,41 @@ function generateSignature(): string {
 }
 
 export const artistRouter = router({
-  testUpload: publicProcedure
-    .input(z.object({ title: z.string(), artistId: z.string(), fileUrl: z.string(), duration: z.number() }))
-    .mutation(async ({ input, ctx }) => {
-      try {
-        return await ctx.db.song.create({
-          data: {
-            title: input.title,
-            artistId: input.artistId,
-            fileUrl: input.fileUrl,
-            duration: input.duration,
-            published: true,
-          },
-        });
-      } catch (e: any) {
-        throw new Error(`DB: ${e?.message || JSON.stringify(e)}`);
-      }
-    }),
-
   uploadSong: artistProcedure
-    .input(z.object({
-      title: z.any(),
-      genre: z.any(),
-      description: z.any(),
-      duration: z.any(),
-      fileUrl: z.any(),
-      hlsUrl: z.any(),
-      coverUrl: z.any(),
-      albumId: z.any(),
-      price: z.any(),
-      story: z.any(),
-      releaseDate: z.any(),
-      songwriters: z.any(),
-      producer: z.any(),
-      beatProducer: z.any(),
-      videoUrl: z.any(),
-      lyrics: z.any(),
-    }))
+    .input(
+      z.object({
+        title: z.string().min(1),
+        genre: z.string().optional(),
+        description: z.string().optional(),
+        duration: z.number(),
+        fileUrl: z.string(),
+        hlsUrl: z.string().optional(),
+        coverUrl: z.string().optional(),
+        albumId: z.string().optional(),
+        price: z.number().min(0).default(1000),
+        story: z.string().optional(),
+        releaseDate: z.string().optional(),
+        songwriters: z.string().optional(),
+        producer: z.string().optional(),
+        beatProducer: z.string().optional(),
+        videoUrl: z.string().optional(),
+        lyrics: z.string().optional(),
+      })
+    )
     .mutation(async ({ input, ctx }) => {
       const artist = await ctx.db.artist.findUnique({
         where: { userId: (ctx.session!.user as any).id },
       });
       if (!artist) throw new Error("Artist profile not found");
 
-      try {
-        return await ctx.db.song.create({
-          data: {
-            title: input.title,
-            duration: input.duration,
-            fileUrl: input.fileUrl,
-            artistId: artist.id,
-            published: true,
-          },
-        });
-      } catch (e: any) {
-        throw new Error(`DB ERROR: ${e?.message || JSON.stringify(e)}`);
-      }
+      return ctx.db.song.create({
+        data: {
+          ...input,
+          artistId: artist.id,
+          published: true,
+          approved: false,
+        },
+      });
     }),
 
   uploadAlbum: artistProcedure

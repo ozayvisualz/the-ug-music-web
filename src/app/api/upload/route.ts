@@ -8,12 +8,12 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File;
 
     return NextResponse.json({
-      url: "https://theugmusic.com/uploads/test-song.mp3",
-      key: "uploads/test-song.mp3",
-      filename: file?.name || "song.mp3",
+      url: "https://theugmusic.com/uploads/placeholder.mp3",
+      key: "uploads/placeholder.mp3",
+      filename: file?.name || "unknown",
       size: file?.size || 0,
     });
   } catch (e: any) {
-    return NextResponse.json({ error: "CATCH: " + (e?.message || "failed") }, { status: 200 });
+    return NextResponse.json({ error: e?.message || "Upload failed" }, { status: 500 });
   }
 }

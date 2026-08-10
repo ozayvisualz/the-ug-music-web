@@ -1,7 +1,7 @@
 "use client";
 import { trpc } from "@/trpc/client";
 import { useState } from "react";
-import { Search, Music2, Eye, EyeOff, Trash2, Edit } from "lucide-react";
+import { Search, Music2, Eye, EyeOff, Trash2, Edit, Clock, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { formatNumber, formatDuration, GENRES } from "@/lib/utils";
 
@@ -38,7 +38,19 @@ export default function ArtistMusicPage() {
                 <td className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-sm">🎵</div><div><p className="text-sm font-medium text-white">{song.title}</p><p className="text-xs text-zinc-500">{formatDuration(song.duration)}</p></div></div></td>
                 <td className="p-4 hidden md:table-cell"><span className="text-sm text-zinc-400">{song.genre || "-"}</span></td>
                 <td className="p-4 hidden lg:table-cell"><span className="text-xs text-zinc-500">{formatNumber(song.playCount)} plays · {song.downloadCount} dls</span></td>
-                <td className="p-4"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${song.published ? "bg-emerald-500/20 text-emerald-400" : "bg-yellow-500/20 text-yellow-500"}`}>{song.published ? "Live" : "Hidden"}</span></td>
+                <td className="p-4">
+                  <div className="flex flex-col gap-1">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${song.approved ? "bg-emerald-500/20 text-emerald-400" : "bg-yellow-500/20 text-yellow-500"}`}>
+                      {song.approved ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                      {song.approved ? "Approved" : "Pending Approval"}
+                    </span>
+                    {song.approved && (
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${song.published ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-600/20 text-zinc-500"}`}>
+                        {song.published ? "Live" : "Hidden"}
+                      </span>
+                    )}
+                  </div>
+                </td>
                 <td className="p-4"><div className="flex items-center justify-end gap-1">
                   <button onClick={() => toggleMut.mutate({ songId: song.id })} className="p-1.5 rounded-lg hover:bg-yellow-500/20 text-zinc-400 hover:text-yellow-500" title={song.published ? "Unpublish" : "Publish"}>
                     {song.published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
