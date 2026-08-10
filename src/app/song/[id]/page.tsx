@@ -17,7 +17,7 @@ export default function SongPage() {
     <div className="max-w-3xl mx-auto px-4 py-10">
       <div className="text-center space-y-4">
         <div className="w-48 h-48 mx-auto rounded-2xl bg-yellow-500/10 flex items-center justify-center text-6xl">🎵</div>
-        <h1 className="text-3xl font-bold">{song.title}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold break-words px-2">{song.title}</h1>
         <Link href={`/artist/${(song as any).artistId}`} className="text-zinc-400 hover:text-yellow-500 transition">{song.artist?.user?.name || "Unknown"}</Link>
         <div className="flex items-center justify-center gap-4 text-sm text-zinc-500">
           <span>{(song as any).genre}</span>
