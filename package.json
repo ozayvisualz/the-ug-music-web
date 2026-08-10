@@ -26,7 +26,7 @@
     "@trpc/server": "^11.0.0-rc.648",
     "bcryptjs": "^2.4.3",
     "firebase": "^12.17.1",
-    "firebase-admin": "^14.2.0",
+    "firebase-admin": "^11.11.1",
     "hls.js": "^1.5.17",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.468.0",
