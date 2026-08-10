@@ -1,5 +1,5 @@
 import { cert, getApps, initializeApp, getApp } from "firebase-admin/app";
-import { getStorage } from "firebase-admin/storage";
+import { getAuth } from "firebase-admin/auth";
 
 function getAdminApp() {
   if (getApps().length) return getApp();
@@ -16,25 +16,10 @@ function getAdminApp() {
   return initializeApp({
     credential: cert(key),
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "the-ug-music",
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "the-ug-music.firebasestorage.app",
   });
 }
 
-export async function uploadToStorage(buffer: Buffer, fileName: string, contentType: string): Promise<string> {
+export async function createCustomToken(userId: string): Promise<string> {
   const app = getAdminApp();
-  const bucket = getStorage(app).bucket();
-
-  const ext = fileName.split(".").pop() || "bin";
-  const id = `u_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
-  const key = `uploads/${id}.${ext}`;
-
-  const file = bucket.file(key);
-  await file.save(buffer, { contentType, resumable: false });
-
-  const [url] = await file.getSignedUrl({
-    action: "read",
-    expires: Date.now() + 365 * 24 * 60 * 60 * 1000,
-  });
-
-  return url;
+  return getAuth(app).createCustomToken(userId);
 }

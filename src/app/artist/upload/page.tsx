@@ -1,13 +1,13 @@
 "use client";
 
 import { trpc } from "@/trpc/client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, Image, Loader2, Check, ShieldCheck } from "lucide-react";
 import { GENRES } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { uploadFileAction } from "./actions";
+import { auth, storage } from "@/lib/firebase";
 
 type Step = "form" | "confirm" | "uploading" | "done";
 
@@ -36,6 +36,8 @@ export default function UploadMusicPage() {
   const [coverProgress, setCoverProgress] = useState(0);
   const [uploadingAudio, setUploadingAudio] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const fbAuthed = useRef(false);
+
   const uploadSongMut = trpc.artist.uploadSong.useMutation({
     onSuccess: () => {
       setStep("done");
@@ -71,14 +73,42 @@ export default function UploadMusicPage() {
     maxFiles: 1,
   });
 
-  const uploadFile = async (file: File, onProgress: (p: number) => void): Promise<string> => {
-    onProgress(10);
-    const formData = new FormData();
-    formData.append("file", file);
-    const result = await uploadFileAction(formData);
-    if (result.error) throw new Error(result.error);
-    onProgress(100);
-    return result.url;
+  const ensureFirebaseAuth = async () => {
+    if (fbAuthed.current || auth.currentUser) {
+      fbAuthed.current = true;
+      return;
+    }
+    const res = await fetch("/api/auth/firebase-token", { credentials: "include" });
+    if (!res.ok) throw new Error("Auth failed — please log in again");
+    const data = await res.json();
+    await auth.signInWithCustomToken(data.token);
+    fbAuthed.current = true;
+  };
+
+  const uploadToFirebase = (file: File, folder: string, onProgress: (p: number) => void): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const ext = file.name.split(".").pop() || "bin";
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      const path = `${folder}/${id}.${ext}`;
+      const task = storage.ref().child(path).put(file);
+
+      task.on(
+        "state_changed",
+        (snap: any) => {
+          const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+          onProgress(pct);
+        },
+        (err: any) => reject(err),
+        async () => {
+          try {
+            const url = await task.snapshot!.ref.getDownloadURL();
+            resolve(url);
+          } catch (e) {
+            reject(e);
+          }
+        }
+      );
+    });
   };
 
   const handlePublish = () => {
@@ -93,6 +123,8 @@ export default function UploadMusicPage() {
     setCoverProgress(0);
 
     try {
+      await ensureFirebaseAuth();
+
       const audioEl = document.createElement("audio");
       audioEl.src = URL.createObjectURL(audioFile!);
       await new Promise<void>((resolve) => {
@@ -102,13 +134,13 @@ export default function UploadMusicPage() {
       const duration = Math.round(audioEl.duration) || 180;
 
       setUploadingAudio(true);
-      const fileUrl = await uploadFile(audioFile!, setAudioProgress);
+      const fileUrl = await uploadToFirebase(audioFile!, "songs", setAudioProgress);
       setUploadingAudio(false);
 
       let coverUrl = "";
       if (coverFile) {
         setUploadingCover(true);
-        coverUrl = await uploadFile(coverFile!, setCoverProgress);
+        coverUrl = await uploadToFirebase(coverFile!, "covers", setCoverProgress);
         setUploadingCover(false);
       }
 
@@ -142,10 +174,8 @@ export default function UploadMusicPage() {
         <p className="text-sm text-zinc-400">Share your music with the world</p>
       </div>
 
-      {/* ===== FORM STEP ===== */}
       {step === "form" && (
         <form onSubmit={(e) => { e.preventDefault(); handlePublish(); }} className="space-y-6">
-          {/* Audio Upload */}
           <div {...getAudioProps()} className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition ${
             audioFile ? "border-green-500/50 bg-green-500/5" : "border-zinc-700 hover:border-yellow-500/50"
           }`}>
@@ -154,7 +184,7 @@ export default function UploadMusicPage() {
               <div className="space-y-2">
                 <Check className="w-10 h-10 text-green-500 mx-auto" />
                 <p className="font-medium">{audioFile.name}</p>
-                <p className="text-sm text-zinc-500">{(audioFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                <p className="text-sm text-zinc-500">{(audioFile.size / 1048576).toFixed(2)} MB</p>
                 {audioPreview && <audio controls src={audioPreview} className="mx-auto mt-2" />}
               </div>
             ) : (
@@ -166,7 +196,6 @@ export default function UploadMusicPage() {
             )}
           </div>
 
-          {/* Cover Image */}
           <div {...getCoverProps()} className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition ${
             coverFile ? "border-green-500/50 bg-green-500/5" : "border-zinc-700 hover:border-yellow-500/50"
           }`}>
@@ -187,7 +216,6 @@ export default function UploadMusicPage() {
             )}
           </div>
 
-          {/* Metadata */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="block text-sm text-zinc-400 mb-1.5">Title</label>
@@ -215,8 +243,6 @@ export default function UploadMusicPage() {
                 rows={3} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500 transition resize-none"
                 placeholder="Tell listeners about this song..." />
             </div>
-
-            {/* Behind the Song */}
             <div className="md:col-span-2 border-t border-zinc-800 pt-4 mt-2">
               <h3 className="text-sm font-semibold text-yellow-500 mb-3">Behind the Song</h3>
             </div>
@@ -239,7 +265,7 @@ export default function UploadMusicPage() {
                 placeholder="Beat producer name" />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm text-zinc-400 mb-1.5">Songwriters & Producers</label>
+              <label className="block text-sm text-zinc-400 mb-1.5">Songwriters / Producers</label>
               <input type="text" value={form.songwriters} onChange={(e) => setForm({ ...form, songwriters: e.target.value })}
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500 transition"
                 placeholder="Name the songwriters" />
@@ -276,7 +302,6 @@ export default function UploadMusicPage() {
         </form>
       )}
 
-      {/* ===== CONFIRMATION MODAL ===== */}
       {step === "confirm" && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#111115] border border-zinc-700/60 rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl">
@@ -314,7 +339,6 @@ export default function UploadMusicPage() {
         </div>
       )}
 
-      {/* ===== UPLOADING PROGRESS ===== */}
       {step === "uploading" && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#111115] border border-zinc-700/60 rounded-2xl w-full max-w-md shadow-2xl">
@@ -325,10 +349,9 @@ export default function UploadMusicPage() {
                 <p className="text-xs text-zinc-500">Please wait while we upload your files...</p>
               </div>
 
-              {/* Audio Progress */}
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs">
-                  <span className="text-zinc-400">{uploadingAudio ? "Uploading audio..." : audioProgress === 100 ? "Audio uploaded" : audioFile?.name}</span>
+                  <span className="text-zinc-400">{uploadingAudio ? "Uploading audio..." : audioProgress === 100 ? "Audio uploaded" : "Audio file"}</span>
                   <span className="text-zinc-500">{audioProgress}%</span>
                 </div>
                 <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
@@ -336,11 +359,10 @@ export default function UploadMusicPage() {
                 </div>
               </div>
 
-              {/* Cover Progress */}
               {coverFile && (
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-xs">
-                    <span className="text-zinc-400">{uploadingCover ? "Uploading cover..." : coverProgress === 100 ? "Cover uploaded" : coverFile?.name}</span>
+                    <span className="text-zinc-400">{uploadingCover ? "Uploading cover..." : coverProgress === 100 ? "Cover uploaded" : "Cover art"}</span>
                     <span className="text-zinc-500">{coverProgress}%</span>
                   </div>
                   <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
@@ -353,7 +375,6 @@ export default function UploadMusicPage() {
         </div>
       )}
 
-      {/* ===== DONE (SUCCESS) ===== */}
       {step === "done" && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#111115] border border-zinc-700/60 rounded-2xl w-full max-w-sm shadow-2xl">
