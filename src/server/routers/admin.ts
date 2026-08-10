@@ -6,6 +6,16 @@ import { BusinessService } from "@/lib/services/business";
 
 export const adminRouter = router({
   // === DASHBOARD ===
+  getCounts: adminProcedure.query(async ({ ctx }) => {
+    const [users, artists, songs, pendingSongs] = await Promise.all([
+      ctx.db.user.count(),
+      ctx.db.artist.count(),
+      ctx.db.song.count(),
+      ctx.db.song.count({ where: { approved: false } }),
+    ]);
+    return { users, artists, songs, pendingSongs };
+  }),
+
   getDashboardStats: adminProcedure.query(async ({ ctx }) => {
     const [totalUsers, totalArtists, totalSongs, totalAlbums, pendingSongs, pendingPayouts] = await Promise.all([
       ctx.db.user.count(),

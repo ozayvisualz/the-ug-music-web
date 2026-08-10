@@ -20,15 +20,16 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const role = user?.role;
 
-  const { data: dashboard, error: dashErr } = trpc.admin.getDashboardFull.useQuery();
+  const { data: dashboard, error: dashErr, isLoading: dashLoading } = trpc.admin.getDashboardFull.useQuery();
+  const { data: counts } = trpc.admin.getCounts.useQuery();
   const { data: pendingSongs } = trpc.admin.getPendingSongs.useQuery();
   const { data: pendingPayouts } = trpc.admin.getPayouts.useQuery();
   const playSong = usePlaySong();
 
-  if (dashErr) {
+  if (dashErr && !counts) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
-        <p className="text-red-400 text-sm">Dashboard data failed to load. Make sure you are logged in as admin.</p>
+        <p className="text-red-400 text-sm">Dashboard data failed to load.</p>
         <p className="text-zinc-500 text-xs">{dashErr.message}</p>
         <Link href="/login" className="px-4 py-2 bg-yellow-500 text-black rounded-lg text-sm">Go to Login</Link>
       </div>
@@ -91,9 +92,9 @@ export default function AdminDashboardPage() {
 
       {/* Quick Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard label="Total Users" value={formatNumber(ds?.totalUsers || 0)} icon={<Users className="w-4 h-4 text-zinc-500" />} />
-        <StatCard label="Artists" value={formatNumber(ds?.totalArtists || 0)} icon={<Mic2 className="w-4 h-4 text-zinc-500" />} />
-        <StatCard label="Songs" value={formatNumber(ds?.totalSongs || 0)} icon={<Music2 className="w-4 h-4 text-zinc-500" />} />
+        <StatCard label="Total Users" value={formatNumber(ds?.totalUsers || counts?.users || 0)} icon={<Users className="w-4 h-4 text-zinc-500" />} />
+        <StatCard label="Artists" value={formatNumber(ds?.totalArtists || counts?.artists || 0)} icon={<Mic2 className="w-4 h-4 text-zinc-500" />} />
+        <StatCard label="Songs" value={formatNumber(ds?.totalSongs || counts?.songs || 0)} icon={<Music2 className="w-4 h-4 text-zinc-500" />} />
         <StatCard label="Streams (24h)" value={formatNumber(streams?.today || 0)} icon={<Play className="w-4 h-4 text-zinc-500" />} />
         <StatCard label="Downloads" value={formatNumber(dashboard?.downloads?.today || 0)} icon={<Download className="w-4 h-4 text-zinc-500" />} />
         <StatCard label="Premium" value={formatNumber(ds?.premiumUsers || 0)} icon={<Crown className="w-4 h-4 text-zinc-500" />} />
