@@ -7,7 +7,7 @@ import { Upload, Image, Loader2, Check, ShieldCheck } from "lucide-react";
 import { GENRES } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { uploadFileAction } from "./actions";
+import { storage } from "@/lib/firebase";
 
 type Step = "form" | "confirm" | "uploading" | "done";
 
@@ -71,14 +71,30 @@ export default function UploadMusicPage() {
     maxFiles: 1,
   });
 
-  const uploadFile = async (file: File, onProgress: (p: number) => void): Promise<string> => {
-    onProgress(5);
-    const fd = new FormData();
-    fd.append("file", file);
-    const result = await uploadFileAction(fd);
-    if (result.error) throw new Error(result.error);
-    onProgress(100);
-    return result.url;
+  const uploadFile = (file: File, onProgress: (p: number) => void): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const ext = file.name.split(".").pop() || "bin";
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      const path = `uploads/${id}.${ext}`;
+      const task = storage.ref().child(path).put(file);
+
+      task.on(
+        "state_changed",
+        (snap: any) => {
+          const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+          onProgress(pct);
+        },
+        (err: any) => reject(err),
+        async () => {
+          try {
+            const url = await task.snapshot!.ref.getDownloadURL();
+            resolve(url);
+          } catch (e) {
+            reject(e);
+          }
+        }
+      );
+    });
   };
 
   const handlePublish = () => {
