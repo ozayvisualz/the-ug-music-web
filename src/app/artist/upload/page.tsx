@@ -1,13 +1,13 @@
 "use client";
 
 import { trpc } from "@/trpc/client";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { Upload, Music2, Image, Loader2, Check, X, ShieldCheck, ArrowLeft } from "lucide-react";
+import { Upload, Image, Loader2, Check, ShieldCheck } from "lucide-react";
 import { GENRES } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { storage } from "@/lib/firebase";
+import { uploadFileAction } from "./actions";
 
 type Step = "form" | "confirm" | "uploading" | "done";
 
@@ -36,8 +36,6 @@ export default function UploadMusicPage() {
   const [coverProgress, setCoverProgress] = useState(0);
   const [uploadingAudio, setUploadingAudio] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
-  const abortRef = useRef<(() => void) | null>(null);
-
   const uploadSongMut = trpc.artist.uploadSong.useMutation({
     onSuccess: () => {
       setStep("done");
@@ -73,34 +71,14 @@ export default function UploadMusicPage() {
     maxFiles: 1,
   });
 
-  const uploadToFirebase = (file: File, folder: string, onProgress: (p: number) => void): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const ext = file.name.split(".").pop() || file.type.split("/")[1] || "bin";
-      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-      const path = `${folder}/${id}.${ext}`;
-      const uploadRef = storage.ref().child(path);
-      const task = uploadRef.put(file);
-
-      abortRef.current = () => task.cancel();
-
-      task.on("state_changed",
-        (snapshot: any) => {
-          const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-          onProgress(pct);
-        },
-        (error: any) => {
-          reject(error);
-        },
-        async () => {
-          try {
-            const url = await task.snapshot.ref.getDownloadURL();
-            resolve(url);
-          } catch (e) {
-            reject(e);
-          }
-        }
-      );
-    });
+  const uploadFile = async (file: File, onProgress: (p: number) => void): Promise<string> => {
+    onProgress(10);
+    const formData = new FormData();
+    formData.append("file", file);
+    const result = await uploadFileAction(formData);
+    if (result.error) throw new Error(result.error);
+    onProgress(100);
+    return result.url;
   };
 
   const handlePublish = () => {
@@ -124,13 +102,13 @@ export default function UploadMusicPage() {
       const duration = Math.round(audioEl.duration) || 180;
 
       setUploadingAudio(true);
-      const fileUrl = await uploadToFirebase(audioFile!, "songs", setAudioProgress);
+      const fileUrl = await uploadFile(audioFile!, setAudioProgress);
       setUploadingAudio(false);
 
       let coverUrl = "";
       if (coverFile) {
         setUploadingCover(true);
-        coverUrl = await uploadToFirebase(coverFile!, "covers", setCoverProgress);
+        coverUrl = await uploadFile(coverFile!, setCoverProgress);
         setUploadingCover(false);
       }
 
@@ -156,8 +134,6 @@ export default function UploadMusicPage() {
       toast.error("Upload failed: " + (e?.message || "Unknown error"));
     }
   };
-
-  const isUploading = uploadingAudio || uploadingCover;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
