@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import { createCustomToken } from "@/lib/firebase-admin";
 
 export async function GET(req: NextRequest) {
   try {
@@ -12,12 +11,22 @@ export async function GET(req: NextRequest) {
       const match = cookie.match(/(?:^|;\s*)auth-token=([^;]*)/);
       if (match) token = match[1];
     }
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!token) return NextResponse.json({ error: "No auth token found" }, { status: 401 });
 
-    const decoded = jwt.verify(token, process.env.AUTH_SECRET || "default-secret") as any;
-    const fbToken = await createCustomToken(decoded.id);
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, process.env.AUTH_SECRET || "default-secret");
+    } catch (jwtErr: any) {
+      return NextResponse.json({ error: "JWT invalid: " + jwtErr.message }, { status: 401 });
+    }
 
-    return NextResponse.json({ token: fbToken });
+    try {
+      const { createCustomToken } = await import("@/lib/firebase-admin");
+      const fbToken = await createCustomToken(decoded.id);
+      return NextResponse.json({ token: fbToken });
+    } catch (fbErr: any) {
+      return NextResponse.json({ error: "Firebase Admin: " + fbErr.message }, { status: 500 });
+    }
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || "Failed" }, { status: 500 });
   }

@@ -79,8 +79,8 @@ export default function UploadMusicPage() {
       return;
     }
     const res = await fetch("/api/auth/firebase-token", { credentials: "include" });
-    if (!res.ok) throw new Error("Auth failed — please log in again");
     const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Auth failed — please log in again");
     await auth.signInWithCustomToken(data.token);
     fbAuthed.current = true;
   };
