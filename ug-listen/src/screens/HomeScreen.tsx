@@ -135,7 +135,7 @@ function HeroCard({ song, onPlay, onSave }: { song: any; onPlay: (s: any) => voi
           <Image source={{ uri: coverUrl }} style={styles.heroArtImage} />
         ) : (
           <View style={styles.heroArtGradient}>
-            <Music2 size={48} color={COLORS.gold} />
+            <Music2 size={32} color={COLORS.gold} />
           </View>
         )}
       </View>
@@ -150,10 +150,10 @@ function HeroCard({ song, onPlay, onSave }: { song: any; onPlay: (s: any) => voi
         </View>
         <View style={styles.heroActions}>
           <TouchableOpacity style={styles.heroPlayBtn} onPress={() => onPlay(song)} hitSlop={HIT_SLOP}>
-            <Play size={22} color={COLORS.bg} fill={COLORS.bg} />
+            <Play size={18} color={COLORS.bg} fill={COLORS.bg} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.heroSaveBtn} onPress={() => onSave(song)} hitSlop={HIT_SLOP}>
-            <Heart size={20} color={COLORS.white} />
+            <Heart size={18} color={COLORS.white} />
           </TouchableOpacity>
         </View>
       </View>
@@ -280,7 +280,7 @@ export default function HomeScreen() {
             {user?.name ? (
               <Text style={styles.avatarText}>{avatarLetter}</Text>
             ) : (
-              <User size={20} color={COLORS.bg} />
+              <User size={18} color={COLORS.bg} />
             )}
           </View>
           <View style={styles.greetingWrap}>
@@ -299,14 +299,14 @@ export default function HomeScreen() {
             onPress={() => navigation.navigate("Notifications")}
             hitSlop={HIT_SLOP}
           >
-            <Bell size={22} color={COLORS.white} />
+            <Bell size={20} color={COLORS.white} />
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.headerIcon}
             onPress={() => navigation.navigate("Settings")}
             hitSlop={HIT_SLOP}
           >
-            <Settings size={22} color={COLORS.white} />
+            <Settings size={20} color={COLORS.white} />
           </TouchableOpacity>
         </View>
       </View>
@@ -319,7 +319,7 @@ export default function HomeScreen() {
         {/* ── Hero Carousel ── */}
         <View style={styles.heroSection}>
           {heroLoading ? (
-            <ShimmerBlock width={HERO_WIDTH} height={280} borderRadius={RADIUS.xxl} />
+            <ShimmerBlock width={HERO_WIDTH} height={200} borderRadius={RADIUS.lg} />
           ) : heroSongs.length > 0 ? (
             <>
               <FlatList
@@ -380,9 +380,9 @@ export default function HomeScreen() {
             <SectionHeader title="Continue Listening" />
             {clLoading ? (
               <View style={styles.skeletonRow}>
-                <ShimmerBlock width={160} height={100} />
-                <View style={{ width: 12 }} />
-                <ShimmerBlock width={160} height={100} />
+                <ShimmerBlock width={136} height={88} />
+                <View style={{ width: 10 }} />
+                <ShimmerBlock width={136} height={88} />
               </View>
             ) : continueListening.length > 0 ? (
               <FlatList
@@ -433,11 +433,11 @@ export default function HomeScreen() {
           />
           {trendingLoading ? (
             <View style={styles.skeletonRow}>
-              <ShimmerBlock width={150} height={200} />
-              <View style={{ width: 12 }} />
-              <ShimmerBlock width={150} height={200} />
-              <View style={{ width: 12 }} />
-              <ShimmerBlock width={150} height={200} />
+              <ShimmerBlock width={130} height={170} />
+              <View style={{ width: 10 }} />
+              <ShimmerBlock width={130} height={170} />
+              <View style={{ width: 10 }} />
+              <ShimmerBlock width={130} height={170} />
             </View>
           ) : trending.length > 0 ? (
             <FlatList
@@ -458,7 +458,7 @@ export default function HomeScreen() {
                       {coverUrl ? (
                         <Image source={{ uri: coverUrl }} style={styles.trendingArtImg} />
                       ) : (
-                        <Music2 size={36} color={COLORS.gold} />
+                        <Music2 size={28} color={COLORS.gold} />
                       )}
                     </View>
                     <Text style={styles.trendingTitle} numberOfLines={1}>
@@ -482,7 +482,7 @@ export default function HomeScreen() {
                       onPress={() => handlePlaySong(item)}
                       hitSlop={HIT_SLOP}
                     >
-                      <Play size={16} color={COLORS.bg} fill={COLORS.bg} />
+                        <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
                     </TouchableOpacity>
                   </TouchableOpacity>
                 );
@@ -496,11 +496,11 @@ export default function HomeScreen() {
           <SectionHeader title="New Releases" />
           {nrLoading ? (
             <View style={styles.skeletonRow}>
-              <ShimmerBlock width={150} height={200} />
-              <View style={{ width: 12 }} />
-              <ShimmerBlock width={150} height={200} />
-              <View style={{ width: 12 }} />
-              <ShimmerBlock width={150} height={200} />
+              <ShimmerBlock width={130} height={170} />
+              <View style={{ width: 10 }} />
+              <ShimmerBlock width={130} height={170} />
+              <View style={{ width: 10 }} />
+              <ShimmerBlock width={130} height={170} />
             </View>
           ) : newReleases.length > 0 ? (
             <FlatList
@@ -521,7 +521,7 @@ export default function HomeScreen() {
                       {coverUrl ? (
                         <Image source={{ uri: coverUrl }} style={styles.releaseArtImg} />
                       ) : (
-                        <Music2 size={36} color={COLORS.gold} />
+                        <Music2 size={28} color={COLORS.gold} />
                       )}
                       <View style={styles.newBadge}>
                         <Text style={styles.newBadgeText}>NEW</Text>
@@ -582,9 +582,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: SPACING.lg,
-    paddingTop: 12,
-    paddingBottom: 10,
+    paddingHorizontal: SPACING.md,
+    paddingTop: 10,
+    paddingBottom: 8,
     backgroundColor: "rgba(9, 9, 11, 0.95)",
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
@@ -592,27 +592,27 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: SPACING.md,
+    gap: SPACING.sm,
   },
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
-    gap: SPACING.sm,
+    gap: SPACING.xs,
   },
   headerIcon: {
     padding: SPACING.xs,
   },
   avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: {
     color: COLORS.bg,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
   },
   greetingWrap: {
@@ -620,14 +620,14 @@ const styles = StyleSheet.create({
   },
   greeting: {
     color: COLORS.whiteMuted,
-    fontSize: 13,
+    fontSize: 12,
   },
   greetingWave: {
-    fontSize: 13,
+    fontSize: 12,
   },
   username: {
     color: COLORS.white,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
   },
 
@@ -636,8 +636,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.md,
+    paddingHorizontal: SPACING.md,
+    paddingTop: SPACING.sm,
   },
 
   // ── Section Header ──
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
     marginTop: SPACING.xs,
   },
   sectionHeaderLeft: {
@@ -655,30 +655,30 @@ const styles = StyleSheet.create({
   },
   goldAccent: {
     width: 3,
-    height: 18,
+    height: 16,
     borderRadius: 2,
     backgroundColor: COLORS.gold,
   },
   sectionHeaderTitle: {
     color: COLORS.white,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     letterSpacing: -0.3,
   },
   seeAll: {
     color: COLORS.gold,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
   },
 
   // ── Section ──
   section: {
-    marginBottom: SPACING.xxxl,
+    marginBottom: SPACING.xl,
   },
 
   // ── Hero Carousel ──
   heroSection: {
-    marginBottom: SPACING.xxl,
+    marginBottom: SPACING.lg,
   },
   heroList: {
     paddingRight: SPACING.lg,
@@ -686,8 +686,8 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     width: HERO_WIDTH,
-    height: 280,
-    borderRadius: RADIUS.xxl,
+    height: 200,
+    borderRadius: RADIUS.lg,
     overflow: "hidden",
     backgroundColor: COLORS.surface,
     ...SHADOWS.card,
@@ -709,20 +709,20 @@ const styles = StyleSheet.create({
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: "flex-end",
-    padding: SPACING.lg,
+    padding: SPACING.md,
     backgroundColor: "rgba(0,0,0,0.45)",
   },
   heroTextWrap: {
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   heroTitle: {
     color: COLORS.white,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
   },
   heroArtist: {
     color: COLORS.whiteMuted,
-    fontSize: 13,
+    fontSize: 12,
     marginTop: 2,
   },
   heroActions: {
@@ -731,17 +731,17 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   heroPlayBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
   },
   heroSaveBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: "rgba(255,255,255,0.15)",
     alignItems: "center",
     justifyContent: "center",
@@ -753,7 +753,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: SPACING.sm,
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
   },
   pagerDot: {
     width: 6,
@@ -770,40 +770,40 @@ const styles = StyleSheet.create({
   // ── Made For You ──
   mixList: {
     paddingRight: SPACING.lg,
-    gap: SPACING.md,
+    gap: SPACING.sm,
   },
   mixCard: {
-    width: 120,
-    height: 120,
+    width: 100,
+    height: 100,
     borderRadius: RADIUS.lg,
     alignItems: "center",
     justifyContent: "center",
-    padding: SPACING.sm,
-    gap: SPACING.sm,
+    padding: SPACING.xs,
+    gap: SPACING.xs,
   },
   mixEmoji: {
-    fontSize: 28,
+    fontSize: 24,
   },
   mixLabel: {
     color: COLORS.white,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
     textAlign: "center",
-    lineHeight: 16,
+    lineHeight: 14,
   },
 
   // ── Continue Listening ──
   continueCard: {
-    width: 160,
-    height: 100,
-    borderRadius: RADIUS.lg,
+    width: 136,
+    height: 88,
+    borderRadius: RADIUS.md,
     backgroundColor: COLORS.surface,
     overflow: "hidden",
     marginRight: SPACING.md,
   },
   continueArt: {
-    width: 160,
-    height: 70,
+    width: 136,
+    height: 60,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: COLORS.surfaceHover,
@@ -814,8 +814,8 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   continueInfo: {
-    paddingHorizontal: SPACING.sm,
-    paddingTop: 4,
+    paddingHorizontal: SPACING.xs,
+    paddingTop: 3,
   },
   continueTitle: {
     color: COLORS.white,
@@ -842,21 +842,21 @@ const styles = StyleSheet.create({
 
   // ── Trending Now ──
   trendingCard: {
-    width: 150,
+    width: 130,
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    padding: SPACING.sm,
+    borderRadius: RADIUS.md,
+    padding: SPACING.xs,
     marginRight: SPACING.md,
     position: "relative",
   },
   trendingArt: {
-    width: 134,
-    height: 120,
-    borderRadius: RADIUS.md,
+    width: 114,
+    height: 100,
+    borderRadius: RADIUS.sm,
     backgroundColor: COLORS.surfaceHover,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
     overflow: "hidden",
   },
   trendingArtImg: {
@@ -866,13 +866,13 @@ const styles = StyleSheet.create({
   },
   trendingTitle: {
     color: COLORS.white,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
   },
   trendingArtist: {
     color: COLORS.textMuted,
-    fontSize: 11,
-    marginBottom: 4,
+    fontSize: 10,
+    marginBottom: 3,
   },
   playCountRow: {
     flexDirection: "row",
@@ -880,19 +880,19 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   fireIcon: {
-    fontSize: 11,
+    fontSize: 10,
   },
   playCountText: {
     color: COLORS.textMuted,
-    fontSize: 10,
+    fontSize: 9,
   },
   trendingPlayBtn: {
     position: "absolute",
-    bottom: SPACING.sm,
-    right: SPACING.sm,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    bottom: SPACING.xs,
+    right: SPACING.xs,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
@@ -901,20 +901,20 @@ const styles = StyleSheet.create({
 
   // ── New Releases ──
   releaseCard: {
-    width: 150,
+    width: 130,
     backgroundColor: COLORS.surface,
-    borderRadius: RADIUS.lg,
-    padding: SPACING.sm,
+    borderRadius: RADIUS.md,
+    padding: SPACING.xs,
     marginRight: SPACING.md,
   },
   releaseArt: {
-    width: 134,
-    height: 120,
-    borderRadius: RADIUS.md,
+    width: 114,
+    height: 100,
+    borderRadius: RADIUS.sm,
     backgroundColor: COLORS.surfaceHover,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: SPACING.sm,
+    marginBottom: SPACING.xs,
     overflow: "hidden",
     position: "relative",
   },
@@ -925,39 +925,39 @@ const styles = StyleSheet.create({
   },
   newBadge: {
     position: "absolute",
-    top: SPACING.sm,
-    left: SPACING.sm,
+    top: 4,
+    left: 4,
     backgroundColor: COLORS.gold,
-    paddingHorizontal: SPACING.xs + 2,
-    paddingVertical: 2,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
     borderRadius: RADIUS.full,
   },
   newBadgeText: {
     color: COLORS.bg,
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: "800",
     letterSpacing: 0.5,
   },
   releaseTitle: {
     color: COLORS.white,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
   },
   releaseArtist: {
     color: COLORS.textMuted,
-    fontSize: 11,
+    fontSize: 10,
   },
 
   // ── Made in Uganda ──
   ugandaGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: SPACING.md,
+    gap: SPACING.sm,
   },
   ugandaCard: {
-    width: (SCREEN_WIDTH - 32 - SPACING.md) / 2,
-    height: 90,
-    borderRadius: RADIUS.lg,
+    width: (SCREEN_WIDTH - 32 - SPACING.sm) / 2,
+    height: 76,
+    borderRadius: RADIUS.md,
     backgroundColor: COLORS.surface,
     overflow: "hidden",
   },
@@ -966,18 +966,18 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(234, 179, 8, 0.08)",
     alignItems: "center",
     justifyContent: "center",
-    padding: SPACING.sm,
-    gap: 4,
+    padding: SPACING.xs,
+    gap: 3,
   },
   ugandaEmoji: {
-    fontSize: 24,
+    fontSize: 20,
   },
   ugandaLabel: {
     color: COLORS.white,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "600",
     textAlign: "center",
-    lineHeight: 16,
+    lineHeight: 14,
   },
 
   // ── Skeleton ──
@@ -990,6 +990,6 @@ const styles = StyleSheet.create({
     paddingRight: SPACING.lg,
   },
   bottomSpacer: {
-    height: 80,
+    height: 70,
   },
 });

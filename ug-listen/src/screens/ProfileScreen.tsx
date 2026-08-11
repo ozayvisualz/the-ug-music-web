@@ -82,53 +82,53 @@ export default function ProfileScreen() {
 
   const menuItems: MenuItem[] = [
     {
-      icon: <Crown size={20} color={COLORS.gold} />,
+      icon: <Crown size={18} color={COLORS.gold} />,
       label: "Premium Plans",
       color: COLORS.gold,
       onPress: () => navigation.navigate("PremiumScreen"),
     },
     {
-      icon: <Clock size={20} color={COLORS.text} />,
+      icon: <Clock size={18} color={COLORS.text} />,
       label: "Listening History",
       onPress: () => {},
     },
     {
-      icon: <Heart size={20} color={COLORS.text} />,
+      icon: <Heart size={18} color={COLORS.text} />,
       label: "Liked Songs",
       onPress: () => {},
     },
     {
-      icon: <Download size={20} color={COLORS.text} />,
+      icon: <Download size={18} color={COLORS.text} />,
       label: "Downloads",
       onPress: () => {},
     },
     {
-      icon: <CreditCard size={20} color={COLORS.text} />,
+      icon: <CreditCard size={18} color={COLORS.text} />,
       label: "Payment Methods",
       onPress: () => {},
     },
     {
-      icon: <Bell size={20} color={COLORS.text} />,
+      icon: <Bell size={18} color={COLORS.text} />,
       label: "Notifications",
       onPress: () => {},
     },
     {
-      icon: <Share2 size={20} color={COLORS.text} />,
+      icon: <Share2 size={18} color={COLORS.text} />,
       label: "Invite Friends",
       onPress: () => {},
     },
     {
-      icon: <Settings size={20} color={COLORS.text} />,
+      icon: <Settings size={18} color={COLORS.text} />,
       label: "Settings",
       onPress: () => {},
     },
     {
-      icon: <HelpCircle size={20} color={COLORS.text} />,
+      icon: <HelpCircle size={18} color={COLORS.text} />,
       label: "Support",
       onPress: () => navigation.navigate("SupportScreen"),
     },
     {
-      icon: <LogOut size={20} color={COLORS.red} />,
+      icon: <LogOut size={18} color={COLORS.red} />,
       label: "Sign Out",
       color: COLORS.red,
       onPress: handleLogout,
@@ -208,7 +208,7 @@ export default function ProfileScreen() {
               >
                 {item.label}
               </Text>
-              <ChevronRight size={16} color={COLORS.textMuted} />
+              <ChevronRight size={14} color={COLORS.textMuted} />
             </TouchableOpacity>
           ))}
         </View>
@@ -224,11 +224,11 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 10,
+    paddingTop: 10,
+    paddingBottom: 8,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: COLORS.white,
   },
@@ -239,83 +239,83 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   emptySubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.textMuted,
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: 20,
   },
   authRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
   },
   authBtn: {
     backgroundColor: COLORS.gold,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
   authBtnText: {
     color: COLORS.bg,
     fontWeight: "700",
-    fontSize: 15,
+    fontSize: 14,
   },
   authOutlineBtn: {
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
   },
   authOutlineBtnText: {
     color: COLORS.white,
     fontWeight: "600",
-    fontSize: 15,
+    fontSize: 14,
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 80,
+    paddingBottom: 70,
   },
   profileCard: {
     alignItems: "center",
-    paddingVertical: 24,
+    paddingVertical: 18,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   avatarText: {
     color: COLORS.bg,
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "700",
   },
   name: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   email: {
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.textMuted,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   roleBadge: {
-    paddingVertical: 4,
-    paddingHorizontal: 14,
+    paddingVertical: 3,
+    paddingHorizontal: 12,
     borderRadius: 999,
   },
   roleArtist: {
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
   },
   roleText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "700",
   },
   roleArtistText: {
@@ -337,9 +337,9 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: "row",
     backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    paddingVertical: 16,
-    marginBottom: 24,
+    borderRadius: 12,
+    paddingVertical: 12,
+    marginBottom: 20,
   },
   statItem: {
     flex: 1,
@@ -351,26 +351,26 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   statNumber: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.textMuted,
     fontWeight: "500",
   },
   menuSection: {
     backgroundColor: COLORS.surface,
-    borderRadius: 14,
+    borderRadius: 12,
     overflow: "hidden",
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
   },
@@ -378,13 +378,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0,
   },
   menuIconWrap: {
-    width: 28,
+    width: 24,
     alignItems: "center",
-    marginRight: 14,
+    marginRight: 12,
   },
   menuLabel: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 14,
     color: COLORS.white,
   },
 });

@@ -3,6 +3,7 @@ import { trpc } from "@/trpc/client";
 import { useState } from "react";
 import { Search, BadgeCheck, Star, Ban, UserX, Mic2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { getArtistName } from "@/lib/utils";
 
 export default function AdminArtistsPage() {
   const [search, setSearch] = useState("");
@@ -25,7 +26,7 @@ export default function AdminArtistsPage() {
           <tbody>
             {artists?.map((a: any) => (
               <tr key={a.id} className="border-b border-zinc-800/30 hover:bg-zinc-800/20">
-                <td className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-sm font-bold text-yellow-500">{a.user?.name?.charAt(0) || "?"}</div><div><p className="text-sm font-medium text-white flex items-center gap-1">{a.user?.name}{a.verified && <BadgeCheck className="w-3.5 h-3.5 text-yellow-500" />}</p><p className="text-xs text-zinc-500">{a.user?.email}</p></div></div></td>
+                <td className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-sm font-bold text-yellow-500">{getArtistName(a).charAt(0) || "?"}</div><div><p className="text-sm font-medium text-white flex items-center gap-1">{getArtistName(a)}{a.verified && <BadgeCheck className="w-3.5 h-3.5 text-yellow-500" />}</p><p className="text-xs text-zinc-500">{a.user?.email}</p></div></div></td>
                 <td className="p-4 hidden md:table-cell"><div className="flex gap-1"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${a.verified ? "bg-emerald-500/20 text-emerald-400" : "bg-yellow-500/20 text-yellow-500"}`}>{a.verified ? "Verified" : "Unverified"}</span>{a.featured && <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-400">Featured</span>}</div></td>
                 <td className="p-4 hidden lg:table-cell"><span className="text-sm text-zinc-400">{a.songs?.length || 0} songs</span></td>
                 <td className="p-4"><div className="flex items-center justify-end gap-1">

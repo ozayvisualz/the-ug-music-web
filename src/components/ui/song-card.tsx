@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Play, Download, MoreVertical, DollarSign } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
-import { formatDuration } from "@/lib/utils";
+import { formatDuration, getArtistName } from "@/lib/utils";
 
 interface SongCardProps {
   song: {
@@ -28,7 +28,7 @@ export function SongCard({ song }: SongCardProps) {
     setCurrentSong({
       id: song.id,
       title: song.title,
-      artist: song.artist.user.name || "Unknown Artist",
+      artist: getArtistName(song.artist),
       coverUrl: song.coverUrl || song.album?.coverUrl || undefined,
       hlsUrl: song.hlsUrl || undefined,
       fileUrl: song.fileUrl || undefined,
@@ -60,7 +60,7 @@ export function SongCard({ song }: SongCardProps) {
         <Link href={`/song/${song.id}`} className="text-sm font-medium hover:text-yellow-500 transition line-clamp-1">
           {song.title}
         </Link>
-        <p className="text-xs text-zinc-500">{song.artist.user.name}</p>
+        <p className="text-xs text-zinc-500">{getArtistName(song.artist)}</p>
         {song.price && song.price > 0 && (
           <span className="inline-flex items-center gap-1 text-xs text-yellow-500 mt-0.5">
             <DollarSign className="w-3 h-3" /> {song.price.toLocaleString()} UGX

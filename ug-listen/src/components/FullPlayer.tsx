@@ -58,7 +58,7 @@ type Props = {
 };
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-const ARTWORK_SIZE = Math.min(300, SCREEN_WIDTH - 80);
+const ARTWORK_SIZE = Math.min(240, SCREEN_WIDTH - 100);
 
 const GLOW_COLORS = [
   "rgba(234,179,8,0.3)",
@@ -332,7 +332,7 @@ export default function FullPlayer({ onCollapse }: Props) {
           />
         ) : (
           <View style={styles.queueArtworkPlaceholder}>
-            <Music2 size={14} color={COLORS.textMuted} />
+            <Music2 size={12} color={COLORS.textMuted} />
           </View>
         )}
       </View>
@@ -345,7 +345,7 @@ export default function FullPlayer({ onCollapse }: Props) {
         </Text>
       </View>
       <TouchableOpacity style={styles.queueRemove} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-        <X size={16} color={COLORS.textMuted} />
+        <X size={14} color={COLORS.textMuted} />
       </TouchableOpacity>
     </View>
   );
@@ -396,7 +396,7 @@ export default function FullPlayer({ onCollapse }: Props) {
             onPress={handleCollapse}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <ChevronDown size={24} color={COLORS.white} />
+            <ChevronDown size={22} color={COLORS.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle} numberOfLines={1}>
             {track.title}
@@ -404,7 +404,7 @@ export default function FullPlayer({ onCollapse }: Props) {
           <TouchableOpacity
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <Ellipsis size={24} color={COLORS.white} />
+            <Ellipsis size={22} color={COLORS.white} />
           </TouchableOpacity>
         </View>
 
@@ -418,7 +418,7 @@ export default function FullPlayer({ onCollapse }: Props) {
                 />
               ) : (
                 <View style={styles.artworkPlaceholder}>
-                  <Music2 size={80} color={COLORS.bg} />
+                  <Music2 size={60} color={COLORS.bg} />
                 </View>
               )}
             </View>
@@ -438,7 +438,7 @@ export default function FullPlayer({ onCollapse }: Props) {
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
               <Heart
-                size={18}
+                size={16}
                 color={liked ? COLORS.red : COLORS.textMuted}
                 fill={liked ? COLORS.red : "none"}
               />
@@ -479,7 +479,7 @@ export default function FullPlayer({ onCollapse }: Props) {
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Shuffle
-              size={20}
+              size={18}
               color={shuffleOn ? COLORS.gold : COLORS.textMuted}
             />
           </TouchableOpacity>
@@ -487,27 +487,27 @@ export default function FullPlayer({ onCollapse }: Props) {
             onPress={skipPrev}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <SkipBack size={26} color={COLORS.white} />
+            <SkipBack size={22} color={COLORS.white} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.playBtn} onPress={togglePlay} activeOpacity={0.8}>
             {playing ? (
-              <Pause size={30} color={COLORS.bg} />
+              <Pause size={26} color={COLORS.bg} />
             ) : (
-              <Play size={30} color={COLORS.bg} style={{ marginLeft: 3 }} />
+              <Play size={26} color={COLORS.bg} style={{ marginLeft: 2 }} />
             )}
           </TouchableOpacity>
           <TouchableOpacity
             onPress={skipNext}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <SkipForward size={26} color={COLORS.white} />
+            <SkipForward size={22} color={COLORS.white} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={toggleRepeat}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
             <Repeat
-              size={20}
+              size={18}
               color={
                 repeatMode > 0 ? COLORS.gold : COLORS.textMuted
               }
@@ -518,22 +518,22 @@ export default function FullPlayer({ onCollapse }: Props) {
         <View style={styles.actionsRow}>
           <TouchableOpacity style={styles.actionBtn} onPress={toggleLike}>
             <Heart
-              size={20}
+              size={18}
               color={liked ? COLORS.red : COLORS.textMuted}
               fill={liked ? COLORS.red : "none"}
             />
             <Text style={styles.actionLabel}>Like</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn}>
-            <Download size={20} color={COLORS.textMuted} />
+            <Download size={18} color={COLORS.textMuted} />
             <Text style={styles.actionLabel}>Download</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn}>
-            <ListPlus size={20} color={COLORS.textMuted} />
+            <ListPlus size={18} color={COLORS.textMuted} />
             <Text style={styles.actionLabel}>Playlist</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn}>
-            <Share2 size={20} color={COLORS.textMuted} />
+            <Share2 size={18} color={COLORS.textMuted} />
             <Text style={styles.actionLabel}>Share</Text>
           </TouchableOpacity>
         </View>
@@ -650,22 +650,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: 56,
-    paddingHorizontal: SPACING.lg,
+    height: 48,
+    paddingHorizontal: SPACING.md,
     zIndex: 1,
   },
   headerTitle: {
     color: COLORS.white,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     flex: 1,
     textAlign: "center",
-    marginHorizontal: SPACING.md,
+    marginHorizontal: SPACING.sm,
   },
   artworkContainer: {
     alignItems: "center",
     justifyContent: "center",
-    marginTop: SPACING.sm,
+    marginTop: SPACING.xs,
     zIndex: 1,
   },
   artwork: {
@@ -701,13 +701,13 @@ const styles = StyleSheet.create({
   },
   songInfo: {
     alignItems: "center",
-    marginTop: SPACING.xl,
+    marginTop: SPACING.md,
     paddingHorizontal: SPACING.xxxl,
     zIndex: 1,
   },
   songTitle: {
     color: COLORS.white,
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     textAlign: "center",
   },
@@ -719,15 +719,15 @@ const styles = StyleSheet.create({
   },
   artistName: {
     color: COLORS.text,
-    fontSize: 15,
+    fontSize: 14,
     textAlign: "center",
     flex: 1,
   },
   seekSection: {
     width: "100%",
     paddingHorizontal: SPACING.lg,
-    marginTop: SPACING.xl,
-    marginBottom: SPACING.sm,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.xs,
     zIndex: 1,
   },
   seekTrackOuter: {
@@ -782,14 +782,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: SPACING.xxl,
-    marginTop: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    marginTop: SPACING.sm,
     zIndex: 1,
   },
   playBtn: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
@@ -797,8 +797,8 @@ const styles = StyleSheet.create({
   actionsRow: {
     flexDirection: "row",
     justifyContent: "space-evenly",
-    marginTop: SPACING.xl,
-    marginBottom: SPACING.lg,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.md,
     paddingHorizontal: SPACING.lg,
     zIndex: 1,
   },
@@ -822,7 +822,7 @@ const styles = StyleSheet.create({
   },
   tabPill: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 7,
     borderRadius: RADIUS.full,
     alignItems: "center",
   },
@@ -832,7 +832,7 @@ const styles = StyleSheet.create({
   tabText: {
     color: COLORS.textMuted,
     fontWeight: "600",
-    fontSize: 13,
+    fontSize: 12,
   },
   tabTextActive: {
     color: COLORS.bg,
@@ -840,7 +840,7 @@ const styles = StyleSheet.create({
   tabContent: {
     flex: 1,
     marginHorizontal: SPACING.lg,
-    marginTop: SPACING.md,
+    marginTop: SPACING.sm,
     zIndex: 1,
   },
   tabScroll: {
@@ -853,9 +853,9 @@ const styles = StyleSheet.create({
   },
   lyricsPlaceholder: {
     color: COLORS.textDisabled,
-    fontSize: 14,
+    fontSize: 13,
     textAlign: "center",
-    marginTop: 40,
+    marginTop: 32,
   },
   queueListContent: {
     paddingBottom: SPACING.lg,
@@ -863,23 +863,23 @@ const styles = StyleSheet.create({
   queueItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: SPACING.sm,
-    paddingRight: SPACING.sm,
+    paddingVertical: SPACING.xs,
+    paddingRight: SPACING.xs,
   },
   queueArtwork: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: RADIUS.sm,
     overflow: "hidden",
   },
   queueArtworkImage: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: RADIUS.sm,
   },
   queueArtworkPlaceholder: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     borderRadius: RADIUS.sm,
     backgroundColor: COLORS.surface,
     alignItems: "center",
@@ -887,24 +887,24 @@ const styles = StyleSheet.create({
   },
   queueInfo: {
     flex: 1,
-    marginLeft: SPACING.md,
+    marginLeft: SPACING.sm,
   },
   queueTitle: {
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "500",
   },
   queueArtist: {
     color: COLORS.textMuted,
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11,
+    marginTop: 1,
   },
   queueRemove: {
     padding: 4,
-    marginLeft: SPACING.sm,
+    marginLeft: SPACING.xs,
   },
   bottomSafe: {
-    height: 80,
+    height: 70,
     zIndex: 1,
   },
 });

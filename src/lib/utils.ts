@@ -46,6 +46,11 @@ export function timeAgo(date: Date): string {
   return "just now";
 }
 
+export function getArtistName(artist: any): string {
+  if (!artist) return "Unknown Artist";
+  return artist.artistName || artist.user?.name || "Unknown Artist";
+}
+
 export const GENRES = [
   "Afrobeat",
   "Dancehall",

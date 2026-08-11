@@ -29,7 +29,7 @@ function SongRow({ song, onPlay }: { song: Song; onPlay: (song: Song) => void })
   return (
     <View style={styles.songRow}>
       <View style={styles.songRowArtwork}>
-        <Music2 size={20} color={COLORS.bg} />
+        <Music2 size={18} color={COLORS.bg} />
       </View>
       <View style={styles.songRowInfo}>
         <Text style={styles.songRowTitle} numberOfLines={1}>
@@ -45,7 +45,7 @@ function SongRow({ song, onPlay }: { song: Song; onPlay: (song: Song) => void })
         onPress={() => onPlay(song)}
         hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
       >
-        <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
+        <Play size={12} color={COLORS.bg} fill={COLORS.bg} />
       </TouchableOpacity>
     </View>
   );
@@ -143,7 +143,7 @@ export default function LibraryScreen() {
         onPress={() => navigation.navigate("PlaylistScreen", { playlist: item })}
       >
         <View style={styles.playlistIcon}>
-          <ListMusic size={22} color={COLORS.bg} />
+          <ListMusic size={20} color={COLORS.bg} />
         </View>
         <View style={styles.playlistInfo}>
           <Text style={styles.playlistName} numberOfLines={1}>
@@ -153,7 +153,7 @@ export default function LibraryScreen() {
             {item.songCount ?? item.songs?.length ?? 0} songs
           </Text>
         </View>
-        <ChevronRight size={18} color={COLORS.textMuted} />
+        <ChevronRight size={16} color={COLORS.textMuted} />
       </TouchableOpacity>
     ),
     [navigation],
@@ -218,7 +218,7 @@ export default function LibraryScreen() {
               activeOpacity={0.8}
               onPress={() => handlePlayAll(liked)}
             >
-              <Play size={16} color={COLORS.bg} fill={COLORS.bg} />
+              <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
               <Text style={styles.playAllText}>Play All</Text>
             </TouchableOpacity>
             <FlatList
@@ -250,7 +250,7 @@ export default function LibraryScreen() {
               activeOpacity={0.8}
               onPress={() => handlePlayAll(history)}
             >
-              <Play size={16} color={COLORS.bg} fill={COLORS.bg} />
+              <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
               <Text style={styles.playAllText}>Play All</Text>
             </TouchableOpacity>
             <FlatList
@@ -274,11 +274,11 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 10,
+    paddingTop: 10,
+    paddingBottom: 8,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: COLORS.white,
   },
@@ -289,32 +289,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   emptyStateTitle: {
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.textMuted,
-    marginBottom: 16,
+    marginBottom: 14,
     textAlign: "center",
   },
   signInBtn: {
     backgroundColor: COLORS.gold,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 32,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 28,
   },
   signInBtnText: {
     color: COLORS.bg,
     fontWeight: "700",
-    fontSize: 15,
+    fontSize: 14,
   },
   tabRow: {
     paddingHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   tabScroll: {
-    gap: 8,
+    gap: 6,
   },
   tabPill: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
     borderRadius: 999,
     backgroundColor: COLORS.surface,
   },
@@ -324,80 +324,33 @@ const styles = StyleSheet.create({
   tabPillText: {
     color: COLORS.textMuted,
     fontWeight: "600",
-    fontSize: 13,
+    fontSize: 12,
   },
   tabPillTextActive: {
     color: COLORS.bg,
   },
   loader: {
-    marginTop: 40,
+    marginTop: 32,
   },
   emptyText: {
     color: COLORS.textMuted,
-    fontSize: 14,
+    fontSize: 13,
     textAlign: "center",
-    marginTop: 40,
+    marginTop: 32,
   },
   listContent: {
     paddingHorizontal: 16,
-    paddingBottom: 80,
+    paddingBottom: 70,
   },
   playlistRow: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 8,
-  },
-  playlistIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: COLORS.gold,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  playlistInfo: {
-    flex: 1,
-  },
-  playlistName: {
-    color: COLORS.white,
-    fontSize: 15,
-    fontWeight: "600",
-    marginBottom: 2,
-  },
-  playlistCount: {
-    color: COLORS.textMuted,
-    fontSize: 12,
-  },
-  playAllBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    backgroundColor: COLORS.gold,
-    borderRadius: 999,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginLeft: 16,
-    marginBottom: 10,
-    gap: 6,
-  },
-  playAllText: {
-    color: COLORS.bg,
-    fontWeight: "700",
-    fontSize: 13,
-  },
-  songRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
+    borderRadius: 10,
     padding: 10,
     marginBottom: 6,
   },
-  songRowArtwork: {
+  playlistIcon: {
     width: 36,
     height: 36,
     borderRadius: 6,
@@ -406,29 +359,76 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 10,
   },
-  songRowInfo: {
+  playlistInfo: {
     flex: 1,
-    marginRight: 8,
   },
-  songRowTitle: {
+  playlistName: {
     color: COLORS.white,
     fontSize: 14,
     fontWeight: "600",
     marginBottom: 1,
   },
+  playlistCount: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+  },
+  playAllBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: COLORS.gold,
+    borderRadius: 999,
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    marginLeft: 16,
+    marginBottom: 8,
+    gap: 5,
+  },
+  playAllText: {
+    color: COLORS.bg,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  songRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: COLORS.surface,
+    borderRadius: 10,
+    padding: 8,
+    marginBottom: 4,
+  },
+  songRowArtwork: {
+    width: 32,
+    height: 32,
+    borderRadius: 5,
+    backgroundColor: COLORS.gold,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 8,
+  },
+  songRowInfo: {
+    flex: 1,
+    marginRight: 6,
+  },
+  songRowTitle: {
+    color: COLORS.white,
+    fontSize: 13,
+    fontWeight: "600",
+    marginBottom: 1,
+  },
   songRowArtist: {
     color: COLORS.textMuted,
-    fontSize: 12,
+    fontSize: 11,
   },
   songRowDuration: {
     color: COLORS.textMuted,
-    fontSize: 12,
-    marginRight: 8,
+    fontSize: 11,
+    marginRight: 6,
   },
   playBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",

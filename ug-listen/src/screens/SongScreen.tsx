@@ -153,7 +153,7 @@ export default function SongScreen() {
         >
           <View style={styles.artworkWrap}>
             <View style={styles.artwork}>
-              <Music2 size={64} color={COLORS.bg} />
+              <Music2 size={48} color={COLORS.bg} />
             </View>
           </View>
 
@@ -179,7 +179,7 @@ export default function SongScreen() {
             <Text style={styles.metaText}>{formatDuration(song.duration)}</Text>
             {song.plays != null ? (
               <View style={styles.playsRow}>
-                <Play size={12} color={COLORS.textMuted} />
+                <Play size={10} color={COLORS.textMuted} />
                 <Text style={styles.metaText}>{formatCount(song.plays)} plays</Text>
               </View>
             ) : null}
@@ -190,7 +190,7 @@ export default function SongScreen() {
             activeOpacity={0.8}
             onPress={handlePlay}
           >
-            <Play size={18} color={COLORS.bg} fill={COLORS.bg} />
+            <Play size={16} color={COLORS.bg} fill={COLORS.bg} />
             <Text style={styles.playBtnText}>Play</Text>
           </TouchableOpacity>
 
@@ -260,7 +260,7 @@ export default function SongScreen() {
             onPress={handleSendComment}
             disabled={!commentText.trim() || sending}
           >
-            <Send size={16} color={commentText.trim() && !sending ? COLORS.bg : COLORS.textMuted} />
+            <Send size={14} color={commentText.trim() && !sending ? COLORS.bg : COLORS.textMuted} />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -277,73 +277,73 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   loader: {
-    marginTop: 80,
+    marginTop: 60,
   },
   emptyText: {
     color: COLORS.textMuted,
-    fontSize: 16,
+    fontSize: 15,
     textAlign: "center",
-    marginTop: 80,
+    marginTop: 60,
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 16,
   },
   artworkWrap: {
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 16,
   },
   artwork: {
-    width: 200,
-    height: 200,
-    borderRadius: 16,
+    width: 160,
+    height: 160,
+    borderRadius: 14,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "700",
     color: COLORS.white,
     textAlign: "center",
-    marginBottom: 4,
+    marginBottom: 3,
   },
   artistName: {
-    fontSize: 16,
+    fontSize: 15,
     color: COLORS.text,
     textAlign: "center",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   metaRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
-    marginBottom: 16,
+    gap: 8,
+    marginBottom: 12,
     flexWrap: "wrap",
   },
   genreBadge: {
     backgroundColor: COLORS.goldMuted,
     borderRadius: 999,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
   },
   genreBadgeText: {
     color: COLORS.gold,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "700",
   },
   metaText: {
     color: COLORS.textMuted,
-    fontSize: 12,
+    fontSize: 11,
   },
   playsRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: 3,
   },
   playBtnLarge: {
     flexDirection: "row",
@@ -352,69 +352,69 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: COLORS.gold,
     borderRadius: 999,
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    marginBottom: 24,
-    gap: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    marginBottom: 20,
+    gap: 7,
   },
   playBtnText: {
     color: COLORS.bg,
     fontWeight: "700",
-    fontSize: 15,
+    fontSize: 14,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   sectionHeader: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   storyText: {
     color: COLORS.text,
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: 13,
+    lineHeight: 20,
   },
   lyricsText: {
     color: COLORS.text,
-    fontSize: 14,
-    lineHeight: 24,
+    fontSize: 13,
+    lineHeight: 22,
   },
   commentsHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 12,
+    gap: 6,
+    marginBottom: 10,
   },
   commentCount: {
     color: COLORS.textMuted,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
   },
   loaderSmall: {
-    marginVertical: 12,
+    marginVertical: 10,
   },
   noCommentsText: {
     color: COLORS.textMuted,
-    fontSize: 13,
+    fontSize: 12,
   },
   commentRow: {
     flexDirection: "row",
-    marginBottom: 16,
+    marginBottom: 14,
   },
   commentAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 10,
+    marginRight: 8,
   },
   commentAvatarText: {
     color: COLORS.bg,
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: "700",
   },
   commentBody: {
@@ -423,49 +423,49 @@ const styles = StyleSheet.create({
   commentTopRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 3,
+    gap: 6,
+    marginBottom: 2,
   },
   commentName: {
     color: COLORS.white,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
   },
   commentTime: {
     color: COLORS.textMuted,
-    fontSize: 11,
+    fontSize: 10,
   },
   commentContent: {
     color: COLORS.text,
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 12,
+    lineHeight: 17,
   },
   bottomSpacer: {
-    height: 20,
+    height: 16,
   },
   commentInputBar: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
     backgroundColor: COLORS.bg,
-    gap: 10,
+    gap: 8,
   },
   commentInput: {
     flex: 1,
     backgroundColor: COLORS.surface,
     borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 13,
   },
   sendBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",

@@ -196,7 +196,7 @@ export default function RadioScreen() {
                   activeOpacity={0.8}
                   onPress={handlePlayAll}
                 >
-                  <Play size={16} color={COLORS.bg} fill={COLORS.bg} />
+                  <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
                   <Text style={styles.playAllText}>Play All</Text>
                 </TouchableOpacity>
               </View>
@@ -218,94 +218,94 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingTop: 10,
+    paddingBottom: 6,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   headerSub: {
-    fontSize: 13,
+    fontSize: 12,
     color: COLORS.textMuted,
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 80,
+    paddingBottom: 70,
   },
   listHeader: {
     paddingHorizontal: 16,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   stationsList: {
     paddingRight: 16,
-    gap: 12,
+    gap: 10,
   },
   stationCard: {
-    width: 100,
-    height: 100,
+    width: 88,
+    height: 88,
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
+    gap: 5,
   },
   stationEmoji: {
-    fontSize: 26,
+    fontSize: 22,
   },
   stationName: {
     color: COLORS.white,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
     textAlign: "center",
   },
   moodGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 8,
   },
   moodCard: {
-    width: (SCREEN_WIDTH - 32 - 10) / 2,
+    width: (SCREEN_WIDTH - 32 - 8) / 2,
     backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 12,
+    padding: 12,
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 8,
   },
   moodEmoji: {
-    fontSize: 22,
+    fontSize: 18,
   },
   moodName: {
     color: COLORS.white,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
     flexShrink: 1,
   },
   loader: {
-    marginVertical: 20,
+    marginVertical: 16,
   },
   queueHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
-    marginTop: 8,
+    marginBottom: 10,
+    marginTop: 6,
   },
   queueTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: COLORS.white,
   },
@@ -314,29 +314,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: COLORS.gold,
     borderRadius: 999,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    gap: 6,
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    gap: 5,
   },
   playAllText: {
     color: COLORS.bg,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "700",
   },
   songRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 16,
-    gap: 10,
+    gap: 8,
   },
   songIdx: {
-    width: 20,
+    width: 18,
     alignItems: "center",
   },
   songBullet: {
-    width: 6,
-    height: 6,
+    width: 5,
+    height: 5,
     borderRadius: 3,
     backgroundColor: COLORS.gold,
   },
@@ -345,16 +345,16 @@ const styles = StyleSheet.create({
   },
   songTitle: {
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
   },
   songSub: {
     color: COLORS.textMuted,
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11,
+    marginTop: 1,
   },
   songDur: {
     color: COLORS.textMuted,
-    fontSize: 12,
+    fontSize: 11,
   },
 });

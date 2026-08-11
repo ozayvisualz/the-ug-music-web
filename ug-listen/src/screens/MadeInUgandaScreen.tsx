@@ -94,7 +94,7 @@ export default function MadeInUgandaScreen() {
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <ArrowLeft size={24} color={COLORS.white} />
+          <ArrowLeft size={22} color={COLORS.white} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.title}>
@@ -146,8 +146,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 16,
+    paddingTop: 10,
+    paddingBottom: 12,
   },
   backBtn: {
     padding: 4,
@@ -160,17 +160,17 @@ const styles = StyleSheet.create({
     width: 32,
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: COLORS.white,
   },
   flag: {
-    fontSize: 22,
+    fontSize: 20,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 12,
     color: COLORS.textMuted,
-    marginTop: 4,
+    marginTop: 3,
   },
   scroll: {
     flex: 1,
@@ -181,30 +181,30 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 8,
   },
   card: {
-    width: (SCREEN_WIDTH - 32 - 10) / 2,
+    width: (SCREEN_WIDTH - 32 - 8) / 2,
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 14,
+    padding: 12,
   },
   cardEmoji: {
-    fontSize: 28,
-    marginBottom: 10,
+    fontSize: 24,
+    marginBottom: 8,
   },
   cardTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
     color: COLORS.white,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   cardDesc: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.textMuted,
-    lineHeight: 15,
+    lineHeight: 14,
   },
   bottomSpacer: {
-    height: 80,
+    height: 70,
   },
 });

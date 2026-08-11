@@ -4,7 +4,7 @@ import { trpc } from "@/trpc/client";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { BadgeCheck, Music2, Play, Users, MapPin, Heart } from "lucide-react";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber, getArtistName } from "@/lib/utils";
 
 export default function ArtistPage() {
   const params = useParams<{ id: string }>();
@@ -14,7 +14,7 @@ export default function ArtistPage() {
   if (!artist) return <div className="text-center py-20 text-zinc-500">Artist not found</div>;
 
   const songs = artist.songs || [];
-  const name = artist.user?.name || "Unknown Artist";
+  const name = getArtistName(artist);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">

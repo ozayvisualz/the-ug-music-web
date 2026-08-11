@@ -142,9 +142,9 @@ export default function SupportScreen() {
               </View>
             </View>
             {isExpanded ? (
-              <ChevronUp size={18} color={COLORS.textMuted} />
+              <ChevronUp size={16} color={COLORS.textMuted} />
             ) : (
-              <ChevronDown size={18} color={COLORS.textMuted} />
+              <ChevronDown size={16} color={COLORS.textMuted} />
             )}
           </View>
           {isExpanded && (
@@ -179,7 +179,7 @@ export default function SupportScreen() {
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <ArrowLeft size={24} color={COLORS.white} />
+          <ArrowLeft size={22} color={COLORS.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Support</Text>
         <View style={styles.headerSpacer} />
@@ -193,7 +193,7 @@ export default function SupportScreen() {
           <View style={styles.listHeader}>
             <View style={styles.contactCard}>
               <View style={styles.contactIconWrap}>
-                <HelpCircle size={22} color={COLORS.bg} />
+                <HelpCircle size={20} color={COLORS.bg} />
               </View>
               <View style={styles.contactTextWrap}>
                 <Text style={styles.contactTitle}>Contact Support</Text>
@@ -286,15 +286,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 12,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   backBtn: {
     padding: 4,
   },
   headerTitle: {
     flex: 1,
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: COLORS.white,
     textAlign: "center",
@@ -306,25 +306,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 80,
+    paddingBottom: 70,
   },
   listHeader: {
     paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingTop: 6,
   },
   contactCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    padding: 16,
+    borderRadius: 12,
+    padding: 14,
     flexDirection: "row",
     alignItems: "center",
-    gap: 14,
-    marginBottom: 24,
+    gap: 12,
+    marginBottom: 20,
   },
   contactIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
@@ -333,46 +333,46 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contactTitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
     color: COLORS.white,
-    marginBottom: 2,
+    marginBottom: 1,
   },
   contactSub: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.textMuted,
   },
   formSection: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   formTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   subjectInput: {
     backgroundColor: COLORS.surface,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     color: COLORS.white,
-    fontSize: 14,
-    marginBottom: 12,
+    fontSize: 13,
+    marginBottom: 10,
   },
   categoryRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 16,
+    gap: 6,
+    marginBottom: 14,
   },
   categoryPill: {
     backgroundColor: COLORS.surface,
     borderRadius: 999,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   },
   categoryPillText: {
     color: COLORS.text,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "500",
   },
   categoryPillTextActive: {
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   submitBtn: {
     backgroundColor: COLORS.gold,
     borderRadius: 999,
-    paddingVertical: 14,
+    paddingVertical: 12,
     alignItems: "center",
   },
   submitBtnDisabled: {
@@ -399,29 +399,29 @@ const styles = StyleSheet.create({
   },
   submitBtnText: {
     color: COLORS.bg,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "700",
   },
   ticketsSectionTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 12,
+    marginBottom: 10,
   },
   ticketsLoader: {
-    marginVertical: 20,
+    marginVertical: 16,
   },
   noTickets: {
     color: COLORS.textMuted,
-    fontSize: 13,
+    fontSize: 12,
     textAlign: "center",
-    marginBottom: 20,
+    marginBottom: 16,
   },
   ticketCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 10,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
   },
   ticketHeader: {
     flexDirection: "row",
@@ -429,47 +429,47 @@ const styles = StyleSheet.create({
   },
   ticketInfo: {
     flex: 1,
-    marginRight: 8,
+    marginRight: 6,
   },
   ticketSubject: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
     color: COLORS.white,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   ticketMetaRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: 8,
   },
   statusBadge: {
     borderRadius: 999,
-    paddingVertical: 3,
-    paddingHorizontal: 10,
+    paddingVertical: 2,
+    paddingHorizontal: 8,
   },
   statusText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
   },
   ticketDate: {
     color: COLORS.textMuted,
-    fontSize: 11,
+    fontSize: 10,
   },
   ticketDetails: {
-    marginTop: 14,
+    marginTop: 12,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
-    paddingTop: 12,
+    paddingTop: 10,
   },
   ticketDetailLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.textMuted,
     fontWeight: "600",
-    marginBottom: 2,
-    marginTop: 8,
+    marginBottom: 1,
+    marginTop: 6,
   },
   ticketDetailValue: {
-    fontSize: 13,
+    fontSize: 12,
     color: COLORS.text,
   },
 });

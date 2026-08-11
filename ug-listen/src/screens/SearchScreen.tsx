@@ -155,7 +155,7 @@ export default function SearchScreen() {
         onPress={() => navigation.navigate("Song", { songId: item.id })}
       >
         <View style={styles.songIcon}>
-          <Music2 size={18} color={COLORS.bg} />
+          <Music2 size={16} color={COLORS.bg} />
         </View>
         <View style={styles.songInfo}>
           <Text style={styles.resultName} numberOfLines={1}>
@@ -171,7 +171,7 @@ export default function SearchScreen() {
           onPress={() => handlePlaySong(item)}
           hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
         >
-          <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
+          <Play size={12} color={COLORS.bg} fill={COLORS.bg} />
         </TouchableOpacity>
       </TouchableOpacity>
     ),
@@ -183,7 +183,7 @@ export default function SearchScreen() {
   return (
     <View style={styles.root}>
       <View style={styles.searchBar}>
-        <Search size={18} color={COLORS.textMuted} style={styles.searchIcon} />
+        <Search size={16} color={COLORS.textMuted} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search artists and songs..."
@@ -295,118 +295,118 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.surface,
     borderRadius: 999,
     marginHorizontal: 16,
-    marginTop: 12,
-    marginBottom: 8,
-    paddingHorizontal: 14,
-    height: 44,
+    marginTop: 10,
+    marginBottom: 6,
+    paddingHorizontal: 12,
+    height: 40,
   },
   searchIcon: {
-    marginRight: 8,
+    marginRight: 6,
   },
   searchInput: {
     flex: 1,
     color: COLORS.white,
-    fontSize: 15,
+    fontSize: 14,
     paddingVertical: 0,
   },
   clearBtn: {
     color: COLORS.textMuted,
-    fontSize: 16,
-    paddingLeft: 8,
+    fontSize: 15,
+    paddingLeft: 6,
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 80,
+    paddingBottom: 70,
   },
   browseContent: {
     paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingTop: 12,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 12,
-    marginTop: 8,
+    marginBottom: 10,
+    marginTop: 6,
   },
   pillRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 24,
+    gap: 6,
+    marginBottom: 20,
   },
   pill: {
     backgroundColor: COLORS.surface,
     borderRadius: 999,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
     borderWidth: 1,
     borderColor: COLORS.border,
   },
   pillText: {
     color: COLORS.text,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "500",
   },
   genreGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 8,
   },
   genreCard: {
-    width: (SCREEN_WIDTH - 32 - 30) / 4,
+    width: (SCREEN_WIDTH - 32 - 24) / 4,
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: 14,
+    padding: 10,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 80,
+    minHeight: 70,
   },
   genreEmoji: {
-    fontSize: 24,
-    marginBottom: 6,
+    fontSize: 20,
+    marginBottom: 4,
   },
   genreLabel: {
     color: COLORS.text,
-    fontSize: 10,
+    fontSize: 9,
     textAlign: "center",
     fontWeight: "500",
   },
   loader: {
-    marginVertical: 40,
+    marginVertical: 32,
   },
   emptyText: {
     color: COLORS.textMuted,
-    fontSize: 14,
+    fontSize: 13,
     textAlign: "center",
-    marginTop: 40,
+    marginTop: 32,
   },
   resultRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
-    gap: 10,
+    paddingVertical: 8,
+    gap: 8,
   },
   artistAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
   },
   artistAvatarText: {
     color: COLORS.bg,
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
   },
   songIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 6,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
@@ -416,22 +416,22 @@ const styles = StyleSheet.create({
   },
   resultName: {
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
   },
   resultSub: {
     color: COLORS.textMuted,
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11,
+    marginTop: 1,
   },
   songDuration: {
     color: COLORS.textMuted,
-    fontSize: 12,
+    fontSize: 11,
   },
   playBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",

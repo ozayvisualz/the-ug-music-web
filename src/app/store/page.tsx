@@ -2,7 +2,7 @@
 
 import { trpc } from "@/trpc/client";
 import { ShoppingBag, Loader2 } from "lucide-react";
-import { formatUGX } from "@/lib/utils";
+import { formatUGX, getArtistName } from "@/lib/utils";
 
 export default function StorePage() {
   const { data: products, isLoading } = trpc.merch.getProducts.useQuery({ limit: 50 });
@@ -26,7 +26,7 @@ export default function StorePage() {
               )}
             </div>
             <p className="text-sm font-semibold truncate">{product.title}</p>
-            <p className="text-xs text-zinc-500">{product.artist?.user?.name}</p>
+            <p className="text-xs text-zinc-500">{getArtistName(product.artist)}</p>
             <div className="flex items-center justify-between mt-2">
               <p className="font-bold text-yellow-500">{formatUGX(product.price)}</p>
               <button className="px-3 py-1 rounded-lg bg-yellow-500 text-black text-xs font-semibold hover:bg-yellow-400 transition">Buy</button>

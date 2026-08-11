@@ -29,7 +29,7 @@ export const musicRouter = router({
       const [songs, total] = await Promise.all([
         ctx.db.song.findMany({
           where,
-          include: { artist: { include: { user: { select: { name: true, image: true } } } }, album: { select: { id: true, title: true, coverUrl: true } } },
+          include: { artist: { select: { artistName: true, user: { select: { name: true, image: true } } } }, album: { select: { id: true, title: true, coverUrl: true } } },
           orderBy: { createdAt: "desc" },
           take: input.limit,
           skip: input.offset,
@@ -46,7 +46,7 @@ export const musicRouter = router({
       return ctx.db.song.findUnique({
         where: { id: input },
         include: {
-          artist: { include: { user: { select: { name: true, image: true } } } },
+          artist: { select: { artistName: true, user: { select: { name: true, image: true } } } },
           album: true,
           comments: {
             include: { user: { select: { id: true, name: true, image: true } } },
@@ -73,7 +73,7 @@ export const musicRouter = router({
 
       return ctx.db.album.findMany({
         where,
-        include: { artist: { include: { user: { select: { name: true, image: true } } } }, songs: { select: { id: true } } },
+        include: { artist: { select: { artistName: true, user: { select: { name: true, image: true } } } }, songs: { select: { id: true } } },
         orderBy: { createdAt: "desc" },
         take: input.limit,
         skip: input.offset,
@@ -86,7 +86,7 @@ export const musicRouter = router({
       return ctx.db.album.findUnique({
         where: { id: input },
         include: {
-          artist: { include: { user: { select: { name: true, image: true } } } },
+          artist: { select: { artistName: true, user: { select: { name: true, image: true } } } },
           songs: { where: { approved: true }, include: { artist: { include: { user: { select: { name: true } } } } } },
         },
       });
@@ -97,7 +97,7 @@ export const musicRouter = router({
     .query(async ({ input, ctx }) => {
       return ctx.db.song.findMany({
         where: { approved: true, published: true },
-        include: { artist: { include: { user: { select: { name: true, image: true } } } } },
+        include: { artist: { select: { artistName: true, user: { select: { name: true, image: true } } } } },
         orderBy: { playCount: "desc" },
         take: input.limit,
       });
@@ -108,7 +108,7 @@ export const musicRouter = router({
     .query(async ({ input, ctx }) => {
       return ctx.db.song.findMany({
         where: { approved: true, published: true },
-        include: { artist: { include: { user: { select: { name: true, image: true } } } } },
+        include: { artist: { select: { artistName: true, user: { select: { name: true, image: true } } } } },
         orderBy: { createdAt: "desc" },
         take: input.limit,
       });

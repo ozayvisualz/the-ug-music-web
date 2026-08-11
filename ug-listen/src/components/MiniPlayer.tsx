@@ -143,7 +143,7 @@ export default function MiniPlayer({ onExpand }: Props) {
                 />
               ) : (
                 <View style={styles.artworkGradient}>
-                  <Music2 size={22} color={COLORS.bg} />
+                  <Music2 size={18} color={COLORS.bg} />
                 </View>
               )}
             </View>
@@ -167,9 +167,9 @@ export default function MiniPlayer({ onExpand }: Props) {
               activeOpacity={0.7}
             >
               {playing ? (
-                <Pause size={14} color={COLORS.bg} />
+                <Pause size={12} color={COLORS.bg} />
               ) : (
-                <Play size={14} color={COLORS.gold} />
+                <Play size={12} color={COLORS.gold} />
               )}
             </TouchableOpacity>
 
@@ -179,7 +179,7 @@ export default function MiniPlayer({ onExpand }: Props) {
               hitSlop={HIT_SLOP}
               activeOpacity={0.7}
             >
-              <SkipForward size={20} color={COLORS.white} />
+              <SkipForward size={18} color={COLORS.white} />
             </TouchableOpacity>
           </View>
 
@@ -195,40 +195,40 @@ export default function MiniPlayer({ onExpand }: Props) {
 const styles = StyleSheet.create({
   wrapper: {
     position: "absolute",
-    bottom: 60,
+    bottom: 52,
     left: 0,
     right: 0,
-    paddingHorizontal: SPACING.lg,
+    paddingHorizontal: SPACING.sm,
     zIndex: 50,
   },
   container: {
     backgroundColor: "rgba(24,24,29,0.95)",
-    borderRadius: RADIUS.lg,
+    borderRadius: RADIUS.md,
     borderWidth: 1,
     borderColor: "rgba(234,179,8,0.3)",
-    height: 64,
+    height: 52,
     overflow: "hidden",
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
-    paddingLeft: SPACING.sm,
+    paddingLeft: SPACING.xs,
   },
   artwork: {
-    width: 44,
-    height: 44,
+    width: 36,
+    height: 36,
     borderRadius: RADIUS.sm,
     overflow: "hidden",
   },
   artworkImage: {
-    width: 44,
-    height: 44,
+    width: 36,
+    height: 36,
     borderRadius: RADIUS.sm,
   },
   artworkGradient: {
-    width: 44,
-    height: 44,
+    width: 36,
+    height: 36,
     borderRadius: RADIUS.sm,
     backgroundColor: COLORS.gold,
     alignItems: "center",
@@ -236,23 +236,23 @@ const styles = StyleSheet.create({
   },
   textArea: {
     flex: 1,
-    marginLeft: SPACING.md,
-    marginRight: SPACING.sm,
+    marginLeft: SPACING.sm,
+    marginRight: SPACING.xs,
   },
   title: {
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
   },
   artist: {
     color: COLORS.textMuted,
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11,
+    marginTop: 1,
   },
   playBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -264,8 +264,8 @@ const styles = StyleSheet.create({
     borderColor: COLORS.gold,
   },
   skipBtn: {
-    width: 34,
-    height: 34,
+    width: 28,
+    height: 28,
     alignItems: "center",
     justifyContent: "center",
   },

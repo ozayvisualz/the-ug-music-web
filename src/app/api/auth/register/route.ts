@@ -20,8 +20,9 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password, role } = await req.json();
+    const { name, email, password, role, artistName } = await req.json();
     if (!name || !email || !password) return respond({ error: "Name, email and password required" }, 400);
+    if (role === "ARTIST" && (!artistName || artistName.trim().length < 2)) return respond({ error: "Artist name is required" }, 400);
 
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) return respond({ error: "User already exists" }, 409);
@@ -33,7 +34,7 @@ export async function POST(req: NextRequest) {
         email,
         password: hashed,
         role: role === "ARTIST" ? "ARTIST" : "LISTENER",
-        ...(role === "ARTIST" ? { artist: { create: {} } } : {}),
+        ...(role === "ARTIST" ? { artist: { create: { artistName: (artistName || name).trim() } } } : {}),
       },
     });
 

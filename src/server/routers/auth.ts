@@ -32,6 +32,7 @@ export const authRouter = router({
         password: z.string().min(6),
         phone: z.string().optional(),
         role: z.enum(["LISTENER", "ARTIST"]).default("LISTENER"),
+        artistName: z.string().min(2).max(60).trim().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -56,14 +57,17 @@ export const authRouter = router({
           ...(input.role === "ARTIST"
             ? {
                 artist: {
-                  create: {},
+                  create: {
+                    artistName: input.artistName || input.name,
+                  },
                 },
               }
             : {}),
         },
+        include: { artist: true },
       });
 
-      return { id: user.id, email: user.email };
+      return { id: user.id, email: user.email, artistName: user.artist?.artistName ?? null };
     }),
 
   me: protectedProcedure.query(async ({ ctx }) => {
@@ -74,7 +78,7 @@ export const authRouter = router({
     });
     if (!user) throw new TRPCError({ code: "NOT_FOUND" });
     const { password, ...safe } = user as any;
-    return safe;
+    return { ...safe, artistName: user.artist?.artistName ?? null };
   }),
 
   updateProfile: protectedProcedure
@@ -93,13 +97,15 @@ export const authRouter = router({
       });
     }),
 
-  becomeArtist: protectedProcedure.mutation(async ({ ctx }) => {
+  becomeArtist: protectedProcedure
+    .input(z.object({ artistName: z.string().min(2).max(60).trim() }))
+    .mutation(async ({ input, ctx }) => {
     const userId = (ctx.session!.user as any).id;
     const existing = await ctx.db.artist.findUnique({ where: { userId } });
     if (existing) throw new TRPCError({ code: "CONFLICT", message: "Already an artist" });
 
     await ctx.db.user.update({ where: { id: userId }, data: { role: "ARTIST" } });
-    await ctx.db.artist.create({ data: { userId } });
-    return { success: true };
+    await ctx.db.artist.create({ data: { userId, artistName: input.artistName } });
+    return { success: true, artistName: input.artistName };
   }),
 });

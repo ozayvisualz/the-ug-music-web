@@ -41,6 +41,7 @@ export const artistRouter = router({
           published: true,
           approved: false,
         },
+        include: { artist: { select: { artistName: true } } },
       });
     }),
 
@@ -82,7 +83,7 @@ export const artistRouter = router({
             create: songs.map((s) => ({ ...s, artistId: artist.id, published: true })),
           },
         },
-        include: { songs: true },
+        include: { songs: true, artist: { select: { artistName: true } } },
       });
 
       return album;
@@ -96,7 +97,7 @@ export const artistRouter = router({
 
     return ctx.db.song.findMany({
       where: { artistId: artist.id },
-      include: { album: { select: { id: true, title: true } } },
+      include: { album: { select: { id: true, title: true } }, artist: { select: { artistName: true } } },
       orderBy: { createdAt: "desc" },
     });
   }),
@@ -109,7 +110,7 @@ export const artistRouter = router({
 
     return ctx.db.album.findMany({
       where: { artistId: artist.id },
-      include: { songs: true },
+      include: { songs: true, artist: { select: { artistName: true } } },
       orderBy: { createdAt: "desc" },
     });
   }),
@@ -128,6 +129,7 @@ export const artistRouter = router({
     });
 
     return {
+      artistName: artist.artistName,
       wallet: artist.wallet,
       revenueRecords,
     };
@@ -162,6 +164,7 @@ export const artistRouter = router({
 
       return {
         period: input.days,
+        artistName: artist.artistName,
         totalStreams: streams,
         totalDownloads: downloads,
         totalRevenue: revenue._sum.grossAmount || 0,
@@ -177,6 +180,7 @@ export const artistRouter = router({
         bio: z.string().optional(),
         genre: z.string().optional(),
         location: z.string().optional(),
+        artistName: z.string().min(2).max(60).trim().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -185,6 +189,16 @@ export const artistRouter = router({
       });
       if (!artist) throw new Error("Artist profile not found");
 
+      if (input.artistName) {
+        await ctx.db.song.updateMany({
+          where: { artistId: artist.id },
+          data: { artistName: input.artistName },
+        });
+        await ctx.db.album.updateMany({
+          where: { artistId: artist.id },
+          data: { artistName: input.artistName },
+        });
+      }
       return ctx.db.artist.update({
         where: { id: artist.id },
         data: input,
@@ -457,7 +471,7 @@ export const artistRouter = router({
 
     const count = await ctx.db.follow.count({ where: { artistId: artist.id } });
 
-    return { count, followers: follows };
+    return { artistName: artist.artistName, count, followers: follows };
   }),
 
   getMyComments: artistProcedure.query(async ({ ctx }) => {
@@ -466,7 +480,7 @@ export const artistRouter = router({
     });
     if (!artist) throw new Error("Artist not found");
 
-    return ctx.db.comment.findMany({
+    const comments = await ctx.db.comment.findMany({
       where: { song: { artistId: artist.id } },
       include: {
         user: { select: { id: true, name: true, image: true } },
@@ -475,5 +489,6 @@ export const artistRouter = router({
       orderBy: { createdAt: "desc" },
       take: 50,
     });
+    return { artistName: artist.artistName, comments };
   }),
 });

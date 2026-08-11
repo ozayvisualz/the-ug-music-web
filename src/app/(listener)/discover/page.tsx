@@ -3,6 +3,7 @@
 import { trpc } from "@/trpc/client";
 import Link from "next/link";
 import { Flame, Sparkles, Search, Radio, Compass, TrendingUp, Mic2, Disc3 } from "lucide-react";
+import { getArtistName } from "@/lib/utils";
 
 export default function DiscoverPage() {
   const { data: trending } = trpc.music.getTrending.useQuery({ limit: 20 });
@@ -70,7 +71,7 @@ export default function DiscoverPage() {
             <Link key={s.id} href={`/song/${s.id}`} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 hover:border-yellow-500/30 transition group">
               <div className="w-full aspect-square rounded-lg bg-yellow-500/10 flex items-center justify-center mb-2 text-3xl">🎵</div>
               <p className="text-sm font-semibold truncate">{s.title}</p>
-              <p className="text-xs text-zinc-500 truncate">{s.artist?.user?.name || "Unknown"}</p>
+              <p className="text-xs text-zinc-500 truncate">{getArtistName(s.artist)}</p>
             </Link>
           )) : <p className="text-zinc-600 text-sm col-span-full py-8 text-center">No trending songs yet</p>}
         </div>
@@ -84,7 +85,7 @@ export default function DiscoverPage() {
             <Link key={s.id} href={`/song/${s.id}`} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 hover:border-yellow-500/30 transition group">
               <div className="w-full aspect-square rounded-lg bg-yellow-500/10 flex items-center justify-center mb-2 text-3xl">🎵</div>
               <p className="text-sm font-semibold truncate">{s.title}</p>
-              <p className="text-xs text-zinc-500 truncate">{s.artist?.user?.name || "Unknown"}</p>
+              <p className="text-xs text-zinc-500 truncate">{getArtistName(s.artist)}</p>
             </Link>
           )) : <p className="text-zinc-600 text-sm col-span-full py-8 text-center">No new releases yet</p>}
         </div>
@@ -97,9 +98,9 @@ export default function DiscoverPage() {
           {artists?.slice(0, 12).map((a: any) => (
             <Link key={a.id} href={`/artist/${a.id}`} className="flex flex-col items-center p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-yellow-500/30 transition">
               <div className="w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center text-xl font-bold text-yellow-500 mb-2">
-                {a.user?.name?.charAt(0) || "?"}
+                {getArtistName(a).charAt(0) || "?"}
               </div>
-              <p className="text-sm font-semibold text-center truncate w-full">{a.user?.name || "Unknown"}</p>
+              <p className="text-sm font-semibold text-center truncate w-full">{getArtistName(a)}</p>
               <p className="text-xs text-zinc-500">Artist</p>
             </Link>
           )) || <p className="text-zinc-600 text-sm col-span-full py-8 text-center">No artists yet</p>}

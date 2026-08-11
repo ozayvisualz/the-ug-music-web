@@ -134,7 +134,7 @@ export default function ArtistScreen() {
           <View style={styles.nameRow}>
             <Text style={styles.artistName}>{artist.name}</Text>
             {artist.verified ? (
-              <BadgeCheck size={20} color={COLORS.gold} />
+              <BadgeCheck size={18} color={COLORS.gold} />
             ) : null}
           </View>
 
@@ -202,7 +202,7 @@ export default function ArtistScreen() {
                   onPress={() => handlePlaySong(song, index)}
                   hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                 >
-                  <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
+                  <Play size={12} color={COLORS.bg} fill={COLORS.bg} />
                 </TouchableOpacity>
               </View>
             ))
@@ -225,7 +225,7 @@ export default function ArtistScreen() {
                   onPress={() => navigation.navigate("Album", { albumId: album.id })}
                 >
                   <View style={styles.albumIcon}>
-                    <Disc3 size={32} color={COLORS.bg} />
+                    <Disc3 size={26} color={COLORS.bg} />
                   </View>
                   <Text style={styles.albumTitle} numberOfLines={1}>
                     {album.title}
@@ -248,80 +248,80 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg,
   },
   loader: {
-    marginTop: 80,
+    marginTop: 60,
   },
   emptyText: {
     color: COLORS.textMuted,
-    fontSize: 16,
+    fontSize: 15,
     textAlign: "center",
-    marginTop: 80,
+    marginTop: 60,
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 16,
   },
   headerArea: {
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: 14,
+    padding: 16,
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 16,
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 14,
+    marginBottom: 10,
   },
   avatarText: {
     color: COLORS.bg,
-    fontSize: 32,
+    fontSize: 26,
     fontWeight: "700",
   },
   nameRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    marginBottom: 4,
+    gap: 5,
+    marginBottom: 3,
   },
   artistName: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: COLORS.white,
   },
   subInfo: {
-    fontSize: 13,
+    fontSize: 12,
     color: COLORS.textMuted,
-    marginBottom: 14,
+    marginBottom: 10,
   },
   statsRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 14,
-    gap: 24,
+    marginBottom: 10,
+    gap: 20,
   },
   statItem: {
     alignItems: "center",
   },
   statDivider: {
     width: 1,
-    height: 28,
+    height: 24,
     backgroundColor: COLORS.border,
   },
   statNumber: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 2,
+    marginBottom: 1,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.textMuted,
     fontWeight: "500",
   },
@@ -329,9 +329,9 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: COLORS.gold,
     borderRadius: 999,
-    paddingVertical: 8,
-    paddingHorizontal: 28,
-    minWidth: 100,
+    paddingVertical: 7,
+    paddingHorizontal: 24,
+    minWidth: 90,
     alignItems: "center",
   },
   followBtnActive: {
@@ -340,93 +340,93 @@ const styles = StyleSheet.create({
   followBtnText: {
     color: COLORS.gold,
     fontWeight: "700",
-    fontSize: 14,
+    fontSize: 13,
   },
   followBtnTextActive: {
     color: COLORS.bg,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   sectionHeader: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 10,
+    marginBottom: 8,
   },
   bioText: {
     color: COLORS.text,
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: 13,
+    lineHeight: 20,
   },
   emptySubText: {
     color: COLORS.textMuted,
-    fontSize: 13,
+    fontSize: 12,
   },
   songRow: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 6,
+    borderRadius: 10,
+    padding: 8,
+    marginBottom: 4,
   },
   songIndex: {
-    width: 24,
+    width: 22,
     color: COLORS.textMuted,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
     textAlign: "center",
   },
   songInfo: {
     flex: 1,
-    marginRight: 8,
+    marginRight: 6,
   },
   songTitle: {
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
   },
   songDuration: {
     color: COLORS.textMuted,
-    fontSize: 12,
-    marginRight: 8,
+    fontSize: 11,
+    marginRight: 6,
   },
   playBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
   },
   albumsScroll: {
-    gap: 12,
+    gap: 10,
     paddingRight: 16,
   },
   albumCard: {
-    width: 120,
+    width: 100,
     backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 10,
+    padding: 10,
     alignItems: "center",
   },
   albumIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 8,
+    width: 52,
+    height: 52,
+    borderRadius: 6,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   albumTitle: {
     color: COLORS.white,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
     textAlign: "center",
   },
   bottomSpacer: {
-    height: 60,
+    height: 70,
   },
 });

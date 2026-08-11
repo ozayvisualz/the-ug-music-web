@@ -120,11 +120,11 @@ export default function PremiumScreen() {
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <ArrowLeft size={24} color={COLORS.white} />
+          <ArrowLeft size={22} color={COLORS.white} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <View style={styles.headerTitleRow}>
-            <Crown size={22} color={COLORS.gold} />
+            <Crown size={20} color={COLORS.gold} />
             <Text style={styles.headerTitle}>Premium Plans</Text>
           </View>
         </View>
@@ -171,7 +171,7 @@ export default function PremiumScreen() {
               )}
               {isActive ? (
                 <View style={styles.activeBadge}>
-                  <Check size={14} color={COLORS.green} />
+                  <Check size={12} color={COLORS.green} />
                   <Text style={styles.activeText}>Current Plan</Text>
                 </View>
               ) : (
@@ -199,7 +199,7 @@ export default function PremiumScreen() {
           <Text style={styles.featuresTitle}>Premium Features</Text>
           {FEATURES.map((feature) => (
             <View key={feature} style={styles.featureRow}>
-              <Check size={16} color={COLORS.green} />
+              <Check size={14} color={COLORS.green} />
               <Text style={styles.featureText}>{feature}</Text>
             </View>
           ))}
@@ -217,14 +217,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg,
   },
   loader: {
-    marginTop: 80,
+    marginTop: 60,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 16,
+    paddingTop: 10,
+    paddingBottom: 12,
   },
   backBtn: {
     padding: 4,
@@ -239,10 +239,10 @@ const styles = StyleSheet.create({
   headerTitleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: 6,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
     color: COLORS.gold,
   },
@@ -254,27 +254,27 @@ const styles = StyleSheet.create({
   },
   currentBadge: {
     backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 20,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   currentLabel: {
     color: COLORS.textMuted,
-    fontSize: 13,
+    fontSize: 12,
   },
   currentPlan: {
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
   },
   planCard: {
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 12,
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 10,
     borderWidth: 2,
     borderColor: "transparent",
     position: "relative",
@@ -287,98 +287,98 @@ const styles = StyleSheet.create({
   },
   bestValueBadge: {
     position: "absolute",
-    top: -10,
-    right: 16,
+    top: -9,
+    right: 14,
     backgroundColor: COLORS.green,
     borderRadius: 999,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
+    paddingVertical: 3,
+    paddingHorizontal: 10,
   },
   bestValueText: {
     color: COLORS.bg,
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "700",
   },
   planName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 6,
+    marginBottom: 4,
   },
   planPriceRow: {
     flexDirection: "row",
     alignItems: "baseline",
-    gap: 4,
-    marginBottom: 4,
+    gap: 3,
+    marginBottom: 3,
   },
   planPrice: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: COLORS.gold,
   },
   planInterval: {
-    fontSize: 14,
+    fontSize: 13,
     color: COLORS.textMuted,
   },
   savingsText: {
-    fontSize: 13,
+    fontSize: 12,
     color: COLORS.green,
     fontWeight: "600",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   activeBadge: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 5,
     backgroundColor: COLORS.surface,
     borderRadius: 999,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     alignSelf: "flex-start",
   },
   activeText: {
     color: COLORS.green,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
   },
   subscribeBtn: {
     backgroundColor: COLORS.gold,
     borderRadius: 999,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     alignItems: "center",
     alignSelf: "flex-start",
-    minWidth: 120,
+    minWidth: 110,
   },
   subscribeBtnDisabled: {
     opacity: 0.6,
   },
   subscribeBtnText: {
     color: COLORS.bg,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "700",
   },
   featuresSection: {
-    marginTop: 24,
-    marginBottom: 20,
+    marginTop: 20,
+    marginBottom: 16,
   },
   featuresTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
     color: COLORS.white,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   featureRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginBottom: 12,
+    gap: 8,
+    marginBottom: 10,
   },
   featureText: {
     color: COLORS.text,
-    fontSize: 14,
+    fontSize: 13,
   },
   bottomSpacer: {
-    height: 80,
+    height: 70,
   },
 });

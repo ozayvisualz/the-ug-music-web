@@ -53,7 +53,7 @@ function SongCard({ song, onPlay }: { song: Song; onPlay: (song: Song) => void }
       onPress={() => navigation.navigate("Song", { songId: song.id })}
     >
       <View style={styles.songArtwork}>
-        <Music2 size={24} color={COLORS.bg} />
+        <Music2 size={20} color={COLORS.bg} />
       </View>
       <Text style={styles.songTitle} numberOfLines={1}>
         {song.title}
@@ -66,7 +66,7 @@ function SongCard({ song, onPlay }: { song: Song; onPlay: (song: Song) => void }
         onPress={() => onPlay(song)}
         hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
       >
-        <Play size={16} color={COLORS.bg} fill={COLORS.bg} />
+        <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -123,7 +123,7 @@ export default function DiscoverScreen() {
           activeOpacity={0.7}
           onPress={() => navigation.navigate("Search")}
         >
-          <Search size={18} color={COLORS.textMuted} style={styles.searchIcon} />
+          <Search size={16} color={COLORS.textMuted} style={styles.searchIcon} />
           <Text style={styles.searchPlaceholder}>Search songs and artists...</Text>
         </TouchableOpacity>
 
@@ -233,11 +233,11 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 10,
+    paddingTop: 10,
+    paddingBottom: 8,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "700",
     color: COLORS.white,
   },
@@ -253,92 +253,92 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: COLORS.surface,
     borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginBottom: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 16,
   },
   searchIcon: {
-    marginRight: 10,
+    marginRight: 8,
   },
   searchPlaceholder: {
     color: COLORS.textMuted,
-    fontSize: 14,
+    fontSize: 13,
     flex: 1,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   sectionHeader: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "700",
     color: "#A1A1AA",
-    marginBottom: 12,
+    marginBottom: 10,
   },
   chipScroll: {
     paddingRight: 16,
-    gap: 8,
+    gap: 6,
   },
   chip: {
     backgroundColor: COLORS.surface,
     borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
   chipText: {
     color: COLORS.text,
-    fontSize: 12,
+    fontSize: 11,
   },
   grid2x3: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 8,
   },
   genreCard: {
-    width: (SCREEN_WIDTH - 32 - 10) / 2,
+    width: (SCREEN_WIDTH - 32 - 8) / 2,
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 16,
-    minHeight: 80,
+    borderRadius: 14,
+    padding: 12,
+    minHeight: 66,
     justifyContent: "center",
   },
   genreEmoji: {
-    fontSize: 24,
-    marginBottom: 6,
+    fontSize: 20,
+    marginBottom: 4,
   },
   genreName: {
     color: COLORS.white,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
   },
   grid2x2: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 8,
   },
   browseCard: {
-    width: (SCREEN_WIDTH - 32 - 10) / 2,
+    width: (SCREEN_WIDTH - 32 - 8) / 2,
     backgroundColor: COLORS.surface,
-    borderRadius: 16,
-    padding: 16,
-    minHeight: 80,
+    borderRadius: 14,
+    padding: 12,
+    minHeight: 66,
     justifyContent: "center",
   },
   browseEmoji: {
-    fontSize: 22,
-    marginBottom: 6,
+    fontSize: 18,
+    marginBottom: 4,
   },
   browseLabel: {
     color: COLORS.white,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
   },
   horizontalList: {
     flexDirection: "row",
-    gap: 12,
+    gap: 10,
     paddingRight: 16,
   },
   loader: {
-    marginVertical: 20,
+    marginVertical: 16,
   },
   emptyText: {
     color: COLORS.textMuted,
@@ -346,44 +346,44 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   songCard: {
-    width: 140,
+    width: 120,
     backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 10,
+    borderRadius: 10,
+    padding: 8,
     position: "relative",
   },
   songArtwork: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 6,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
+    marginBottom: 8,
   },
   songTitle: {
     color: COLORS.white,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: "600",
-    marginBottom: 2,
+    marginBottom: 1,
   },
   songArtist: {
     color: COLORS.textMuted,
-    fontSize: 11,
-    marginBottom: 6,
+    fontSize: 10,
+    marginBottom: 4,
   },
   songPlayBtn: {
     position: "absolute",
-    bottom: 10,
-    right: 10,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    bottom: 8,
+    right: 8,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
   },
   bottomSpacer: {
-    height: 80,
+    height: 70,
   },
 });

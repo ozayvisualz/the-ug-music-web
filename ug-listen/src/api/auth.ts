@@ -23,7 +23,9 @@ async function apiPost(url: string, body: Record<string, unknown>) {
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
-  const data = await trpc.auth.login.query({ email, password });
+  const res = await fetch(`https://theugmusic.com/api/auth/login-get?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Login failed");
   await SecureStore.setItemAsync(TOKEN_KEY, data.token);
   await SecureStore.setItemAsync(USER_KEY, JSON.stringify(data.user));
   setAuthToken(data.token);

@@ -45,10 +45,10 @@ export const adminRouter = router({
       ]);
       return { songs, total };
     }),
-  getPendingSongs: adminProcedure.query(async ({ ctx }) => ctx.db.song.findMany({ where: { approved: false }, include: { artist: { include: { user: { select: { name: true, email: true } } } } }, orderBy: { createdAt: "desc" } })),
+  getPendingSongs: adminProcedure.query(async ({ ctx }) => ctx.db.song.findMany({ where: { approved: false }, include: { artist: { select: { artistName: true, user: { select: { name: true, email: true } } } } }, orderBy: { createdAt: "desc" } })),
 
   // === ALBUMS ===
-  getPendingAlbums: adminProcedure.query(async ({ ctx }) => ctx.db.album.findMany({ where: { approved: false }, include: { artist: { include: { user: { select: { name: true, email: true } } } } }, orderBy: { createdAt: "desc" } })),
+  getPendingAlbums: adminProcedure.query(async ({ ctx }) => ctx.db.album.findMany({ where: { approved: false }, include: { artist: { select: { artistName: true, user: { select: { name: true, email: true } } } } }, orderBy: { createdAt: "desc" } })),
   approveAlbum: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => ctx.db.album.update({ where: { id: input }, data: { approved: true } })),
   deleteAlbum: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => ctx.db.album.delete({ where: { id: input } })),
   getAllAlbums: adminProcedure

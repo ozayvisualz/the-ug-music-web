@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Music2, Search, Check, X, Trash2, Star, Clock, Filter, Play } from "lucide-react";
 import toast from "react-hot-toast";
 import { usePlaySong, usePlaySongWithQueue } from "@/components/admin/AudioPlayer";
+import { getArtistName } from "@/lib/utils";
 
 export default function AdminSongsPage() {
   const [tab, setTab] = useState<"all" | "pending">("all");
@@ -47,14 +48,14 @@ export default function AdminSongsPage() {
           <tbody>
             {songs.map((song: any) => (
               <tr key={song.id} className="border-b border-zinc-800/30 hover:bg-zinc-800/20">
-                <td className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-xs text-yellow-500">🎵</div><div><p className="text-sm font-medium text-white">{song.title}</p><p className="text-xs text-zinc-500">{song.artist?.user?.name}</p></div></div></td>
+                <td className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-xs text-yellow-500">🎵</div><div><p className="text-sm font-medium text-white">{song.title}</p><p className="text-xs text-zinc-500">{getArtistName(song.artist)}</p></div></div></td>
                 <td className="p-4 hidden md:table-cell"><span className="text-sm text-zinc-400">{song.genre || "—"}</span></td>
                 <td className="p-4 hidden lg:table-cell"><span className="text-xs text-zinc-500">{song.playCount} plays · {song.downloadCount} dls</span></td>
                 <td className="p-4"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${song.approved ? "bg-emerald-500/20 text-emerald-400" : "bg-yellow-500/20 text-yellow-500"}`}>{song.approved ? "Live" : "Pending"}</span></td>
                 <td className="p-4"><div className="flex items-center justify-end gap-1">
                   <button onClick={() => playSong(
-                    { id: song.id, title: song.title, artist: song.artist?.user?.name || "Unknown", url: song.hlsUrl || song.fileUrl || "", duration: song.duration },
-                    songs.map((s: any) => ({ id: s.id, title: s.title, artist: s.artist?.user?.name || "Unknown", url: s.hlsUrl || s.fileUrl || "", duration: s.duration }))
+                    { id: song.id, title: song.title, artist: getArtistName(song.artist), url: song.hlsUrl || song.fileUrl || "", duration: song.duration },
+                    songs.map((s: any) => ({ id: s.id, title: s.title, artist: getArtistName(s.artist), url: s.hlsUrl || s.fileUrl || "", duration: s.duration }))
                   )} className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-zinc-400 hover:text-emerald-400" title="Play"><Play className="w-4 h-4" /></button>
                   {tab === "pending" && <><button onClick={() => approveMut.mutate(song.id)} className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-zinc-400 hover:text-emerald-400"><Check className="w-4 h-4" /></button><button onClick={() => rejectMut.mutate(song.id)} className="p-1.5 rounded-lg hover:bg-red-500/20 text-zinc-400 hover:text-red-400"><X className="w-4 h-4" /></button></>}
                   <button onClick={() => featureMut.mutate(song.id)} className="p-1.5 rounded-lg hover:bg-yellow-500/20 text-zinc-400 hover:text-yellow-500" title="Toggle publish"><Star className="w-4 h-4" /></button>

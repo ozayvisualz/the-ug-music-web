@@ -7,7 +7,7 @@ import { trpc } from "@/trpc/client";
 import { Music, Mail, Lock, User, Phone, Loader2 } from "lucide-react";
 
 export default function RegisterPage() {
-  const [form, setForm] = useState<{ name: string; email: string; password: string; phone: string; role: "LISTENER" | "ARTIST" }>({ name: "", email: "", password: "", phone: "", role: "LISTENER" });
+  const [form, setForm] = useState<{ name: string; email: string; password: string; phone: string; artistName: string; role: "LISTENER" | "ARTIST" }>({ name: "", email: "", password: "", phone: "", artistName: "", role: "LISTENER" });
   const [error, setError] = useState("");
   const router = useRouter();
   const registerMut = trpc.auth.register.useMutation({
@@ -92,6 +92,18 @@ export default function RegisterPage() {
               ))}
             </div>
           </div>
+
+          {form.role === "ARTIST" && (
+            <div>
+              <label className="block text-sm text-zinc-400 mb-1.5">Artist / Stage Name</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <input type="text" value={form.artistName} onChange={(e) => setForm({ ...form, artistName: e.target.value })}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2.5 pl-10 pr-3 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-500 transition"
+                  placeholder="e.g. Alien Skin, Spice Diana" required={form.role === "ARTIST"} minLength={2} maxLength={60} />
+              </div>
+            </div>
+          )}
 
           <button type="submit" disabled={registerMut.isPending}
             className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-semibold rounded-lg py-2.5 transition disabled:opacity-50 flex items-center justify-center gap-2">
