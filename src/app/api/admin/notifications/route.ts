@@ -1,11 +1,36 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import jwt from "jsonwebtoken";
+
+function getUserId(req: NextRequest): { id: string; role: string } | null {
+  const authHeader = req.headers.get("authorization");
+  let token: string | null = null;
+  if (authHeader?.startsWith("Bearer ")) token = authHeader.slice(7);
+  if (!token) {
+    const cookie = req.headers.get("cookie") || "";
+    const match = cookie.match(/(?:^|;\s*)auth-token=([^;]*)/);
+    if (match) token = match[1];
+  }
+  if (!token) {
+    const cookie = req.headers.get("cookie") || "";
+    const match = cookie.match(/(?:^|;\s*)next-auth\.session-token=([^;]*)/);
+    if (match) {
+      const session = (req as any).cookies?.get?.("next-auth.session-token");
+      token = session?.value || "session";
+    }
+  }
+  if (token && token !== "session") {
+    try {
+      return jwt.verify(token, process.env.AUTH_SECRET || "default-secret") as any;
+    } catch {}
+  }
+  return null;
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user || (session.user as any).role !== "ADMIN") {
+    const user = getUserId(req);
+    if (!user || user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -50,8 +75,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await auth();
-    if (session?.user && (session.user as any).role === "ADMIN") {
+    const user = getUserId(req);
+    if (user?.role === "ADMIN") {
       const notifications = await db.notification.findMany({
         orderBy: { createdAt: "desc" },
         take: 50,
@@ -59,10 +84,9 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(notifications);
     }
 
-    if (session?.user) {
-      const userId = (session.user as any).id;
+    if (user?.id) {
       const notifications = await db.notification.findMany({
-        where: { OR: [{ userId }, { userId: null }] },
+        where: { OR: [{ userId: user.id }, { userId: null }] },
         orderBy: { createdAt: "desc" },
         take: 30,
       });
