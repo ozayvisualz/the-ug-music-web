@@ -87,6 +87,7 @@ export const authRouter = router({
         name: z.string().min(2).optional(),
         phone: z.string().optional(),
         image: z.string().optional(),
+        preferredMoods: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {

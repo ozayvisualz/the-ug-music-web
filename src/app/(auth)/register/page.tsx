@@ -11,7 +11,7 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const registerMut = trpc.auth.register.useMutation({
-    onSuccess: () => router.push("/login"),
+    onSuccess: () => router.push("/onboarding"),
     onError: (e) => setError(e.message),
   });
 

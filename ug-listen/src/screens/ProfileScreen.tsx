@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import {
   Crown,
@@ -24,6 +26,9 @@ import {
 import { COLORS } from "../constants/theme";
 import { logout } from "../api/auth";
 import { useAuthStore } from "../store/authStore";
+import { useTheme } from "../theme/ThemeContext";
+
+const SW = Dimensions.get("window").width;
 
 type MenuItem = {
   icon: React.ReactNode;
@@ -36,6 +41,7 @@ export default function ProfileScreen() {
   const navigation = useNavigation<any>();
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
+  const { colors } = useTheme();
 
   const handleLogout = useCallback(() => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -53,7 +59,7 @@ export default function ProfileScreen() {
 
   if (!user) {
     return (
-      <View style={styles.root}>
+      <View style={[styles.root, { backgroundColor: colors.bg }]}>
         <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>You're not signed in</Text>
           <Text style={styles.emptySubtitle}>
@@ -120,7 +126,7 @@ export default function ProfileScreen() {
     {
       icon: <Settings size={18} color={COLORS.text} />,
       label: "Settings",
-      onPress: () => {},
+      onPress: () => navigation.navigate("Settings"),
     },
     {
       icon: <HelpCircle size={18} color={COLORS.text} />,
@@ -136,7 +142,8 @@ export default function ProfileScreen() {
   ];
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Profile</Text>
       </View>
@@ -145,6 +152,7 @@ export default function ProfileScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
@@ -213,6 +221,7 @@ export default function ProfileScreen() {
           ))}
         </View>
       </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
@@ -223,7 +232,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg,
   },
   header: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 10,
     paddingBottom: 8,
   },
@@ -281,7 +290,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingBottom: 70,
   },
   profileCard: {
@@ -373,6 +382,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
+    minWidth: 0,
   },
   menuItemLast: {
     borderBottomWidth: 0,
@@ -386,5 +396,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     color: COLORS.white,
+    flexShrink: 1,
   },
 });

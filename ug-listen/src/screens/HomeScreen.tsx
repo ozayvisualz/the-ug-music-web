@@ -11,6 +11,7 @@ import {
   Image,
   StatusBar,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Animated, {
   useSharedValue,
@@ -39,9 +40,13 @@ import { COLORS, SPACING, RADIUS, SPRING, TIMING, SHADOWS, HIT_SLOP } from "../c
 import { trpc } from "../api/client";
 import { useAuthStore } from "../store/authStore";
 import { useQueueStore } from "../store/playerStore";
+import { useTheme } from "../theme/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const HERO_WIDTH = SCREEN_WIDTH - 32;
+const SW = SCREEN_WIDTH;
+const HERO_WIDTH = Math.min(SW * 0.85, SCREEN_WIDTH - 32);
+const TREND_WIDTH = Math.min(SW * 0.35, 150);
+const TREND_ART = TREND_WIDTH - 16;
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -178,6 +183,7 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
   const user = useAuthStore((s) => s.user);
   const setQueue = useQueueStore((s) => s.setQueue);
+  const { colors } = useTheme();
 
   const [heroSongs, setHeroSongs] = useState<any[]>([]);
   const [heroLoading, setHeroLoading] = useState(true);
@@ -260,8 +266,10 @@ export default function HomeScreen() {
   const avatarLetter = user?.name?.charAt(0)?.toUpperCase() ?? "L";
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.bg} />
+
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
 
       {/* ── Header Bar ── */}
       <View style={styles.header}>
@@ -305,6 +313,7 @@ export default function HomeScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         {/* ── Hero Carousel ── */}
         <View style={styles.heroSection}>
@@ -370,9 +379,9 @@ export default function HomeScreen() {
             <SectionHeader title="Continue Listening" />
             {clLoading ? (
               <View style={styles.skeletonRow}>
-                <ShimmerBlock width={136} height={88} />
+                <ShimmerBlock width={Math.min(SW * 0.4, 160)} height={Math.min(SW * 0.25, 100)} />
                 <View style={{ width: 10 }} />
-                <ShimmerBlock width={136} height={88} />
+                <ShimmerBlock width={Math.min(SW * 0.4, 160)} height={Math.min(SW * 0.25, 100)} />
               </View>
             ) : continueListening.length > 0 ? (
               <FlatList
@@ -423,11 +432,11 @@ export default function HomeScreen() {
           />
           {trendingLoading ? (
             <View style={styles.skeletonRow}>
-              <ShimmerBlock width={130} height={170} />
+              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
               <View style={{ width: 10 }} />
-              <ShimmerBlock width={130} height={170} />
+              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
               <View style={{ width: 10 }} />
-              <ShimmerBlock width={130} height={170} />
+              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
             </View>
           ) : trending.length > 0 ? (
             <FlatList
@@ -486,11 +495,11 @@ export default function HomeScreen() {
           <SectionHeader title="New Releases" />
           {nrLoading ? (
             <View style={styles.skeletonRow}>
-              <ShimmerBlock width={130} height={170} />
+              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
               <View style={{ width: 10 }} />
-              <ShimmerBlock width={130} height={170} />
+              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
               <View style={{ width: 10 }} />
-              <ShimmerBlock width={130} height={170} />
+              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
             </View>
           ) : newReleases.length > 0 ? (
             <FlatList
@@ -557,6 +566,7 @@ export default function HomeScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
@@ -572,7 +582,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 10,
     paddingBottom: 8,
     backgroundColor: "rgba(9, 9, 11, 0.95)",
@@ -626,7 +636,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: SPACING.md,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: SPACING.sm,
   },
 
@@ -704,16 +714,19 @@ const styles = StyleSheet.create({
   },
   heroTextWrap: {
     marginBottom: SPACING.sm,
+    minWidth: 0,
   },
   heroTitle: {
     color: COLORS.white,
     fontSize: 16,
     fontWeight: "700",
+    flexShrink: 1,
   },
   heroArtist: {
     color: COLORS.whiteMuted,
     fontSize: 12,
     marginTop: 2,
+    flexShrink: 1,
   },
   heroActions: {
     flexDirection: "row",
@@ -763,8 +776,8 @@ const styles = StyleSheet.create({
     gap: SPACING.sm,
   },
   mixCard: {
-    width: 100,
-    height: 100,
+    width: Math.min(SW * 0.28, 110),
+    height: Math.min(SW * 0.28, 110),
     borderRadius: RADIUS.lg,
     alignItems: "center",
     justifyContent: "center",
@@ -784,16 +797,16 @@ const styles = StyleSheet.create({
 
   // ── Continue Listening ──
   continueCard: {
-    width: 136,
-    height: 88,
+    width: Math.min(SW * 0.4, 160),
+    height: Math.min(SW * 0.25, 100),
     borderRadius: RADIUS.md,
     backgroundColor: COLORS.surface,
     overflow: "hidden",
     marginRight: SPACING.md,
   },
   continueArt: {
-    width: 136,
-    height: 60,
+    width: Math.min(SW * 0.4, 160),
+    height: Math.min(SW * 0.16, 66),
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: COLORS.surfaceHover,
@@ -832,7 +845,7 @@ const styles = StyleSheet.create({
 
   // ── Trending Now ──
   trendingCard: {
-    width: 130,
+    width: TREND_WIDTH,
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.md,
     padding: SPACING.xs,
@@ -840,8 +853,8 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   trendingArt: {
-    width: 114,
-    height: 100,
+    width: TREND_ART,
+    height: Math.min(SW * 0.3, 120),
     borderRadius: RADIUS.sm,
     backgroundColor: COLORS.surfaceHover,
     alignItems: "center",
@@ -891,15 +904,15 @@ const styles = StyleSheet.create({
 
   // ── New Releases ──
   releaseCard: {
-    width: 130,
+    width: TREND_WIDTH,
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.md,
     padding: SPACING.xs,
     marginRight: SPACING.md,
   },
   releaseArt: {
-    width: 114,
-    height: 100,
+    width: TREND_ART,
+    height: Math.min(SW * 0.3, 120),
     borderRadius: RADIUS.sm,
     backgroundColor: COLORS.surfaceHover,
     alignItems: "center",

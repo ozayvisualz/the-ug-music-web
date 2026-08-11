@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { View, StyleSheet } from "react-native";
 import { Home, Compass, Library, User } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
+import { useTheme } from "../theme/ThemeContext";
 import HomeScreen from "../screens/HomeScreen";
 import DiscoverScreen from "../screens/DiscoverScreen";
 import LibraryScreen from "../screens/LibraryScreen";
@@ -14,8 +15,11 @@ import PlaylistScreen from "../screens/PlaylistScreen";
 import SearchScreen from "../screens/SearchScreen";
 import MadeInUgandaScreen from "../screens/MadeInUgandaScreen";
 import RadioScreen from "../screens/RadioScreen";
+import CategoryPlaylistScreen from "../screens/CategoryPlaylistScreen";
+import NotificationsScreen from "../screens/NotificationsScreen";
 import PremiumScreen from "../screens/PremiumScreen";
 import SupportScreen from "../screens/SupportScreen";
+import SettingsScreen from "../screens/SettingsScreen";
 import MiniPlayer from "../components/MiniPlayer";
 import FullPlayer from "../components/FullPlayer";
 import { useState } from "react";
@@ -33,6 +37,8 @@ function HomeStack() {
       <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="MadeInUganda" component={MadeInUgandaScreen} />
       <Stack.Screen name="Radio" component={RadioScreen} />
+      <Stack.Screen name="Notifications" component={NotificationsScreen} />
+      <Stack.Screen name="CategoryPlaylist" component={CategoryPlaylistScreen} />
     </Stack.Navigator>
   );
 }
@@ -46,6 +52,7 @@ function DiscoverStack() {
       <Stack.Screen name="Artist" component={ArtistScreen} />
       <Stack.Screen name="Playlist" component={PlaylistScreen} />
       <Stack.Screen name="Search" component={SearchScreen} />
+      <Stack.Screen name="CategoryPlaylist" component={CategoryPlaylistScreen} />
     </Stack.Navigator>
   );
 }
@@ -69,14 +76,16 @@ function ProfileStack() {
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />
       <Stack.Screen name="Premium" component={PremiumScreen} />
       <Stack.Screen name="Support" component={SupportScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   );
 }
 
 export default function RootNavigator() {
   const [expanded, setExpanded] = useState(false);
+  const { colors } = useTheme();
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.bg }]}>
       <NavigationContainer>
         <Tab.Navigator
           screenOptions={({ route }) => ({
@@ -93,7 +102,7 @@ export default function RootNavigator() {
             },
             tabBarActiveTintColor: COLORS.gold,
             tabBarInactiveTintColor: COLORS.textMuted,
-            tabBarStyle: styles.tabBar,
+            tabBarStyle: [styles.tabBar, { backgroundColor: colors.bg, borderTopColor: colors.border }],
             tabBarShowLabel: false,
           })}
         >

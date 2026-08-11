@@ -5,11 +5,17 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Disc3, Music2, Play, Shuffle } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { useQueueStore } from "../store/playerStore";
+import { useTheme } from "../theme/ThemeContext";
+
+const SW = Dimensions.get("window").width;
+const ART_SIZE = Math.min(SW * 0.5, 200);
 
 type Song = {
   id: string;
@@ -38,6 +44,7 @@ export default function PlaylistScreen() {
   const playlist: Playlist = route.params.playlist;
   const songs: Song[] = playlist.songs ?? [];
   const setQueue = useQueueStore((s) => s.setQueue);
+  const { colors } = useTheme();
 
   const handlePlayAll = useCallback(() => {
     const tracks = songs.map((s) => ({
@@ -80,11 +87,13 @@ export default function PlaylistScreen() {
   );
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         <View style={styles.artworkWrap}>
           <View style={styles.artwork}>
@@ -151,6 +160,7 @@ export default function PlaylistScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
@@ -164,7 +174,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 16,
   },
   artworkWrap: {
@@ -172,19 +182,20 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   artwork: {
-    width: 140,
-    height: 140,
+    width: ART_SIZE,
+    height: ART_SIZE,
     borderRadius: 14,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
   },
   title: {
-    fontSize: 20,
+    fontSize: SW < 360 ? 17 : 20,
     fontWeight: "700",
     color: COLORS.white,
     textAlign: "center",
     marginBottom: 2,
+    flexShrink: 1,
   },
   byYouLabel: {
     fontSize: 12,
@@ -265,16 +276,19 @@ const styles = StyleSheet.create({
   songInfo: {
     flex: 1,
     marginRight: 6,
+    minWidth: 0,
   },
   songTitle: {
     color: COLORS.white,
     fontSize: 13,
     fontWeight: "600",
     marginBottom: 1,
+    flexShrink: 1,
   },
   songArtist: {
     color: COLORS.textMuted,
     fontSize: 11,
+    flexShrink: 1,
   },
   songDuration: {
     color: COLORS.textMuted,

@@ -8,12 +8,17 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
+  Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { ArrowLeft, HelpCircle, ChevronDown, ChevronUp } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
 import { useAuthStore } from "../store/authStore";
+import { useTheme } from "../theme/ThemeContext";
+
+const SW = Dimensions.get("window").width;
 
 const CATEGORIES = ["General", "Payment", "Technical", "Content", "Account"] as const;
 type Category = (typeof CATEGORIES)[number];
@@ -60,6 +65,7 @@ function capitalizeStatus(s: string): string {
 export default function SupportScreen() {
   const navigation = useNavigation<any>();
   const user = useAuthStore((s) => s.user);
+  const { colors } = useTheme();
 
   const [subject, setSubject] = useState("");
   const [category, setCategory] = useState<Category>("General");
@@ -172,7 +178,8 @@ export default function SupportScreen() {
   );
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backBtn}
@@ -273,6 +280,7 @@ export default function SupportScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
       />
+      </SafeAreaView>
     </View>
   );
 }
@@ -285,7 +293,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 10,
     paddingBottom: 10,
   },
@@ -309,7 +317,7 @@ const styles = StyleSheet.create({
     paddingBottom: 70,
   },
   listHeader: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 6,
   },
   contactCard: {
@@ -430,12 +438,14 @@ const styles = StyleSheet.create({
   ticketInfo: {
     flex: 1,
     marginRight: 6,
+    minWidth: 0,
   },
   ticketSubject: {
     fontSize: 13,
     fontWeight: "600",
     color: COLORS.white,
     marginBottom: 6,
+    flexShrink: 1,
   },
   ticketMetaRow: {
     flexDirection: "row",

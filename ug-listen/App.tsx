@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
-import { View, Text, ActivityIndicator, StyleSheet, Animated } from "react-native";
-import { COLORS } from "./src/constants/theme";
+import { View, ActivityIndicator, StyleSheet, Animated } from "react-native";
 import { useAuthStore } from "./src/store/authStore";
 import LoginScreen from "./src/screens/LoginScreen";
 import RootNavigator from "./src/navigation/RootNavigator";
@@ -9,9 +8,12 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import ErrorBoundary from "./src/components/ErrorBoundary";
 import { getStoredToken, getStoredUser, setAuthToken } from "./src/api/auth";
+import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
+import { PlayerProvider } from "./src/components/PlayerContext";
 
-export default function App() {
+function AppContent() {
   const { user, loading, setUser, setLoading } = useAuthStore();
+  const { colors, isDark } = useTheme();
 
   useEffect(() => {
     (async () => {
@@ -27,41 +29,55 @@ export default function App() {
   }, []);
 
   if (loading) {
-    return <View style={styles.center}><StatusBar style="light" /><ActivityIndicator size="large" color={COLORS.gold} /></View>;
+    return (
+      <View style={[styles.center, { backgroundColor: colors.bg }]}>
+        <StatusBar style={isDark ? "light" : "dark"} />
+        <ActivityIndicator size="large" color={colors.gold} />
+      </View>
+    );
   }
 
   return (
-    <GestureHandlerRootView style={styles.root}>
-      <SafeAreaProvider>
-        <ErrorBoundary>
-          <StatusBar style="light" />
-          {user ? <AppShell /> : <LoginScreen />}
-        </ErrorBoundary>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <StatusBar style={isDark ? "light" : "dark"} />
+      {user ? <AppShell /> : <LoginScreen />}
+    </View>
   );
 }
 
 function AppShell() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const { colors } = useTheme();
 
   useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+    Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }).start();
   }, []);
 
   return (
-    <Animated.View style={[styles.shell, { opacity: fadeAnim }]}>
+    <Animated.View style={[styles.shell, { opacity: fadeAnim, backgroundColor: colors.bg }]}>
       <RootNavigator />
     </Animated.View>
   );
 }
 
+export default function App() {
+  return (
+    <GestureHandlerRootView style={styles.root}>
+      <SafeAreaProvider>
+      <ThemeProvider>
+        <PlayerProvider>
+          <ErrorBoundary>
+            <AppContent />
+          </ErrorBoundary>
+        </PlayerProvider>
+      </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  center: { flex: 1, backgroundColor: COLORS.bg, alignItems: "center", justifyContent: "center" },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
   shell: { flex: 1 },
 });

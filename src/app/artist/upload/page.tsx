@@ -26,6 +26,7 @@ export default function UploadMusicPage() {
     beatProducer: "",
     videoUrl: "",
     lyrics: "",
+    moods: [] as string[],
   });
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -143,6 +144,7 @@ export default function UploadMusicPage() {
         beatProducer: form.beatProducer || undefined,
         videoUrl: form.videoUrl || undefined,
         lyrics: form.lyrics || undefined,
+        moods: form.moods.length > 0 ? JSON.stringify(form.moods) : undefined,
       });
     } catch (e: any) {
       if (e?.code === "storage/canceled") return;
@@ -227,6 +229,55 @@ export default function UploadMusicPage() {
                 rows={3} className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500 transition resize-none"
                 placeholder="Tell listeners about this song..." />
             </div>
+            <div className="md:col-span-2 border-t border-zinc-800 pt-4 mt-2">
+              <h3 className="text-sm font-semibold text-yellow-500 mb-3">Song Moods</h3>
+              <p className="text-xs text-zinc-500 mb-3">Select up to 5 moods that match this song</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { id: "chill-relax", emoji: "😌", label: "Chill & Relax" },
+                  { id: "party-time", emoji: "🎉", label: "Party Time" },
+                  { id: "love-songs", emoji: "💕", label: "Love Songs" },
+                  { id: "workout", emoji: "💪", label: "Workout" },
+                  { id: "road-trip", emoji: "🚗", label: "Road Trip" },
+                  { id: "late-night", emoji: "🌙", label: "Late Night" },
+                  { id: "morning-vibes", emoji: "🌅", label: "Morning Vibes" },
+                  { id: "study-focus", emoji: "📚", label: "Study & Focus" },
+                  { id: "dancehall-energy", emoji: "🔥", label: "Dancehall Energy" },
+                  { id: "afrobeat-vibes", emoji: "🎶", label: "Afrobeat Vibes" },
+                  { id: "gospel-worship", emoji: "🙏", label: "Gospel Worship" },
+                  { id: "lugaflow-heat", emoji: "🥁", label: "Lugaflow Heat" },
+                  { id: "amapiano-groove", emoji: "🕺", label: "Amapiano Groove" },
+                  { id: "emotional", emoji: "🥺", label: "Emotional" },
+                  { id: "romantic", emoji: "🌹", label: "Romantic" },
+                  { id: "inspirational", emoji: "✨", label: "Inspirational" },
+                  { id: "happy", emoji: "😊", label: "Happy" },
+                  { id: "sad", emoji: "💔", label: "Sad" },
+                  { id: "motivational", emoji: "🚀", label: "Motivational" },
+                  { id: "street-vibes", emoji: "🏙️", label: "Street Vibes" },
+                  { id: "celebration", emoji: "🎊", label: "Celebration" },
+                  { id: "cultural", emoji: "🏛️", label: "Cultural" },
+                  { id: "acoustic", emoji: "🎸", label: "Acoustic" },
+                  { id: "rnb", emoji: "🎤", label: "R&B" },
+                  { id: "reggae", emoji: "🟡", label: "Reggae" },
+                  { id: "soul", emoji: "🎷", label: "Soul" },
+                  { id: "jazz", emoji: "🎹", label: "Jazz" },
+                  { id: "instrumental", emoji: "🎻", label: "Instrumental" },
+                ].map((mood) => (
+                  <button
+                    key={mood.id}
+                    type="button"
+                    onClick={() => setForm((f) => ({
+                      ...f,
+                      moods: f.moods.includes(mood.id) ? f.moods.filter((m) => m !== mood.id) : f.moods.length < 5 ? [...f.moods, mood.id] : f.moods,
+                    }))}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${form.moods.includes(mood.id) ? "bg-yellow-500 text-black" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}
+                  >
+                    {mood.emoji} {mood.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="md:col-span-2 border-t border-zinc-800 pt-4 mt-2">
               <h3 className="text-sm font-semibold text-yellow-500 mb-3">Behind the Song</h3>
             </div>

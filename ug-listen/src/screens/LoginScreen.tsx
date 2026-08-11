@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Dimensions } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Music2 } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { login, register } from "../api/auth";
 import { useAuthStore } from "../store/authStore";
+import { useTheme } from "../theme/ThemeContext";
+
+const SW = Dimensions.get("window").width;
 
 export default function LoginScreen() {
   const [tab, setTab] = useState<"signin" | "register">("signin");
@@ -15,6 +19,7 @@ export default function LoginScreen() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const setUser = useAuthStore((s) => s.setUser);
+  const { colors } = useTheme();
 
   const handleSubmit = async () => {
     setError("");
@@ -36,8 +41,9 @@ export default function LoginScreen() {
   const handleGuest = () => setUser({ id: "guest", email: "", name: "Guest", role: "LISTENER" });
 
   return (
-    <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+    <KeyboardAvoidingView style={[styles.root, { backgroundColor: colors.bg }]} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} bounces={false}>
         <View style={styles.card}>
           <View style={styles.iconCircle}><Music2 size={28} color={COLORS.bg} /></View>
           <Text style={styles.brand}>TheUgMusic</Text>
@@ -76,14 +82,15 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      </SafeAreaView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: COLORS.bg },
-  scroll: { flexGrow: 1, justifyContent: "center", alignItems: "center", padding: 24 },
-  card: { width: "100%", maxWidth: 384, backgroundColor: COLORS.surface, borderRadius: 16, padding: 28, alignItems: "center" },
+  scroll: { flexGrow: 1, justifyContent: "center", alignItems: "center", padding: Math.min(SW * 0.04, 24) },
+  card: { width: "100%", maxWidth: 384, backgroundColor: COLORS.surface, borderRadius: 16, padding: Math.min(SW * 0.06, 28), alignItems: "center" },
   iconCircle: { width: 64, height: 64, borderRadius: 32, backgroundColor: COLORS.gold, alignItems: "center", justifyContent: "center", marginBottom: 12 },
   brand: { fontSize: 22, fontWeight: "700", color: COLORS.white, marginBottom: 24 },
   pillRow: { flexDirection: "row", backgroundColor: COLORS.bg, borderRadius: 999, padding: 3, marginBottom: 20, width: "100%" },

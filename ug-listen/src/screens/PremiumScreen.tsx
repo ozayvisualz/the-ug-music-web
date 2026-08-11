@@ -7,11 +7,16 @@ import {
   ActivityIndicator,
   Alert,
   StyleSheet,
+  Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { ArrowLeft, Crown, Check } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
+import { useTheme } from "../theme/ThemeContext";
+
+const SW = Dimensions.get("window").width;
 
 type Plan = {
   id: string;
@@ -66,6 +71,7 @@ function formatUGX(amount: number): string {
 
 export default function PremiumScreen() {
   const navigation = useNavigation<any>();
+  const { colors } = useTheme();
 
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [subLoading, setSubLoading] = useState(true);
@@ -106,14 +112,15 @@ export default function PremiumScreen() {
 
   if (subLoading) {
     return (
-      <View style={styles.root}>
+      <View style={[styles.root, { backgroundColor: colors.bg }]}>
         <ActivityIndicator color={COLORS.gold} style={styles.loader} />
       </View>
     );
   }
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backBtn}
@@ -135,6 +142,7 @@ export default function PremiumScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         <View style={styles.currentBadge}>
           <Text style={styles.currentLabel}>Current Plan</Text>
@@ -207,6 +215,7 @@ export default function PremiumScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
@@ -222,7 +231,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 10,
     paddingBottom: 12,
   },
@@ -250,7 +259,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
   },
   currentBadge: {
     backgroundColor: COLORS.surface,

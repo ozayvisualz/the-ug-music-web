@@ -9,13 +9,19 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Music2, Play, Send, Heart, MessageCircle } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
 import { useQueueStore } from "../store/playerStore";
 import { useAuthStore } from "../store/authStore";
+import { useTheme } from "../theme/ThemeContext";
+
+const SW = Dimensions.get("window").width;
+const ARTWORK_SIZE = Math.min(SW * 0.55, 220);
 
 type Song = {
   id: string;
@@ -69,6 +75,7 @@ export default function SongScreen() {
   const songId: string = route.params.songId;
   const setQueue = useQueueStore((s) => s.setQueue);
   const user = useAuthStore((s) => s.user);
+  const { colors } = useTheme();
 
   const [song, setSong] = useState<Song | null>(null);
   const [songLoading, setSongLoading] = useState(true);
@@ -124,7 +131,7 @@ export default function SongScreen() {
 
   if (songLoading) {
     return (
-      <View style={styles.root}>
+      <View style={[styles.root, { backgroundColor: colors.bg }]}>
         <ActivityIndicator color={COLORS.gold} style={styles.loader} />
       </View>
     );
@@ -132,14 +139,15 @@ export default function SongScreen() {
 
   if (!song) {
     return (
-      <View style={styles.root}>
+      <View style={[styles.root, { backgroundColor: colors.bg }]}>
         <Text style={styles.emptyText}>Song not found</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -149,6 +157,7 @@ export default function SongScreen() {
           style={styles.scroll}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          bounces={false}
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.artworkWrap}>
@@ -264,6 +273,7 @@ export default function SongScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+      </SafeAreaView>
     </View>
   );
 }
@@ -289,7 +299,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 16,
   },
   artworkWrap: {
@@ -297,25 +307,27 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   artwork: {
-    width: 160,
-    height: 160,
+    width: ARTWORK_SIZE,
+    height: ARTWORK_SIZE,
     borderRadius: 14,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
   },
   title: {
-    fontSize: 22,
+    fontSize: SW < 360 ? 18 : 22,
     fontWeight: "700",
     color: COLORS.white,
     textAlign: "center",
     marginBottom: 3,
+    flexShrink: 1,
   },
   artistName: {
-    fontSize: 15,
+    fontSize: SW < 360 ? 13 : 15,
     color: COLORS.text,
     textAlign: "center",
     marginBottom: 10,
+    flexShrink: 1,
   },
   metaRow: {
     flexDirection: "row",
@@ -419,17 +431,20 @@ const styles = StyleSheet.create({
   },
   commentBody: {
     flex: 1,
+    minWidth: 0,
   },
   commentTopRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     marginBottom: 2,
+    minWidth: 0,
   },
   commentName: {
     color: COLORS.white,
     fontSize: 12,
     fontWeight: "600",
+    flexShrink: 1,
   },
   commentTime: {
     color: COLORS.textMuted,
@@ -446,7 +461,7 @@ const styles = StyleSheet.create({
   commentInputBar: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 14,
+    paddingHorizontal: Math.min(SW * 0.035, 14),
     paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,

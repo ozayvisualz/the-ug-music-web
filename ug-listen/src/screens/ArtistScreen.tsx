@@ -7,12 +7,17 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Music2, Play, BadgeCheck, Disc3 } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
 import { useQueueStore } from "../store/playerStore";
+import { useTheme } from "../theme/ThemeContext";
+
+const SW = Dimensions.get("window").width;
 
 type Song = {
   id: string;
@@ -58,6 +63,7 @@ export default function ArtistScreen() {
   const navigation = useNavigation<any>();
   const artistId: string = route.params.artistId;
   const setQueue = useQueueStore((s) => s.setQueue);
+  const { colors } = useTheme();
 
   const [artist, setArtist] = useState<Artist | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,7 +109,7 @@ export default function ArtistScreen() {
 
   if (loading) {
     return (
-      <View style={styles.root}>
+      <View style={[styles.root, { backgroundColor: colors.bg }]}>
         <ActivityIndicator color={COLORS.gold} style={styles.loader} />
       </View>
     );
@@ -111,18 +117,20 @@ export default function ArtistScreen() {
 
   if (!artist) {
     return (
-      <View style={styles.root}>
+      <View style={[styles.root, { backgroundColor: colors.bg }]}>
         <Text style={styles.emptyText}>Artist not found</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         <View style={styles.headerArea}>
           <View style={styles.avatar}>
@@ -215,6 +223,7 @@ export default function ArtistScreen() {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
+              bounces={false}
               contentContainerStyle={styles.albumsScroll}
             >
               {artist.albums.map((album) => (
@@ -238,6 +247,7 @@ export default function ArtistScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
@@ -260,7 +270,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 16,
   },
   headerArea: {
@@ -381,11 +391,13 @@ const styles = StyleSheet.create({
   songInfo: {
     flex: 1,
     marginRight: 6,
+    minWidth: 0,
   },
   songTitle: {
     color: COLORS.white,
     fontSize: 13,
     fontWeight: "600",
+    flexShrink: 1,
   },
   songDuration: {
     color: COLORS.textMuted,
@@ -405,11 +417,12 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   albumCard: {
-    width: 100,
+    width: Math.min(SW * 0.3, 120),
     backgroundColor: COLORS.surface,
     borderRadius: 10,
     padding: 10,
     alignItems: "center",
+    minWidth: 0,
   },
   albumIcon: {
     width: 52,
@@ -425,6 +438,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
     textAlign: "center",
+    flexShrink: 1,
   },
   bottomSpacer: {
     height: 70,

@@ -7,11 +7,14 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { ArrowLeft } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
+import { useTheme } from "../theme/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const SW = SCREEN_WIDTH;
 
 const CATEGORIES = [
   {
@@ -78,16 +81,18 @@ const CATEGORIES = [
 
 export default function MadeInUgandaScreen() {
   const navigation = useNavigation<any>();
+  const { colors } = useTheme();
 
   const handleCategoryPress = useCallback(
     (title: string) => {
-      navigation.navigate("Search", { query: title });
+      navigation.navigate("CategoryPlaylist", { category: title });
     },
     [navigation],
   );
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backBtn}
@@ -112,6 +117,7 @@ export default function MadeInUgandaScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         <View style={styles.grid}>
           {CATEGORIES.map((cat) => (
@@ -133,6 +139,7 @@ export default function MadeInUgandaScreen() {
         </View>
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
@@ -145,7 +152,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "flex-start",
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 10,
     paddingBottom: 12,
   },
@@ -176,7 +183,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
   },
   grid: {
     flexDirection: "row",
@@ -184,10 +191,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   card: {
-    width: (SCREEN_WIDTH - 32 - 8) / 2,
+    width: (SW - 2 * Math.min(SW * 0.04, 16) - 8) / 2,
     backgroundColor: COLORS.surface,
     borderRadius: 14,
     padding: 12,
+    minWidth: 0,
   },
   cardEmoji: {
     fontSize: 24,

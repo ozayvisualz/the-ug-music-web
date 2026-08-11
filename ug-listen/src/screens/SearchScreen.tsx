@@ -9,13 +9,16 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Search, Music2, Play } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
 import { useQueueStore } from "../store/playerStore";
+import { useTheme } from "../theme/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const SW = SCREEN_WIDTH;
 
 const TRENDING_SEARCHES = [
   "Eddy Kenzo",
@@ -26,7 +29,7 @@ const TRENDING_SEARCHES = [
   "Spice Diana",
   "John Blaq",
   "Azawi",
-  "Pallaso",
+  "Alien Skin",
   "Winnie Nwagi",
 ];
 
@@ -64,6 +67,7 @@ function formatDuration(d: number): string {
 export default function SearchScreen() {
   const navigation = useNavigation<any>();
   const setQueue = useQueueStore((s) => s.setQueue);
+  const { colors } = useTheme();
 
   const [query, setQuery] = useState("");
   const [songs, setSongs] = useState<Song[]>([]);
@@ -181,7 +185,8 @@ export default function SearchScreen() {
   const hasQuery = query.trim().length > 0;
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.searchBar}>
         <Search size={16} color={COLORS.textMuted} style={styles.searchIcon} />
         <TextInput
@@ -280,6 +285,7 @@ export default function SearchScreen() {
           contentContainerStyle={styles.scrollContent}
         />
       )}
+      </SafeAreaView>
     </View>
   );
 }
@@ -294,7 +300,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: COLORS.surface,
     borderRadius: 999,
-    marginHorizontal: 16,
+    marginHorizontal: Math.min(SW * 0.04, 16),
     marginTop: 10,
     marginBottom: 6,
     paddingHorizontal: 12,
@@ -318,11 +324,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingBottom: 70,
   },
   browseContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 12,
   },
   sectionTitle: {
@@ -413,16 +419,19 @@ const styles = StyleSheet.create({
   },
   songInfo: {
     flex: 1,
+    minWidth: 0,
   },
   resultName: {
     color: COLORS.white,
     fontSize: 13,
     fontWeight: "600",
+    flexShrink: 1,
   },
   resultSub: {
     color: COLORS.textMuted,
     fontSize: 11,
     marginTop: 1,
+    flexShrink: 1,
   },
   songDuration: {
     color: COLORS.textMuted,

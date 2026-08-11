@@ -9,19 +9,23 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Music2, Search, Play } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
 import { useQueueStore } from "../store/playerStore";
+import { useTheme } from "../theme/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const SW = SCREEN_WIDTH;
+const SONGCARD_W = Math.min(SW * 0.34, 140);
 
 type Song = { id: string; title: string; artist: string; duration: number; url: string; coverUrl?: string };
 
 const TRENDING_SEARCHES = [
   "Eddy Kenzo", "Sheebah", "Bobi Wine", "Rema", "Vinka",
-  "Spice Diana", "John Blaq", "Azawi", "Pallaso", "Winnie Nwagi",
+  "Spice Diana", "John Blaq", "Azawi", "Alien Skin", "Winnie Nwagi",
 ];
 
 const GENRES = [
@@ -75,6 +79,7 @@ function SongCard({ song, onPlay }: { song: Song; onPlay: (song: Song) => void }
 export default function DiscoverScreen() {
   const navigation = useNavigation<any>();
   const setQueue = useQueueStore((s) => s.setQueue);
+  const { colors } = useTheme();
 
   const [newReleases, setNewReleases] = useState<Song[]>([]);
   const [nrLoading, setNrLoading] = useState(true);
@@ -108,7 +113,8 @@ export default function DiscoverScreen() {
   );
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Discover</Text>
       </View>
@@ -117,6 +123,7 @@ export default function DiscoverScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
         <TouchableOpacity
           style={styles.searchBar}
@@ -132,6 +139,7 @@ export default function DiscoverScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            bounces={false}
             contentContainerStyle={styles.chipScroll}
           >
             {TRENDING_SEARCHES.map((item) => (
@@ -155,7 +163,7 @@ export default function DiscoverScreen() {
                 key={genre.name}
                 style={styles.genreCard}
                 activeOpacity={0.7}
-                onPress={() => navigation.navigate("Search", { query: genre.name })}
+                onPress={() => navigation.navigate("CategoryPlaylist", { category: genre.name })}
               >
                 <Text style={styles.genreEmoji}>{genre.emoji}</Text>
                 <Text style={styles.genreName}>{genre.name}</Text>
@@ -222,6 +230,7 @@ export default function DiscoverScreen() {
 
         <View style={styles.bottomSpacer} />
       </ScrollView>
+      </SafeAreaView>
     </View>
   );
 }
@@ -232,7 +241,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg,
   },
   header: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 10,
     paddingBottom: 8,
   },
@@ -245,7 +254,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 4,
   },
   searchBar: {
@@ -335,7 +344,7 @@ const styles = StyleSheet.create({
   horizontalList: {
     flexDirection: "row",
     gap: 10,
-    paddingRight: 16,
+    paddingRight: Math.min(SW * 0.04, 16),
   },
   loader: {
     marginVertical: 16,
@@ -346,15 +355,15 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   songCard: {
-    width: 120,
+    width: SONGCARD_W,
     backgroundColor: COLORS.surface,
     borderRadius: 10,
     padding: 8,
     position: "relative",
   },
   songArtwork: {
-    width: 36,
-    height: 36,
+    width: Math.min(SW * 0.1, 40),
+    height: Math.min(SW * 0.1, 40),
     borderRadius: 6,
     backgroundColor: COLORS.gold,
     alignItems: "center",
@@ -363,14 +372,16 @@ const styles = StyleSheet.create({
   },
   songTitle: {
     color: COLORS.white,
-    fontSize: 12,
+    fontSize: SW < 360 ? 11 : 12,
     fontWeight: "600",
     marginBottom: 1,
+    flexShrink: 1,
   },
   songArtist: {
     color: COLORS.textMuted,
-    fontSize: 10,
+    fontSize: SW < 360 ? 9 : 10,
     marginBottom: 4,
+    flexShrink: 1,
   },
   songPlayBtn: {
     position: "absolute",

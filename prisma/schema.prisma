@@ -69,6 +69,7 @@ model User {
   image         String?
   password      String?
   role          UserRole  @default(LISTENER)
+  preferredMoods String? @default("[]")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -211,6 +212,7 @@ model Song {
   beatProducer String?
   videoUrl    String?
   lyrics      String?
+  moods       String?   @default("[]")
   signature   String?  @unique
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

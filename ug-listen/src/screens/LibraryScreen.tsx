@@ -7,13 +7,18 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { ListMusic, Music2, ChevronRight, Play } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
 import { useAuthStore } from "../store/authStore";
 import { useQueueStore } from "../store/playerStore";
+import { useTheme } from "../theme/ThemeContext";
+
+const SW = Dimensions.get("window").width;
 
 type Song = { id: string; title: string; artist: string; duration: number; url: string; coverUrl?: string };
 type Playlist = { id: string; name: string; songCount?: number; songs?: Song[] };
@@ -55,6 +60,7 @@ export default function LibraryScreen() {
   const navigation = useNavigation<any>();
   const user = useAuthStore((s) => s.user);
   const setQueue = useQueueStore((s) => s.setQueue);
+  const { colors } = useTheme();
 
   const [tab, setTab] = useState<Tab>("Playlists");
 
@@ -120,7 +126,7 @@ export default function LibraryScreen() {
 
   if (!user) {
     return (
-      <View style={styles.root}>
+      <View style={[styles.root, { backgroundColor: colors.bg }]}>
         <View style={styles.emptyState}>
           <Text style={styles.emptyStateTitle}>Log in to see your library</Text>
           <TouchableOpacity
@@ -165,7 +171,8 @@ export default function LibraryScreen() {
   );
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Your Library</Text>
       </View>
@@ -174,6 +181,7 @@ export default function LibraryScreen() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
+          bounces={false}
           contentContainerStyle={styles.tabScroll}
         >
           {TABS.map((t) => (
@@ -263,6 +271,7 @@ export default function LibraryScreen() {
           </>
         )
       )}
+      </SafeAreaView>
     </View>
   );
 }
@@ -273,7 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg,
   },
   header: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 10,
     paddingBottom: 8,
   },
@@ -306,11 +315,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   tabRow: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     marginBottom: 10,
   },
   tabScroll: {
     gap: 6,
+    paddingRight: Math.min(SW * 0.04, 16),
   },
   tabPill: {
     paddingVertical: 6,
@@ -339,7 +349,7 @@ const styles = StyleSheet.create({
     marginTop: 32,
   },
   listContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingBottom: 70,
   },
   playlistRow: {
@@ -349,6 +359,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 10,
     marginBottom: 6,
+    minWidth: 0,
   },
   playlistIcon: {
     width: 36,
@@ -361,16 +372,19 @@ const styles = StyleSheet.create({
   },
   playlistInfo: {
     flex: 1,
+    minWidth: 0,
   },
   playlistName: {
     color: COLORS.white,
     fontSize: 14,
     fontWeight: "600",
     marginBottom: 1,
+    flexShrink: 1,
   },
   playlistCount: {
     color: COLORS.textMuted,
     fontSize: 11,
+    flexShrink: 1,
   },
   playAllBtn: {
     flexDirection: "row",
@@ -396,6 +410,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 8,
     marginBottom: 4,
+    minWidth: 0,
   },
   songRowArtwork: {
     width: 32,
@@ -409,16 +424,19 @@ const styles = StyleSheet.create({
   songRowInfo: {
     flex: 1,
     marginRight: 6,
+    minWidth: 0,
   },
   songRowTitle: {
     color: COLORS.white,
     fontSize: 13,
     fontWeight: "600",
     marginBottom: 1,
+    flexShrink: 1,
   },
   songRowArtist: {
     color: COLORS.textMuted,
     fontSize: 11,
+    flexShrink: 1,
   },
   songRowDuration: {
     color: COLORS.textMuted,

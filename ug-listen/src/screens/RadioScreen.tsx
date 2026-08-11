@@ -8,13 +8,17 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Play } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
 import { useQueueStore, type Track } from "../store/playerStore";
+import { useTheme } from "../theme/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const SW = SCREEN_WIDTH;
+const STATION_SIZE = Math.min(SW * 0.22, 96);
 
 const GENRE_STATIONS = [
   { id: "afrobeats", name: "Afrobeats", emoji: "\uD83C\uDFB5" },
@@ -56,6 +60,7 @@ function formatDuration(d: number): string {
 export default function RadioScreen() {
   const navigation = useNavigation<any>();
   const setQueue = useQueueStore((s) => s.setQueue);
+  const { colors } = useTheme();
 
   const [generatedQueue, setGeneratedQueue] = useState<QueueSong[]>([]);
   const [queueTitle, setQueueTitle] = useState("");
@@ -133,7 +138,8 @@ export default function RadioScreen() {
   );
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
+      <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Radio</Text>
         <Text style={styles.headerSub}>
@@ -207,6 +213,7 @@ export default function RadioScreen() {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
       />
+      </SafeAreaView>
     </View>
   );
 }
@@ -217,7 +224,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg,
   },
   header: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingTop: 10,
     paddingBottom: 6,
   },
@@ -238,7 +245,7 @@ const styles = StyleSheet.create({
     paddingBottom: 70,
   },
   listHeader: {
-    paddingHorizontal: 16,
+    paddingHorizontal: Math.min(SW * 0.04, 16),
   },
   section: {
     marginBottom: 20,
@@ -250,12 +257,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   stationsList: {
-    paddingRight: 16,
+    paddingRight: Math.min(SW * 0.04, 16),
     gap: 10,
   },
   stationCard: {
-    width: 88,
-    height: 88,
+    width: STATION_SIZE,
+    height: STATION_SIZE,
     backgroundColor: COLORS.surface,
     borderRadius: 14,
     alignItems: "center",
@@ -277,7 +284,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   moodCard: {
-    width: (SCREEN_WIDTH - 32 - 8) / 2,
+    width: (SW - 2 * Math.min(SW * 0.04, 16) - 8) / 2,
     backgroundColor: COLORS.surface,
     borderRadius: 12,
     padding: 12,
@@ -342,16 +349,19 @@ const styles = StyleSheet.create({
   },
   songInfo: {
     flex: 1,
+    minWidth: 0,
   },
   songTitle: {
     color: COLORS.white,
     fontSize: 13,
     fontWeight: "600",
+    flexShrink: 1,
   },
   songSub: {
     color: COLORS.textMuted,
     fontSize: 11,
     marginTop: 1,
+    flexShrink: 1,
   },
   songDur: {
     color: COLORS.textMuted,
