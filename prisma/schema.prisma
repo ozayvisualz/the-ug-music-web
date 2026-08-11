@@ -93,6 +93,7 @@ model User {
   referrals       Referral[]      @relation("ReferrerUser")
   supportTickets  SupportTicket[]
   playbackSessions PlaybackSession[]
+  notifications    Notification[]
   referredIn      Referral[]      @relation("ReferredUser")
   auditLogs       AuditLog[]
 }
