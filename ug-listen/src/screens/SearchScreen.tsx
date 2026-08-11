@@ -111,9 +111,9 @@ export default function SearchScreen() {
         {
           id: song.id,
           title: song.title,
-          artist: song.artist,
-          url: song.url,
-          duration: song.duration,
+          artist: typeof song.artist === "string" ? song.artist : song.artist?.artistName || song.artist?.user?.name || "Unknown",
+          url: song.fileUrl || song.hlsUrl || "",
+          duration: song.duration || 180,
           coverUrl: song.coverUrl,
         },
       ]);
@@ -138,10 +138,10 @@ export default function SearchScreen() {
       >
         <View style={styles.artistAvatar}>
           <Text style={styles.artistAvatarText}>
-            {item.name?.charAt(0).toUpperCase()}
+            {(item.artistName || item.user?.name || item.name || "?").charAt(0).toUpperCase()}
           </Text>
         </View>
-        <Text style={styles.resultName}>{item.name}</Text>
+        <Text style={styles.resultName} numberOfLines={1}>{item.artistName || item.user?.name || item.name || "Unknown"}</Text>
       </TouchableOpacity>
     ),
     [navigation],
@@ -162,7 +162,7 @@ export default function SearchScreen() {
             {item.title}
           </Text>
           <Text style={styles.resultSub} numberOfLines={1}>
-            {item.artist}
+            {typeof item.artist === "string" ? item.artist : item.artist?.artistName || item.artist?.user?.name || "Unknown"}
           </Text>
         </View>
         <Text style={styles.songDuration}>{formatDuration(item.duration)}</Text>

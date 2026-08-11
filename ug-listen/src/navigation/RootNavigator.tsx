@@ -29,7 +29,7 @@ const Tab = createBottomTabNavigator();
 function HomeStack() {
   const Stack = createNativeStackNavigator();
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade_from_bottom", animationDuration: 250 }}>
       <Stack.Screen name="HomeMain" component={HomeScreen} />
       <Stack.Screen name="Song" component={SongScreen} />
       <Stack.Screen name="Artist" component={ArtistScreen} />
@@ -46,7 +46,7 @@ function HomeStack() {
 function DiscoverStack() {
   const Stack = createNativeStackNavigator();
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade_from_bottom", animationDuration: 250 }}>
       <Stack.Screen name="DiscoverMain" component={DiscoverScreen} />
       <Stack.Screen name="Song" component={SongScreen} />
       <Stack.Screen name="Artist" component={ArtistScreen} />
@@ -60,7 +60,7 @@ function DiscoverStack() {
 function LibraryStack() {
   const Stack = createNativeStackNavigator();
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade_from_bottom", animationDuration: 250 }}>
       <Stack.Screen name="LibraryMain" component={LibraryScreen} />
       <Stack.Screen name="Song" component={SongScreen} />
       <Stack.Screen name="Artist" component={ArtistScreen} />
@@ -72,7 +72,7 @@ function LibraryStack() {
 function ProfileStack() {
   const Stack = createNativeStackNavigator();
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade_from_bottom", animationDuration: 250 }}>
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />
       <Stack.Screen name="Premium" component={PremiumScreen} />
       <Stack.Screen name="Support" component={SupportScreen} />

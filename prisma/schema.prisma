@@ -698,10 +698,22 @@ model SupportTicket {
 model AuditLog {
   id        String   @id @default(cuid())
   userId    String
-  action    String   // "login", "approve_song", "verify_artist", "payout", "role_change", "settings_update"
+  action    String
   details   String?
   ipAddress String?
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?
+  title     String
+  body      String
+  audience  String   @default("all")
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
 }

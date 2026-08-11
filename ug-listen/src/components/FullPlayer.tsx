@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions } from "react-native";
-import { Music2, Play, Pause, SkipBack, SkipForward, X, Heart, Download, ListPlus, Share2, Shuffle, Repeat, ChevronDown } from "lucide-react-native";
-import { COLORS, RADIUS, HIT_SLOP } from "../constants/theme";
+import { Music2, Play, Pause, SkipBack, SkipForward, Heart, Download, ListPlus, Share2, Shuffle, Repeat, ChevronDown } from "lucide-react-native";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from "react-native-reanimated";
+import { COLORS, RADIUS, HIT_SLOP, SPRING } from "../constants/theme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePlayer } from "./PlayerContext";
 import { useQueueStore } from "../store/playerStore";
 import { useTheme } from "../theme/ThemeContext";
@@ -15,11 +17,35 @@ export default function FullPlayer({ onCollapse }: Props) {
   const queue = useQueueStore((s) => s.queue);
   const currentIndex = useQueueStore((s) => s.currentIndex);
   const { colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const [tab, setTab] = useState<"lyrics" | "queue" | "comments">("lyrics");
   const [liked, setLiked] = useState(false);
   const [shuffleMode, setShuffleMode] = useState(false);
   const [repeatMode, setRepeatMode] = useState(0);
+
+  const scale = useSharedValue(0.92);
+  const opacity = useSharedValue(0);
+  const translateY = useSharedValue(100);
+
+  useEffect(() => {
+    scale.value = withSpring(1, SPRING.gentle);
+    opacity.value = withTiming(1, { duration: 280 });
+    translateY.value = withSpring(0, SPRING.gentle);
+  }, []);
+
+  const handleCollapse = () => {
+    scale.value = withSpring(0.92, SPRING.gentle);
+    opacity.value = withTiming(0, { duration: 200 });
+    translateY.value = withSpring(100, SPRING.gentle, () => {
+      if (onCollapse) runOnJS(onCollapse)();
+    });
+  };
+
+  const cardStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ scale: scale.value }, { translateY: translateY.value }],
+  }));
 
   if (!currentTrack) return null;
 
@@ -36,8 +62,8 @@ export default function FullPlayer({ onCollapse }: Props) {
   return (
     <View style={styles.overlay}>
       <View style={[styles.backdrop, { backgroundColor: isDark ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.5)" }]} />
-      <View style={[styles.card, { backgroundColor: colors.bg }]}>
-        <TouchableOpacity onPress={onCollapse} style={styles.dragBar}>
+      <Animated.View style={[styles.card, { backgroundColor: colors.bg, paddingTop: insets.top }, cardStyle]}>
+        <TouchableOpacity onPress={handleCollapse} style={styles.dragBar}>
           <View style={[styles.dragPill, { backgroundColor: colors.textDisabled }]} />
         </TouchableOpacity>
 
@@ -133,7 +159,7 @@ export default function FullPlayer({ onCollapse }: Props) {
             />
           )}
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 }

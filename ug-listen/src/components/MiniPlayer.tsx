@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from "react-native";
 import { Music2, Play, Pause, SkipForward, X } from "lucide-react-native";
 import { COLORS, RADIUS, HIT_SLOP } from "../constants/theme";
 import { usePlayer } from "./PlayerContext";
@@ -9,7 +9,7 @@ const SW = Dimensions.get("window").width;
 type Props = { onExpand?: () => void };
 
 export default function MiniPlayer({ onExpand }: Props) {
-  const { currentTrack, isPlaying, position, duration, togglePlay, skipNext, stopPlayback } = usePlayer();
+  const { currentTrack, isPlaying, isLoaded, position, duration, togglePlay, skipNext, stopPlayback } = usePlayer();
   const { colors } = useTheme();
 
   if (!currentTrack) return null;
@@ -21,14 +21,14 @@ export default function MiniPlayer({ onExpand }: Props) {
       <View style={[styles.bar, { backgroundColor: colors.gold, width: `${progress * 100}%` }]} />
       <View style={styles.row}>
         <View style={[styles.art, { backgroundColor: colors.gold }]}>
-          <Music2 size={18} color={colors.bg} />
+          {isLoaded ? <Music2 size={18} color={colors.bg} /> : <ActivityIndicator size="small" color={colors.bg} />}
         </View>
         <View style={styles.info}>
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>{currentTrack.title}</Text>
-          <Text style={[styles.artist, { color: colors.textMuted }]} numberOfLines={1}>{currentTrack.artist}</Text>
+          <Text style={[styles.artist, { color: colors.textMuted }]} numberOfLines={1}>{isLoaded ? currentTrack.artist : "Loading..."}</Text>
         </View>
-        <TouchableOpacity onPress={togglePlay} hitSlop={HIT_SLOP} style={styles.btn}>
-          {isPlaying ? <Pause size={20} color={colors.gold} /> : <Play size={20} color={colors.gold} />}
+        <TouchableOpacity onPress={togglePlay} hitSlop={HIT_SLOP} style={styles.btn} disabled={!isLoaded}>
+          {!isLoaded ? <ActivityIndicator size="small" color={colors.gold} /> : isPlaying ? <Pause size={20} color={colors.gold} /> : <Play size={20} color={colors.gold} />}
         </TouchableOpacity>
         <TouchableOpacity onPress={skipNext} hitSlop={HIT_SLOP} style={styles.btn}>
           <SkipForward size={18} color={colors.textMuted} />
