@@ -141,9 +141,9 @@ export default function FullPlayer({ onCollapse }: Props) {
 const ART_SIZE = Math.min(SW * 0.55, 260);
 const isSmall = SW < 360;
 const styles = StyleSheet.create({
-  overlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 100, justifyContent: "flex-end" },
+  overlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 100 },
   backdrop: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
-  card: { flex: 0.68, borderTopLeftRadius: RADIUS.xxl, borderTopRightRadius: RADIUS.xxl, paddingHorizontal: Math.min(SW * 0.04, 20), paddingBottom: 60 },
+  card: { flex: 1, borderTopLeftRadius: RADIUS.xxl, borderTopRightRadius: RADIUS.xxl, paddingHorizontal: Math.min(SW * 0.04, 20), paddingBottom: 60 },
   dragBar: { alignItems: "center", paddingVertical: 12 },
   dragPill: { width: 32, height: 4, borderRadius: 2 },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: isSmall ? 8 : 16 },

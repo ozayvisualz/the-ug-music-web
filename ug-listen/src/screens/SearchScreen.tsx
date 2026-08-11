@@ -87,22 +87,18 @@ export default function SearchScreen() {
     }
 
     setLoading(true);
-    timerRef.current = setTimeout(() => {
-      const search = trimmed;
-      Promise.all([
-        trpc.music.getSongs.query({ search, limit: 20 }),
-        trpc.music.getArtists.query({ search, limit: 10 }),
-      ])
-        .then(([songsData, artistsData]) => {
-          setSongs(songsData as Song[]);
-          setArtists(artistsData as Artist[]);
-        })
-        .catch(() => {
-          setSongs([]);
-          setArtists([]);
-        })
-        .finally(() => setLoading(false));
-    }, 400);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://theugmusic.com/api/search?q=${encodeURIComponent(trimmed)}`);
+        const data = await res.json();
+        setSongs(data.songs || []);
+        setArtists(data.artists || []);
+      } catch {
+        setSongs([]);
+        setArtists([]);
+      }
+      setLoading(false);
+    }, 250);
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
