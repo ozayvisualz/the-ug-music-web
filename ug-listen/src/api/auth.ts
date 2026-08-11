@@ -1,5 +1,5 @@
 import * as SecureStore from "expo-secure-store";
-import { setAuthToken } from "./client";
+import { setAuthToken, trpc } from "./client";
 
 const TOKEN_KEY = "auth_token";
 const USER_KEY = "auth_user";
@@ -11,47 +11,27 @@ export type AuthUser = {
   role: "LISTENER" | "ARTIST" | "ADMIN";
 };
 
-type LoginResponse = {
-  token: string;
-  user: AuthUser;
-};
-
-async function apiPost<T>(url: string, body: Record<string, unknown>): Promise<T> {
-  let res: Response;
-  try {
-    res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-  } catch (e: any) {
-    throw new Error("Network error: " + (e?.message || "Could not connect to server"));
-  }
+async function apiPost(url: string, body: Record<string, unknown>) {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(data.error ?? data.message ?? "Request failed (" + res.status + ")");
-  }
+  if (!res.ok) throw new Error(data.error || "Request failed (" + res.status + ")");
   return data;
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
-  const data = await apiPost<any>("https://theugmusic.com/api/auth/login", { email, password });
+  const data = await apiPost("https://theugmusic.com/api/auth/login", { email, password });
+  await SecureStore.setItemAsync(TOKEN_KEY, data.token);
+  await SecureStore.setItemAsync(USER_KEY, JSON.stringify(data.user));
   setAuthToken(data.token);
   return data.user;
 }
 
-export async function register(
-  name: string,
-  email: string,
-  password: string,
-  role: "LISTENER" | "ARTIST" | "ADMIN"
-): Promise<AuthUser> {
-  await apiPost("https://theugmusic.com/api/auth/register", {
-    name,
-    email,
-    password,
-    role,
-  });
+export async function register(name: string, email: string, password: string, role: "LISTENER" | "ARTIST" = "LISTENER"): Promise<AuthUser> {
+  await apiPost("https://theugmusic.com/api/auth/register", { name, email, password, role });
   return login(email, password);
 }
 
@@ -62,19 +42,25 @@ export async function logout(): Promise<void> {
 }
 
 export async function getStoredUser(): Promise<AuthUser | null> {
-  const raw = await SecureStore.getItemAsync(USER_KEY);
-  if (!raw) return null;
   try {
+    const raw = await SecureStore.getItemAsync(USER_KEY);
+    if (!raw) return null;
     return JSON.parse(raw) as AuthUser;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 export async function getStoredToken(): Promise<string | null> {
-  const token = await SecureStore.getItemAsync(TOKEN_KEY);
-  if (token) {
-    setAuthToken(token);
-  }
-  return token;
+  try {
+    const token = await SecureStore.getItemAsync(TOKEN_KEY);
+    if (token) setAuthToken(token);
+    return token;
+  } catch { return null; }
+}
+
+export async function refreshUser(): Promise<AuthUser | null> {
+  try {
+    const user = await trpc.auth.me.query();
+    await SecureStore.setItemAsync(USER_KEY, JSON.stringify(user));
+    return user as AuthUser;
+  } catch { return null; }
 }
