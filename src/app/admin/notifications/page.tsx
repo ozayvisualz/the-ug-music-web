@@ -18,11 +18,11 @@ export default function AdminNotificationsPage() {
     if (!title || !message) { toast.error("Title and message are required"); return; }
     setSending(true);
     try {
-      const token = getAuthToken();
       const res = await fetch("/api/admin/notifications", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, body: message, audience }),
+        credentials: "include",
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");

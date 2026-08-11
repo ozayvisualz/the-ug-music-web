@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import jwt from "jsonwebtoken";
+import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader?.startsWith("Bearer ")) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-    const decoded = jwt.verify(authHeader.slice(7), process.env.AUTH_SECRET || "default-secret") as any;
-    if (decoded.role !== "ADMIN") return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const session = await auth();
+    if (!session?.user || (session.user as any).role !== "ADMIN") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { title, body, audience } = await req.json();
     if (!title || !body) return NextResponse.json({ error: "Title and body required" }, { status: 400 });
@@ -51,12 +50,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const authHeader = req.headers.get("authorization");
-    const decoded = authHeader?.startsWith("Bearer ")
-      ? jwt.verify(authHeader.slice(7), process.env.AUTH_SECRET || "default-secret") as any
-      : null;
-
-    if (decoded?.role === "ADMIN") {
+    const session = await auth();
+    if (session?.user && (session.user as any).role === "ADMIN") {
       const notifications = await db.notification.findMany({
         orderBy: { createdAt: "desc" },
         take: 50,
@@ -64,9 +59,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(notifications);
     }
 
-    if (decoded?.id) {
+    if (session?.user) {
+      const userId = (session.user as any).id;
       const notifications = await db.notification.findMany({
-        where: { OR: [{ userId: decoded.id }, { userId: null }] },
+        where: { OR: [{ userId }, { userId: null }] },
         orderBy: { createdAt: "desc" },
         take: 30,
       });
