@@ -135,7 +135,7 @@ model VerificationToken {
 model Artist {
   id             String   @id @default(cuid())
   userId         String   @unique
-  artistName     String?
+  artistName     String   @unique
   bio            String?
   genre          String?
   location       String?
