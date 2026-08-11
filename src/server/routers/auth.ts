@@ -1,9 +1,29 @@
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import { publicProcedure, protectedProcedure, router } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
 export const authRouter = router({
+  login: publicProcedure
+    .input(z.object({ email: z.string().email(), password: z.string() }))
+    .mutation(async ({ input }) => {
+      const { db } = await import("@/lib/db");
+      const user = await db.user.findUnique({ where: { email: input.email }, include: { artist: true } });
+      if (!user || !user.password) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid credentials" });
+      const valid = await bcrypt.compare(input.password, user.password);
+      if (!valid) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid credentials" });
+      const token = jwt.sign(
+        { id: user.id, email: user.email, name: user.name, role: user.role },
+        process.env.AUTH_SECRET || "default-secret",
+        { expiresIn: "30d" }
+      );
+      return {
+        token,
+        user: { id: user.id, name: user.name, email: user.email, phone: user.phone, image: user.image, role: user.role, artist: user.artist || null },
+      };
+    }),
+
   register: publicProcedure
     .input(
       z.object({

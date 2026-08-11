@@ -23,7 +23,7 @@ async function apiPost(url: string, body: Record<string, unknown>) {
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
-  const data = await apiPost("https://theugmusic.com/api/auth/login", { email, password });
+  const data = await trpc.auth.login.mutate({ email, password });
   await SecureStore.setItemAsync(TOKEN_KEY, data.token);
   await SecureStore.setItemAsync(USER_KEY, JSON.stringify(data.user));
   setAuthToken(data.token);
@@ -31,7 +31,7 @@ export async function login(email: string, password: string): Promise<AuthUser> 
 }
 
 export async function register(name: string, email: string, password: string, role: "LISTENER" | "ARTIST" = "LISTENER"): Promise<AuthUser> {
-  await apiPost("https://theugmusic.com/api/auth/register", { name, email, password, role });
+  await trpc.auth.register.mutate({ name, email, password, role });
   return login(email, password);
 }
 
