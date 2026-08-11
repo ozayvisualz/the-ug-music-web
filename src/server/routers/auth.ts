@@ -6,8 +6,8 @@ import { TRPCError } from "@trpc/server";
 
 export const authRouter = router({
   login: publicProcedure
-    .input(z.object({ email: z.string().email(), password: z.string() }))
-    .mutation(async ({ input }) => {
+    .input(z.object({ email: z.string(), password: z.string() }))
+    .query(async ({ input }) => {
       const { db } = await import("@/lib/db");
       const user = await db.user.findUnique({ where: { email: input.email }, include: { artist: true } });
       if (!user || !user.password) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid credentials" });

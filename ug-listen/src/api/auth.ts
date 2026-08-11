@@ -23,7 +23,7 @@ async function apiPost(url: string, body: Record<string, unknown>) {
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
-  const data = await trpc.auth.login.mutate({ email, password });
+  const data = await trpc.auth.login.query({ email, password });
   await SecureStore.setItemAsync(TOKEN_KEY, data.token);
   await SecureStore.setItemAsync(USER_KEY, JSON.stringify(data.user));
   setAuthToken(data.token);
