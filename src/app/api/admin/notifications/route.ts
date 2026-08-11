@@ -12,14 +12,9 @@ function getUserId(req: NextRequest): { id: string; role: string } | null {
     if (match) token = match[1];
   }
   if (!token) {
-    const cookie = req.headers.get("cookie") || "";
-    const match = cookie.match(/(?:^|;\s*)next-auth\.session-token=([^;]*)/);
-    if (match) {
-      const session = (req as any).cookies?.get?.("next-auth.session-token");
-      token = session?.value || "session";
-    }
+    token = req.nextUrl.searchParams.get("token");
   }
-  if (token && token !== "session") {
+  if (token) {
     try {
       return jwt.verify(token, process.env.AUTH_SECRET || "default-secret") as any;
     } catch {}

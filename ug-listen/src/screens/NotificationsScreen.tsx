@@ -12,10 +12,10 @@ export default function NotificationsScreen() {
   useEffect(() => {
     (async () => {
       const token = await getStoredToken();
+      setLoading(true);
       try {
-        const res = await fetch("https://theugmusic.com/api/admin/notifications", {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const url = token ? `https://theugmusic.com/api/admin/notifications?token=${encodeURIComponent(token)}` : "https://theugmusic.com/api/admin/notifications";
+        const res = await fetch(url);
         const data = await res.json();
         if (Array.isArray(data)) setNotifications(data);
       } catch {}
