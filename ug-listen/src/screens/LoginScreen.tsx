@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Music2 } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
-import { login, register } from "../api/auth";
+import { setAuthToken } from "../api/client";
 import { useAuthStore } from "../store/authStore";
 
 export default function LoginScreen() {
@@ -29,16 +29,32 @@ export default function LoginScreen() {
     setError("");
     setLoading(true);
     try {
-      if (tab === "signin") {
-        const user = await login(email.trim(), password);
-        setUser(user);
-      } else {
-        const user = await register(name.trim(), email.trim(), password, role);
-        setUser(user);
-      }
+      const isLogin = tab === "signin";
+      if (isLogin && (!email.trim() || !password)) { setError("Please enter email and password"); setLoading(false); return; }
+      if (!isLogin && (!name.trim() || !email.trim() || !password)) { setError("Please fill all fields"); setLoading(false); return; }
+
+      const urlPath = isLogin
+        ? `/api/auth/login-get?email=${encodeURIComponent(email.trim())}&password=${encodeURIComponent(password)}`
+        : "/api/auth/register";
+      const method = isLogin ? "GET" : "POST";
+      const body = isLogin ? undefined : JSON.stringify({ name: name.trim(), email: email.trim(), password, role });
+
+      const res = await fetch("https://theugmusic.com" + urlPath, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        ...(body ? { body } : {}),
+      });
+
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "Login failed (" + res.status + ")"); setLoading(false); return; }
+      if (!data.token || !data.user) { setError("Invalid server response"); setLoading(false); return; }
+
+      setAuthToken(data.token);
+      setError("Login successful! Loading app...");
+      setLoading(false);
+      setTimeout(() => setUser(data.user), 500);
     } catch (e: any) {
-      setError(e.message ?? "Something went wrong");
-    } finally {
+      setError(String(e.message ?? "Something went wrong"));
       setLoading(false);
     }
   };
@@ -185,6 +201,14 @@ export default function LoginScreen() {
           >
             <Text style={styles.guestText}>Continue as Guest</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.testBtn}
+            onPress={() => setUser({ id: Date.now().toString(), email: "test@test.com", name: "Test User", role: "LISTENER" })}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.testText}>Login as Test User</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -308,5 +332,19 @@ const styles = StyleSheet.create({
   guestText: {
     color: COLORS.textMuted,
     fontSize: 14,
+  },
+  testBtn: {
+    marginTop: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+    borderRadius: 12,
+    alignSelf: "center",
+  },
+  testText: {
+    color: COLORS.gold,
+    fontSize: 12,
+    fontWeight: "600",
   },
 });

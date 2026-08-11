@@ -17,25 +17,25 @@ type LoginResponse = {
 };
 
 async function apiPost<T>(url: string, body: Record<string, unknown>): Promise<T> {
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error ?? err.message ?? "Request failed");
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (e: any) {
+    throw new Error("Network error: " + (e?.message || "Could not connect to server"));
   }
-  return res.json();
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error ?? data.message ?? "Request failed (" + res.status + ")");
+  }
+  return data;
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
-  const data = await apiPost<LoginResponse>("https://theugmusic.com/api/auth/login", {
-    email,
-    password,
-  });
-  await SecureStore.setItemAsync(TOKEN_KEY, data.token);
-  await SecureStore.setItemAsync(USER_KEY, JSON.stringify(data.user));
+  const data = await apiPost<any>("https://theugmusic.com/api/auth/login", { email, password });
   setAuthToken(data.token);
   return data.user;
 }

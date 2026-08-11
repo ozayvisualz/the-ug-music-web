@@ -16,9 +16,6 @@ import MadeInUgandaScreen from "../screens/MadeInUgandaScreen";
 import RadioScreen from "../screens/RadioScreen";
 import PremiumScreen from "../screens/PremiumScreen";
 import SupportScreen from "../screens/SupportScreen";
-import MiniPlayer from "../components/MiniPlayer";
-import FullPlayer from "../components/FullPlayer";
-import { useState } from "react";
 
 const Tab = createBottomTabNavigator();
 
@@ -74,8 +71,6 @@ function ProfileStack() {
 }
 
 export default function RootNavigator() {
-  const [expanded, setExpanded] = useState(false);
-
   return (
     <View style={styles.container}>
       <NavigationContainer>
@@ -104,8 +99,6 @@ export default function RootNavigator() {
           <Tab.Screen name="Profile" component={ProfileStack} />
         </Tab.Navigator>
       </NavigationContainer>
-      <MiniPlayer onExpand={() => setExpanded(true)} />
-      {expanded && <FullPlayer onCollapse={() => setExpanded(false)} />}
     </View>
   );
 }
