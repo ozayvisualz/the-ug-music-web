@@ -194,35 +194,25 @@ export default function HomeScreen() {
   const heroAutoAdvance = useRef(true);
 
   useEffect(() => {
-    trpc.music.getTrending
-      .query({ limit: 5 })
-      .then((data: any[]) => {
-        setHeroSongs(data);
-        setTrending(data);
+    const token = user && user.id !== "guest" ? require("../api/client").getAuthToken() : null;
+    fetch("https://theugmusic.com/api/mobile/home", {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.trending) { setHeroSongs(data.trending); setTrending(data.trending); }
+        if (data.newReleases) setNewReleases(data.newReleases);
+        if (data.continueListening) setContinueListening(Array.isArray(data.continueListening) ? data.continueListening : [data.continueListening]);
+        if (data.artists) setArtists(data.artists);
       })
-      .catch(() => {
-        setHeroSongs([]);
-        setTrending([]);
-      })
+      .catch(() => {})
       .finally(() => {
         setHeroLoading(false);
         setTrendingLoading(false);
+        setNrLoading(false);
+        setClLoading(false);
+        setArtistsLoading(false);
       });
-
-    trpc.music.getNewReleases
-      .query({ limit: 10 })
-      .then((data: any[]) => setNewReleases(data))
-      .catch(() => setNewReleases([]))
-      .finally(() => setNrLoading(false));
-
-    if (user && user.id !== "guest") {
-      setClLoading(true);
-      trpc.sync.getContinueListening
-        .query()
-        .then((data: any[]) => setContinueListening(data))
-        .catch(() => setContinueListening([]))
-        .finally(() => setClLoading(false));
-    }
   }, [user]);
 
   useEffect(() => {

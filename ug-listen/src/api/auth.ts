@@ -32,8 +32,10 @@ export async function login(email: string, password: string): Promise<AuthUser> 
   return data.user;
 }
 
-export async function register(name: string, email: string, password: string, role: "LISTENER" | "ARTIST" = "LISTENER"): Promise<AuthUser> {
-  await trpc.auth.register.mutate({ name, email, password, role });
+export async function register(name: string, email: string, password: string, role: "LISTENER" | "ARTIST" = "LISTENER", artistName?: string): Promise<AuthUser> {
+  const body: any = { name, email, password, role };
+  if (artistName) body.artistName = artistName;
+  await apiPost("https://theugmusic.com/api/auth/register", body);
   return login(email, password);
 }
 

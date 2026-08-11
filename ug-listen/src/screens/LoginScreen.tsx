@@ -11,6 +11,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"LISTENER" | "ARTIST">("LISTENER");
+  const [artistName, setArtistName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const setUser = useAuthStore((s) => s.setUser);
@@ -19,11 +20,12 @@ export default function LoginScreen() {
     setError("");
     if (tab === "signin" && (!email.trim() || !password)) { setError("Please enter email and password"); return; }
     if (tab === "register" && (!name.trim() || !email.trim() || !password)) { setError("Please fill all fields"); return; }
+    if (tab === "register" && role === "ARTIST" && !artistName.trim()) { setError("Please enter your artist name"); return; }
     setLoading(true);
     try {
       const user = tab === "signin"
         ? await login(email.trim(), password)
-        : await register(name.trim(), email.trim(), password, role);
+        : await register(name.trim(), email.trim(), password, role, artistName.trim() || undefined);
       setUser(user);
     } catch (e: any) {
       setError(e.message ?? "Login failed");
@@ -62,6 +64,9 @@ export default function LoginScreen() {
                 <Text style={[styles.rolePillText, role === "ARTIST" && styles.rolePillTextActive]}>Artist</Text>
               </TouchableOpacity>
             </View>
+          )}
+          {tab === "register" && role === "ARTIST" && (
+            <TextInput style={styles.input} placeholder="Artist / Stage Name" placeholderTextColor={COLORS.textMuted} value={artistName} onChangeText={setArtistName} autoCapitalize="words" />
           )}
           <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={loading} activeOpacity={0.8}>
             {loading ? <ActivityIndicator color={COLORS.bg} /> : <Text style={styles.submitText}>{tab === "signin" ? "Sign In" : "Create Account"}</Text>}
