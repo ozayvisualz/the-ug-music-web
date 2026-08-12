@@ -29,6 +29,14 @@ export async function POST(req: NextRequest) {
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) return respond({ error: "Invalid credentials" }, 401);
 
+    if (user.accountStatus === "banned" || user.accountStatus === "permanently_banned") {
+      return respond({ error: "Your account has been banned from The UG Music.", reason: user.banReason }, 403);
+    }
+    if (user.accountStatus === "suspended") {
+      const msg = user.banExpiresAt ? `Account suspended until ${new Date(user.banExpiresAt).toLocaleString()}` : "Account temporarily suspended";
+      return respond({ error: msg, reason: user.banReason }, 403);
+    }
+
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name, role: user.role },
       process.env.AUTH_SECRET || "default-secret",

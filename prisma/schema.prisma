@@ -70,6 +70,13 @@ model User {
   password      String?
   role          UserRole  @default(LISTENER)
   preferredMoods String? @default("[]")
+  accountStatus String    @default("active")
+  banReason     String?
+  banNotes      String?
+  bannedBy      String?
+  bannedAt      DateTime?
+  banExpiresAt  DateTime?
+  restrictionFlags String? @default("[]")
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -705,6 +712,22 @@ model AuditLog {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model ModerationLog {
+  id           String   @id @default(cuid())
+  userId       String
+  adminId      String
+  action       String
+  reason       String?
+  notes        String?
+  duration     String?
+  previousStatus String?
+  newStatus    String
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id])
+  admin        User     @relation(fields: [adminId], references: [id])
 }
 
 model Notification {

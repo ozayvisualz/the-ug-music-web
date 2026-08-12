@@ -2,7 +2,7 @@
 import { trpc } from "@/trpc/client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Trash2, Shield, UserCheck, UserX } from "lucide-react";
+import { Search, Trash2, Shield, UserCheck, UserX, Ban, Clock, RotateCcw } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/lib/client-auth";
 
@@ -23,6 +23,21 @@ export default function UsersPage() {
 
   const users = data?.users || [];
   const total = data?.total || 0;
+
+  const moderateUser = async (userId: string, action: string, duration?: string) => {
+    const reason = prompt("Reason for moderation:") || "Moderator action";
+    const token = document.cookie.match(/(?:^|;\s*)auth-token=([^;]*)/)?.[1] || "";
+    try {
+      const res = await fetch("/api/admin/moderation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action, userId, reason, duration }),
+      });
+      const data = await res.json();
+      if (res.ok) { toast.success(`User ${action}ed`); refetch(); }
+      else toast.error(data.error || "Failed");
+    } catch { toast.error("Network error"); }
+  };
 
   return (
     <div className="p-6 space-y-4">
@@ -52,12 +67,16 @@ export default function UsersPage() {
             <tr className="border-b border-zinc-800/60">
               <th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">User</th>
               <th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">Role</th>
+              <th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">Status</th>
               <th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase hidden md:table-cell">Joined</th>
               <th className="text-right p-4 text-xs font-medium text-zinc-500 uppercase">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {users.map((user: any) => (
+            {users.map((user: any) => {
+              const statusColors: any = { active: "bg-emerald-500/20 text-emerald-400", suspended: "bg-yellow-500/20 text-yellow-500", restricted: "bg-orange-500/20 text-orange-400", banned: "bg-red-500/20 text-red-400", permanently_banned: "bg-red-800/20 text-red-800", deleted: "bg-zinc-600/20 text-zinc-600" };
+              const status = user.accountStatus || "active";
+              return (
               <tr key={user.id} className="border-b border-zinc-800/30 hover:bg-zinc-800/20 transition">
                 <td className="p-4">
                   <div className="flex items-center gap-3">
@@ -71,23 +90,25 @@ export default function UsersPage() {
                 <td className="p-4">
                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${user.role === "ADMIN" ? "bg-purple-500/20 text-purple-400" : user.role === "ARTIST" ? "bg-yellow-500/20 text-yellow-500" : "bg-zinc-500/20 text-zinc-400"}`}>{user.role}</span>
                 </td>
+                <td className="p-4">
+                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${statusColors[status] || ""}`}>{status.replace("_", " ")}</span>
+                  {user.banReason && <p className="text-[10px] text-zinc-600 mt-0.5">{user.banReason}</p>}
+                </td>
                 <td className="p-4 text-sm text-zinc-400 hidden md:table-cell">{new Date(user.createdAt).toLocaleDateString()}</td>
                 <td className="p-4">
-                  <div className="flex items-center justify-end gap-2">
+                  <div className="flex items-center justify-end gap-1">
                     {user.role !== "ADMIN" && (
-                      <button onClick={() => promoteMut.mutate({ id: user.id, role: "ADMIN" })} className="p-1.5 rounded-lg hover:bg-purple-500/20 text-zinc-400 hover:text-purple-400 transition" title="Promote"><Shield className="w-4 h-4" /></button>
+                      <><button onClick={() => moderateUser(user.id, "suspend", "24")} className="p-1.5 rounded-lg hover:bg-yellow-500/20 text-zinc-400 hover:text-yellow-500 transition" title="Suspend 24h"><Clock className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => moderateUser(user.id, "ban")} className="p-1.5 rounded-lg hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition" title="Ban"><Ban className="w-3.5 h-3.5" /></button>
+                      {status !== "active" && <button onClick={() => moderateUser(user.id, "restore")} className="p-1.5 rounded-lg hover:bg-emerald-500/20 text-zinc-400 hover:text-emerald-400 transition" title="Restore"><RotateCcw className="w-3.5 h-3.5" /></button>}
+                      {user.role !== "ARTIST" && <button onClick={() => promoteMut.mutate({ id: user.id, role: "ARTIST" })} className="p-1.5 rounded-lg hover:bg-yellow-500/20 text-zinc-400 hover:text-yellow-500 transition" title="Make Artist"><UserCheck className="w-3.5 h-3.5" /></button>}
+                      <button onClick={() => { if (confirm("Delete this user?")) deleteMut.mutate(user.id); }} className="p-1.5 rounded-lg hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button></>
                     )}
-                    {user.role !== "ARTIST" && (
-                      <button onClick={() => promoteMut.mutate({ id: user.id, role: "ARTIST" })} className="p-1.5 rounded-lg hover:bg-yellow-500/20 text-zinc-400 hover:text-yellow-500 transition" title="Make Artist"><UserCheck className="w-4 h-4" /></button>
-                    )}
-                    {user.role !== "LISTENER" && (
-                      <button onClick={() => promoteMut.mutate({ id: user.id, role: "LISTENER" })} className="p-1.5 rounded-lg hover:bg-zinc-500/20 text-zinc-400 hover:text-zinc-300 transition" title="Demote"><UserX className="w-4 h-4" /></button>
-                    )}
-                    <button onClick={() => { if (confirm("Delete this user?")) deleteMut.mutate(user.id); }} className="p-1.5 rounded-lg hover:bg-red-500/20 text-zinc-400 hover:text-red-400 transition" title="Delete"><Trash2 className="w-4 h-4" /></button>
                   </div>
                 </td>
               </tr>
-            ))}
+              );
+            })}
             {users.length === 0 && (
               <tr><td colSpan={4} className="p-12 text-center text-zinc-600 text-sm">No users found</td></tr>
             )}
