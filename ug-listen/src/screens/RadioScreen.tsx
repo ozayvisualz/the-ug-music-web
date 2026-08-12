@@ -18,7 +18,9 @@ import { useTheme } from "../theme/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SW = SCREEN_WIDTH;
-const STATION_SIZE = Math.min(SW * 0.22, 96);
+const H_PAD = 16;
+const GAP = 10;
+const CARD_W = (SW - H_PAD * 2 - GAP * 3) / 4;
 
 const GENRE_STATIONS = [
   { id: "afrobeats", name: "Afrobeats", emoji: "\uD83C\uDFB5" },
@@ -176,6 +178,8 @@ export default function RadioScreen() {
                 renderItem={renderGenreStation}
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                snapToInterval={CARD_W + GAP}
+                decelerationRate="fast"
                 contentContainerStyle={styles.stationsList}
               />
             </View>
@@ -257,12 +261,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   stationsList: {
-    paddingRight: Math.min(SW * 0.04, 16),
-    gap: 10,
+    paddingHorizontal: H_PAD,
+    gap: GAP,
   },
   stationCard: {
-    width: STATION_SIZE,
-    height: STATION_SIZE,
+    width: CARD_W,
+    height: CARD_W,
     backgroundColor: COLORS.surface,
     borderRadius: 14,
     alignItems: "center",
@@ -281,10 +285,10 @@ const styles = StyleSheet.create({
   moodGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: GAP,
   },
   moodCard: {
-    width: (SW - 2 * Math.min(SW * 0.04, 16) - 8) / 2,
+    width: CARD_W,
     backgroundColor: COLORS.surface,
     borderRadius: 12,
     padding: 12,

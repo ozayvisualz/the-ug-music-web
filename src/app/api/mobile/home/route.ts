@@ -13,6 +13,20 @@ function getUser(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const user = getUser(req);
+    const userId = user?.id;
+
+    let preferredMoods: string[] = [];
+    if (userId) {
+      const u = await db.user.findUnique({ where: { id: userId }, select: { preferredMoods: true } });
+      if (u?.preferredMoods) {
+        try { preferredMoods = JSON.parse(u.preferredMoods); } catch {}
+      }
+    }
+
+    const newReleasesWhere: any = { approved: true, published: true };
+    if (preferredMoods.length > 0) {
+      newReleasesWhere.OR = preferredMoods.map((m) => ({ moods: { contains: m } }));
+    }
 
     const [trending, newReleases, artists] = await Promise.all([
       db.song.findMany({
@@ -21,7 +35,7 @@ export async function GET(req: NextRequest) {
         orderBy: { playCount: "desc" }, take: 10,
       }),
       db.song.findMany({
-        where: { approved: true, published: true },
+        where: newReleasesWhere,
         include: { artist: { select: { artistName: true, user: { select: { name: true, image: true } } } }, album: { select: { id: true, title: true, coverUrl: true } } },
         orderBy: { createdAt: "desc" }, take: 10,
       }),
@@ -41,7 +55,7 @@ export async function GET(req: NextRequest) {
       continueListening = session || null;
     }
 
-    const response = NextResponse.json({ trending, newReleases, artists, continueListening });
+    const response = NextResponse.json({ trending, newReleases, artists, continueListening, moods: preferredMoods });
     response.headers.set("Access-Control-Allow-Origin", "*");
     return response;
   } catch (e: any) {

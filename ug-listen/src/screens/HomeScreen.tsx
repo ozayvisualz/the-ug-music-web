@@ -45,8 +45,9 @@ import { useTheme } from "../theme/ThemeContext";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SW = SCREEN_WIDTH;
 const HERO_WIDTH = Math.min(SW * 0.85, SCREEN_WIDTH - 32);
-const TREND_WIDTH = Math.min(SW * 0.35, 150);
-const TREND_ART = TREND_WIDTH - 16;
+const H_PAD = 16;
+const GAP = 10;
+const CARD_W = (SW - H_PAD * 2 - GAP * 3) / 4;
 
 function getGreeting(): string {
   const h = new Date().getHours();
@@ -318,7 +319,7 @@ export default function HomeScreen() {
         {/* ── Hero Carousel ── */}
         <View style={styles.heroSection}>
           {heroLoading ? (
-            <ShimmerBlock width={HERO_WIDTH} height={200} borderRadius={RADIUS.lg} />
+            <ShimmerBlock width={HERO_WIDTH} height={180} borderRadius={RADIUS.lg} />
           ) : heroSongs.length > 0 ? (
             <>
               <FlatList
@@ -357,6 +358,8 @@ export default function HomeScreen() {
             keyExtractor={(_, i) => `mix-${i}`}
             horizontal
             showsHorizontalScrollIndicator={false}
+            snapToInterval={CARD_W + GAP}
+            decelerationRate="fast"
             contentContainerStyle={styles.mixList}
             renderItem={({ item }) => (
               <TouchableOpacity
@@ -379,9 +382,9 @@ export default function HomeScreen() {
             <SectionHeader title="Continue Listening" />
             {clLoading ? (
               <View style={styles.skeletonRow}>
-                <ShimmerBlock width={Math.min(SW * 0.4, 160)} height={Math.min(SW * 0.25, 100)} />
+                <ShimmerBlock width={CARD_W} height={Math.min(SW * 0.25, 100)} />
                 <View style={{ width: 10 }} />
-                <ShimmerBlock width={Math.min(SW * 0.4, 160)} height={Math.min(SW * 0.25, 100)} />
+                <ShimmerBlock width={CARD_W} height={Math.min(SW * 0.25, 100)} />
               </View>
             ) : continueListening.length > 0 ? (
               <FlatList
@@ -389,6 +392,8 @@ export default function HomeScreen() {
                 keyExtractor={(item: any) => item.id}
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                snapToInterval={CARD_W + GAP}
+                decelerationRate="fast"
                 contentContainerStyle={styles.horizontalList}
                 renderItem={({ item }) => {
                   const coverUrl = getCoverUrl(item);
@@ -432,11 +437,11 @@ export default function HomeScreen() {
           />
           {trendingLoading ? (
             <View style={styles.skeletonRow}>
-              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
+              <ShimmerBlock width={CARD_W} height={Math.min(SW * 0.45, 180)} />
               <View style={{ width: 10 }} />
-              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
+              <ShimmerBlock width={CARD_W} height={Math.min(SW * 0.45, 180)} />
               <View style={{ width: 10 }} />
-              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
+              <ShimmerBlock width={CARD_W} height={Math.min(SW * 0.45, 180)} />
             </View>
           ) : trending.length > 0 ? (
             <FlatList
@@ -444,6 +449,8 @@ export default function HomeScreen() {
               keyExtractor={(item: any) => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
+              snapToInterval={CARD_W + GAP}
+              decelerationRate="fast"
               contentContainerStyle={styles.horizontalList}
               renderItem={({ item }) => {
                 const coverUrl = getCoverUrl(item);
@@ -495,11 +502,11 @@ export default function HomeScreen() {
           <SectionHeader title="New Releases" />
           {nrLoading ? (
             <View style={styles.skeletonRow}>
-              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
+              <ShimmerBlock width={CARD_W} height={Math.min(SW * 0.45, 180)} />
               <View style={{ width: 10 }} />
-              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
+              <ShimmerBlock width={CARD_W} height={Math.min(SW * 0.45, 180)} />
               <View style={{ width: 10 }} />
-              <ShimmerBlock width={TREND_WIDTH} height={Math.min(SW * 0.45, 180)} />
+              <ShimmerBlock width={CARD_W} height={Math.min(SW * 0.45, 180)} />
             </View>
           ) : newReleases.length > 0 ? (
             <FlatList
@@ -507,6 +514,8 @@ export default function HomeScreen() {
               keyExtractor={(item: any) => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
+              snapToInterval={CARD_W + GAP}
+              decelerationRate="fast"
               contentContainerStyle={styles.horizontalList}
               renderItem={({ item }) => {
                 const coverUrl = getCoverUrl(item);
@@ -582,7 +591,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: Math.min(SW * 0.04, 16),
+    paddingHorizontal: 0,
     paddingTop: 10,
     paddingBottom: 8,
     backgroundColor: "rgba(9, 9, 11, 0.95)",
@@ -636,8 +645,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: Math.min(SW * 0.04, 16),
-    paddingTop: SPACING.sm,
+    paddingHorizontal: 0,
+    paddingTop: 0,
   },
 
   // ── Section Header ──
@@ -645,8 +654,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: SPACING.sm,
-    marginTop: SPACING.xs,
+    marginBottom: 6,
+    marginTop: 2,
+    paddingHorizontal: 8,
   },
   sectionHeaderLeft: {
     flexDirection: "row",
@@ -673,12 +683,12 @@ const styles = StyleSheet.create({
 
   // ── Section ──
   section: {
-    marginBottom: SPACING.xl,
+    marginBottom: 10,
   },
 
   // ── Hero Carousel ──
   heroSection: {
-    marginBottom: SPACING.lg,
+    marginBottom: 10,
   },
   heroList: {
     paddingRight: SPACING.lg,
@@ -686,7 +696,7 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     width: HERO_WIDTH,
-    height: 200,
+    height: 180,
     borderRadius: RADIUS.lg,
     overflow: "hidden",
     backgroundColor: COLORS.surface,
@@ -772,12 +782,12 @@ const styles = StyleSheet.create({
 
   // ── Made For You ──
   mixList: {
-    paddingRight: SPACING.lg,
-    gap: SPACING.sm,
+    paddingHorizontal: H_PAD,
+    gap: GAP,
   },
   mixCard: {
-    width: Math.min(SW * 0.28, 110),
-    height: Math.min(SW * 0.28, 110),
+    width: CARD_W,
+    height: CARD_W,
     borderRadius: RADIUS.lg,
     alignItems: "center",
     justifyContent: "center",
@@ -797,16 +807,15 @@ const styles = StyleSheet.create({
 
   // ── Continue Listening ──
   continueCard: {
-    width: Math.min(SW * 0.4, 160),
+    width: CARD_W,
     height: Math.min(SW * 0.25, 100),
     borderRadius: RADIUS.md,
     backgroundColor: COLORS.surface,
     overflow: "hidden",
-    marginRight: SPACING.md,
   },
   continueArt: {
-    width: Math.min(SW * 0.4, 160),
-    height: Math.min(SW * 0.16, 66),
+    width: CARD_W,
+    height: CARD_W * 1.1,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: COLORS.surfaceHover,
@@ -845,16 +854,15 @@ const styles = StyleSheet.create({
 
   // ── Trending Now ──
   trendingCard: {
-    width: TREND_WIDTH,
+    width: CARD_W,
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.md,
     padding: SPACING.xs,
-    marginRight: SPACING.md,
     position: "relative",
   },
   trendingArt: {
-    width: TREND_ART,
-    height: Math.min(SW * 0.3, 120),
+    width: CARD_W,
+    height: CARD_W,
     borderRadius: RADIUS.sm,
     backgroundColor: COLORS.surfaceHover,
     alignItems: "center",
@@ -871,11 +879,13 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 12,
     fontWeight: "600",
+    paddingRight: 34,
   },
   trendingArtist: {
     color: COLORS.textMuted,
     fontSize: 10,
     marginBottom: 3,
+    paddingRight: 34,
   },
   playCountRow: {
     flexDirection: "row",
@@ -891,28 +901,34 @@ const styles = StyleSheet.create({
   },
   trendingPlayBtn: {
     position: "absolute",
-    bottom: SPACING.xs,
-    right: SPACING.xs,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    bottom: 4,
+    right: 4,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
-    ...SHADOWS.glow,
+    shadowColor: COLORS.gold,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+  trendingPlayIcon: {
+    marginLeft: 1,
   },
 
   // ── New Releases ──
   releaseCard: {
-    width: TREND_WIDTH,
+    width: CARD_W,
     backgroundColor: COLORS.surface,
     borderRadius: RADIUS.md,
     padding: SPACING.xs,
-    marginRight: SPACING.md,
   },
   releaseArt: {
-    width: TREND_ART,
-    height: Math.min(SW * 0.3, 120),
+    width: CARD_W,
+    height: CARD_W,
     borderRadius: RADIUS.sm,
     backgroundColor: COLORS.surfaceHover,
     alignItems: "center",
@@ -945,20 +961,22 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 12,
     fontWeight: "600",
+    paddingRight: 34,
   },
   releaseArtist: {
     color: COLORS.textMuted,
     fontSize: 10,
+    paddingRight: 34,
   },
 
   // ── Made in Uganda ──
   ugandaGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: SPACING.sm,
+    gap: GAP,
   },
   ugandaCard: {
-    width: (SCREEN_WIDTH - 32 - SPACING.sm) / 2,
+    width: CARD_W,
     height: 76,
     borderRadius: RADIUS.md,
     backgroundColor: COLORS.surface,
@@ -990,7 +1008,8 @@ const styles = StyleSheet.create({
 
   // ── Misc ──
   horizontalList: {
-    paddingRight: SPACING.lg,
+    paddingHorizontal: H_PAD,
+    gap: GAP,
   },
   bottomSpacer: {
     height: 70,

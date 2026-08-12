@@ -19,7 +19,9 @@ import { useTheme } from "../theme/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SW = SCREEN_WIDTH;
-const SONGCARD_W = Math.min(SW * 0.34, 140);
+const H_PAD = 16;
+const GAP = 10;
+const CARD_W = (SW - H_PAD * 2 - GAP * 3) / 4;
 
 type Song = { id: string; title: string; artist: string; duration: number; url: string; coverUrl?: string };
 
@@ -203,6 +205,8 @@ export default function DiscoverScreen() {
               renderItem={renderSongItem}
               horizontal
               showsHorizontalScrollIndicator={false}
+              snapToInterval={CARD_W + GAP}
+              decelerationRate="fast"
               contentContainerStyle={styles.horizontalList}
               scrollEnabled={false}
             />
@@ -222,6 +226,8 @@ export default function DiscoverScreen() {
               renderItem={renderSongItem}
               horizontal
               showsHorizontalScrollIndicator={false}
+              snapToInterval={CARD_W + GAP}
+              decelerationRate="fast"
               contentContainerStyle={styles.horizontalList}
               scrollEnabled={false}
             />
@@ -300,10 +306,10 @@ const styles = StyleSheet.create({
   grid2x3: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: GAP,
   },
   genreCard: {
-    width: (SCREEN_WIDTH - 32 - 8) / 2,
+    width: CARD_W,
     backgroundColor: COLORS.surface,
     borderRadius: 14,
     padding: 12,
@@ -322,10 +328,10 @@ const styles = StyleSheet.create({
   grid2x2: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    gap: GAP,
   },
   browseCard: {
-    width: (SCREEN_WIDTH - 32 - 8) / 2,
+    width: CARD_W,
     backgroundColor: COLORS.surface,
     borderRadius: 14,
     padding: 12,
@@ -343,8 +349,8 @@ const styles = StyleSheet.create({
   },
   horizontalList: {
     flexDirection: "row",
-    gap: 10,
-    paddingRight: Math.min(SW * 0.04, 16),
+    gap: GAP,
+    paddingHorizontal: H_PAD,
   },
   loader: {
     marginVertical: 16,
@@ -355,15 +361,15 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   songCard: {
-    width: SONGCARD_W,
+    width: CARD_W,
     backgroundColor: COLORS.surface,
     borderRadius: 10,
     padding: 8,
     position: "relative",
   },
   songArtwork: {
-    width: Math.min(SW * 0.1, 40),
-    height: Math.min(SW * 0.1, 40),
+    width: CARD_W,
+    height: CARD_W,
     borderRadius: 6,
     backgroundColor: COLORS.gold,
     alignItems: "center",
@@ -375,24 +381,31 @@ const styles = StyleSheet.create({
     fontSize: SW < 360 ? 11 : 12,
     fontWeight: "600",
     marginBottom: 1,
+    paddingRight: 32,
     flexShrink: 1,
   },
   songArtist: {
     color: COLORS.textMuted,
     fontSize: SW < 360 ? 9 : 10,
     marginBottom: 4,
+    paddingRight: 32,
     flexShrink: 1,
   },
   songPlayBtn: {
     position: "absolute",
-    bottom: 8,
-    right: 8,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    bottom: 4,
+    right: 4,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: COLORS.gold,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 6,
   },
   bottomSpacer: {
     height: 70,
