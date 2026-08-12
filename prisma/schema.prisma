@@ -103,6 +103,8 @@ model User {
   notifications    Notification[]
   referredIn      Referral[]      @relation("ReferredUser")
   auditLogs       AuditLog[]
+  moderationLogs  ModerationLog[]  @relation("ModerationUser")
+  adminActions    ModerationLog[]  @relation("ModerationAdmin")
 }
 
 model Account {
@@ -726,8 +728,8 @@ model ModerationLog {
   newStatus    String
   createdAt    DateTime @default(now())
 
-  user         User     @relation(fields: [userId], references: [id])
-  admin        User     @relation(fields: [adminId], references: [id])
+  user         User     @relation("ModerationUser", fields: [userId], references: [id])
+  admin        User     @relation("ModerationAdmin", fields: [adminId], references: [id])
 }
 
 model Notification {
