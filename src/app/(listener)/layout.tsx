@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { Music2, Search, Home, Compass } from "lucide-react";
 import { WebPlayer } from "@/components/layout/player";
+import { AppFooter } from "@/components/layout/footer";
 
 export default function ListenerLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="flex flex-1">
+    <div className="h-screen flex flex-col">
+      <div className="flex flex-1 overflow-hidden">
         <aside className="hidden lg:flex flex-col w-64 h-full bg-zinc-900/80 border-r border-zinc-800">
           <div className="p-4">
             <Link href="/" className="flex items-center gap-2">
@@ -25,7 +26,7 @@ export default function ListenerLayout({ children }: { children: React.ReactNode
             ))}
           </nav>
         </aside>
-        <main className="flex-1 pb-24">{children}</main>
+        <main className="flex-1 overflow-y-auto pb-24">{children}<AppFooter /></main>
       </div>
       <WebPlayer />
     </div>

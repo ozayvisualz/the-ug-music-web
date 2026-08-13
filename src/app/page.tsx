@@ -6,6 +6,7 @@ import { WebPlayer } from "@/components/layout/player";
 import { SongCard } from "@/components/ui/song-card";
 import { ArtistCard } from "@/components/ui/artist-card";
 import { AlbumCard } from "@/components/ui/album-card";
+import { AppFooter } from "@/components/layout/footer";
 import { TrendingUp, Sparkles, Flame, Music, Mic2, Disc3, Radio } from "lucide-react";
 import Link from "next/link";
 
@@ -16,10 +17,10 @@ export default function HomePage() {
   const { data: albums } = trpc.music.getAlbums.useQuery({ limit: 10 });
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="flex flex-1">
+    <div className="h-screen flex flex-col">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 pb-24">
+        <main className="flex-1 overflow-y-auto pb-24">
           <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
             {/* Hero */}
             <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-yellow-500/20 via-yellow-500/5 to-zinc-900 p-6 md:p-10">
@@ -81,6 +82,7 @@ export default function HomePage() {
               </div>
             </section>
           </div>
+          <AppFooter />
         </main>
       </div>
       <WebPlayer />
