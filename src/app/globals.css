@@ -10,10 +10,6 @@
   --color-zinc-600: #52525b;
 }
 
-body {
-  overflow: hidden;
-}
-
 ::-webkit-scrollbar {
   width: 8px;
 }
