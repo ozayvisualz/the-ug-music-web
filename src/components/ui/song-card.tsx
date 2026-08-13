@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Play, Download, MoreVertical, DollarSign } from "lucide-react";
+import { Play, Download, MoreVertical } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
-import { formatDuration, getArtistName } from "@/lib/utils";
+import { formatDuration, formatUGX, getArtistName } from "@/lib/utils";
 
 interface SongCardProps {
   song: {
@@ -63,7 +63,7 @@ export function SongCard({ song }: SongCardProps) {
         <p className="text-xs text-zinc-500">{getArtistName(song.artist)}</p>
         {song.price && song.price > 0 && (
           <span className="inline-flex items-center gap-1 text-xs text-yellow-500 mt-0.5">
-            <DollarSign className="w-3 h-3" /> {song.price.toLocaleString()} UGX
+            {formatUGX(song.price)}
           </span>
         )}
       </div>

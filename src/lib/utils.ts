@@ -3,11 +3,7 @@ export function cn(...inputs: (string | undefined | null | false)[]): string {
 }
 
 export function formatUGX(amount: number): string {
-  return new Intl.NumberFormat("en-UG", {
-    style: "currency",
-    currency: "UGX",
-    minimumFractionDigits: 0,
-  }).format(amount);
+  return `UGX ${Math.round(amount).toLocaleString("en-UG")}`;
 }
 
 export function formatNumber(num: number): string {
