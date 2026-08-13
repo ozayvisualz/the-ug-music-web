@@ -369,10 +369,13 @@ model Transaction {
   status          TransactionStatus @default(PENDING)
   amount          Int
   reference       String            @unique
+  flutterwaveId   String?
   paymentMethod   String?
   metadata        String?
   createdAt       DateTime          @default(now())
   completedAt     DateTime?
+  verifiedAt      DateTime?
+  webhookProcessedAt DateTime?
 }
 
 model Subscription {

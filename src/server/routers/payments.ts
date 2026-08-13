@@ -54,9 +54,25 @@ export const paymentsRouter = router({
     .mutation(async ({ input, ctx }) => {
       const userId = (ctx.session!.user as any).id;
 
+      const tx = await ctx.db.transaction.findUnique({ where: { reference: input.transactionRef } });
+      if (!tx) throw new Error("Transaction not found");
+      if (tx.status === "COMPLETED") {
+        const song = await ctx.db.song.findUnique({ where: { id: input.songId } });
+        return { downloadUrl: song?.fileUrl || "" };
+      }
+
+      const { verifyTransaction } = await import("@/lib/flutterwave");
+      const verification = await verifyTransaction(input.flutterwaveRef);
+      if (verification?.status !== "success" || verification?.data?.status !== "successful") {
+        throw new Error("Payment verification failed");
+      }
+      if (verification.data.amount !== tx.amount) {
+        throw new Error("Payment amount mismatch");
+      }
+
       await ctx.db.transaction.update({
         where: { reference: input.transactionRef },
-        data: { status: "COMPLETED", completedAt: new Date() },
+        data: { status: "COMPLETED", completedAt: new Date(), verifiedAt: new Date(), flutterwaveId: input.flutterwaveRef },
       });
 
       const song = await ctx.db.song.findUnique({
@@ -188,15 +204,35 @@ export const paymentsRouter = router({
     .input(
       z.object({
         transactionRef: z.string(),
+        flutterwaveRef: z.string().optional(),
         plan: z.enum(["MONTHLY", "QUARTERLY", "ANNUAL"]),
       })
     )
     .mutation(async ({ input, ctx }) => {
       const userId = (ctx.session!.user as any).id;
 
+      const tx = await ctx.db.transaction.findUnique({ where: { reference: input.transactionRef } });
+      if (!tx) throw new Error("Transaction not found");
+
+      if (tx.status === "COMPLETED") {
+        const existing = await ctx.db.subscription.findFirst({ where: { userId, status: "COMPLETED" }, orderBy: { endDate: "desc" } });
+        return { success: true, endDate: existing?.endDate || new Date() };
+      }
+
+      if (input.flutterwaveRef) {
+        const { verifyTransaction } = await import("@/lib/flutterwave");
+        const verification = await verifyTransaction(input.flutterwaveRef);
+        if (verification?.status !== "success" || verification?.data?.status !== "successful") {
+          throw new Error("Payment verification failed");
+        }
+        if (verification.data.amount !== tx.amount) {
+          throw new Error("Payment amount mismatch");
+        }
+      }
+
       await ctx.db.transaction.update({
         where: { reference: input.transactionRef },
-        data: { status: "COMPLETED", completedAt: new Date() },
+        data: { status: "COMPLETED", completedAt: new Date(), verifiedAt: new Date() },
       });
 
       const durations: Record<string, number> = { MONTHLY: 30, QUARTERLY: 90, ANNUAL: 365 };
