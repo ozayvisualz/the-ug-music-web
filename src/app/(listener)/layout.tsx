@@ -7,7 +7,7 @@ import { WebPlayer } from "@/components/layout/player";
 export default function ListenerLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1">
         <aside className="hidden lg:flex flex-col w-64 h-full bg-zinc-900/80 border-r border-zinc-800">
           <div className="p-4">
             <Link href="/" className="flex items-center gap-2">
@@ -25,7 +25,7 @@ export default function ListenerLayout({ children }: { children: React.ReactNode
             ))}
           </nav>
         </aside>
-        <main className="flex-1 overflow-y-auto pb-24">{children}</main>
+        <main className="flex-1 pb-24">{children}</main>
       </div>
       <WebPlayer />
     </div>
