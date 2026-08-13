@@ -10,7 +10,7 @@ export default function PremiumPage() {
   const { data: plans } = trpc.payments.getSubscriptionPlans.useQuery();
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10 space-y-10">
+    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
       <div className="text-center">
         <Crown className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
         <h1 className="text-4xl font-bold">TheUgMusic Premium</h1>

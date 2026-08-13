@@ -23,7 +23,7 @@ export default function DiscoverPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 py-4 space-y-5">
       <div>
         <h1 className="text-3xl font-bold">Discover</h1>
         <p className="text-zinc-500 mt-1">Explore Uganda's best music</p>

@@ -21,7 +21,7 @@ export default function RadioPage() {
   const { data: songs } = trpc.music.getSongs.useQuery({ limit: 5 });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 py-4 space-y-5">
       <div><h1 className="text-3xl font-bold">Radio</h1><p className="text-zinc-500 mt-1">Genre and mood-based stations</p></div>
 
       <section>
