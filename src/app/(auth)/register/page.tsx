@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [form, setForm] = useState({
     name: "", email: "", password: "", phone: "", role: "LISTENER" as "LISTENER" | "ARTIST",
     artistName: "", legalName: "", country: "", city: "", dateOfBirth: "", genre: "", bio: "", socialLinks: "",
+    musicLinks: "", recordLabel: "", managementContact: "", accepted: false,
   });
   const [error, setError] = useState("");
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function RegisterPage() {
               phone: form.phone, country: form.country, city: form.city,
               dateOfBirth: form.dateOfBirth, bio: form.bio, genre: form.genre,
               socialLinks: form.socialLinks.split(",").map((s) => s.trim()).filter(Boolean),
+              musicLinks: form.musicLinks, recordLabel: form.recordLabel, managementContact: form.managementContact,
             }),
           });
           router.push("/artist/pending");
@@ -47,6 +49,7 @@ export default function RegisterPage() {
       if (!form.artistName.trim()) { setError("Artist / Stage name is required"); return; }
       if (!form.country.trim()) { setError("Country is required"); return; }
       if (!form.genre.trim()) { setError("Genre is required"); return; }
+      if (!form.accepted) { setError("You must accept the artist terms"); return; }
     }
     registerMut.mutate({
       name: form.name, email: form.email, password: form.password,
@@ -181,6 +184,28 @@ export default function RegisterPage() {
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-500 text-sm resize-none"
                   placeholder="Tell us about your music journey..." />
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm text-zinc-400 mb-1.5">Record Label (optional)</label>
+                  <input type="text" value={form.recordLabel} onChange={(e) => set("recordLabel", e.target.value)}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-500 text-sm" />
+                </div>
+                <div>
+                  <label className="block text-sm text-zinc-400 mb-1.5">Management Contact (optional)</label>
+                  <input type="text" value={form.managementContact} onChange={(e) => set("managementContact", e.target.value)}
+                    className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-500 text-sm" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm text-zinc-400 mb-1.5">Existing Music Links (optional)</label>
+                <input type="text" value={form.musicLinks} onChange={(e) => set("musicLinks", e.target.value)}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-500 text-sm"
+                  placeholder="Link to existing music" />
+              </div>
+              <label className="flex items-start gap-2 text-sm text-zinc-400 cursor-pointer">
+                <input type="checkbox" checked={form.accepted} onChange={(e) => setForm((f) => ({ ...f, accepted: e.target.checked }))} className="mt-0.5 accent-yellow-500" />
+                <span>I confirm that all information provided is accurate and I accept the Artist Terms of Service.</span>
+              </label>
             </>
           )}
 

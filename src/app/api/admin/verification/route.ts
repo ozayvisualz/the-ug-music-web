@@ -27,6 +27,17 @@ export async function GET(req: NextRequest) {
 
   const status = req.nextUrl.searchParams.get("status") || "pending";
   const search = req.nextUrl.searchParams.get("search") || "";
+  const statsOnly = req.nextUrl.searchParams.get("stats") === "1";
+
+  if (statsOnly) {
+    const [pending, approved, rejected, suspended] = await Promise.all([
+      db.artist.count({ where: { verificationStatus: "pending" } }),
+      db.artist.count({ where: { verificationStatus: "approved" } }),
+      db.artist.count({ where: { verificationStatus: "rejected" } }),
+      db.artist.count({ where: { verificationStatus: "suspended" } }),
+    ]);
+    return NextResponse.json({ pending, approved, rejected, suspended });
+  }
 
   const where: any = { verificationStatus: status };
   if (search) {

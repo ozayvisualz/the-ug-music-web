@@ -8,6 +8,7 @@ export default function AdminVerificationPage() {
   const [tab, setTab] = useState("pending");
   const [search, setSearch] = useState("");
   const [artists, setArtists] = useState<any[]>([]);
+  const [stats, setStats] = useState<any>({ pending: 0, approved: 0, rejected: 0, suspended: 0 });
   const [loading, setLoading] = useState(true);
 
   const load = () => {
@@ -20,6 +21,13 @@ export default function AdminVerificationPage() {
   };
 
   useEffect(() => { load(); }, [tab, search]);
+
+  useEffect(() => {
+    fetch("/api/admin/verification?stats=1")
+      .then((r) => r.json())
+      .then((d) => setStats(d))
+      .catch(() => {});
+  }, []);
 
   const act = async (action: string, artistId: string, reason?: string) => {
     try {
@@ -40,6 +48,20 @@ export default function AdminVerificationPage() {
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-2"><ShieldCheck className="w-6 h-6 text-yellow-500" /> Artist Verification</h1>
         <p className="text-sm text-zinc-500 mt-1">Review and approve artist applications</p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: "Pending", value: stats.pending, color: "text-yellow-500" },
+          { label: "Approved", value: stats.approved, color: "text-emerald-400" },
+          { label: "Rejected", value: stats.rejected, color: "text-red-400" },
+          { label: "Suspended", value: stats.suspended, color: "text-orange-400" },
+        ].map((s) => (
+          <div key={s.label} className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-4">
+            <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
+            <p className="text-xs text-zinc-500">{s.label}</p>
+          </div>
+        ))}
       </div>
 
       <div className="flex gap-2 flex-wrap">
@@ -72,11 +94,29 @@ export default function AdminVerificationPage() {
               <div className="grid grid-cols-2 gap-2 text-xs mb-3">
                 <div><span className="text-zinc-500">Genre:</span> <span className="text-zinc-300">{a.genre || "—"}</span></div>
                 <div><span className="text-zinc-500">Country:</span> <span className="text-zinc-300">{a.country || "—"}</span></div>
+                <div><span className="text-zinc-500">Phone:</span> <span className="text-zinc-300">{a.phone || "—"}</span></div>
+                <div><span className="text-zinc-500">City:</span> <span className="text-zinc-300">{a.city || "—"}</span></div>
                 <div><span className="text-zinc-500">Submitted:</span> <span className="text-zinc-300">{a.submittedAt ? new Date(a.submittedAt).toLocaleDateString() : "—"}</span></div>
                 <div><span className="text-zinc-500">Status:</span> <span className={`font-semibold capitalize ${a.verificationStatus === "approved" ? "text-emerald-400" : a.verificationStatus === "rejected" ? "text-red-400" : "text-yellow-500"}`}>{a.verificationStatus}</span></div>
+                {a.recordLabel && <div><span className="text-zinc-500">Label:</span> <span className="text-zinc-300">{a.recordLabel}</span></div>}
+                {a.managementContact && <div><span className="text-zinc-500">Management:</span> <span className="text-zinc-300">{a.managementContact}</span></div>}
               </div>
 
               {a.bio && <p className="text-xs text-zinc-400 mb-3 line-clamp-2">{a.bio}</p>}
+              {a.socialLinks && <p className="text-xs text-zinc-500 mb-2">Social: {a.socialLinks}</p>}
+              {a.musicLinks && <p className="text-xs text-zinc-500 mb-2">Music: {a.musicLinks}</p>}
+
+              {(a.idDocument || a.selfieDocument) && (
+                <div className="flex gap-2 mb-3">
+                  {a.idDocument && (
+                    <a href={a.idDocument} target="_blank" rel="noopener noreferrer" className="px-2 py-1 rounded bg-zinc-800 text-zinc-300 text-[10px] hover:bg-zinc-700 transition">View ID</a>
+                  )}
+                  {a.selfieDocument && (
+                    <a href={a.selfieDocument} target="_blank" rel="noopener noreferrer" className="px-2 py-1 rounded bg-zinc-800 text-zinc-300 text-[10px] hover:bg-zinc-700 transition">View Selfie</a>
+                  )}
+                </div>
+              )}
+
               {a.rejectionReason && <p className="text-xs text-red-400 mb-3">Reason: {a.rejectionReason}</p>}
 
               <div className="flex gap-2">
