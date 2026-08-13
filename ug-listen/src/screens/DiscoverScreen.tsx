@@ -13,9 +13,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { Music2, Search, Play } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
-import { trpc } from "../api/client";
 import { useQueueStore } from "../store/playerStore";
 import { useTheme } from "../theme/ThemeContext";
+import { getStoredToken } from "../api/auth";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SW = SCREEN_WIDTH;
@@ -23,7 +23,13 @@ const H_PAD = 16;
 const GAP = 10;
 const CARD_W = (SW - H_PAD * 2 - GAP * 3) / 4;
 
-type Song = { id: string; title: string; artist: string; duration: number; url: string; coverUrl?: string };
+type Song = { id: string; title: string; artist: any; duration: number; url: string; coverUrl?: string; fileUrl?: string; hlsUrl?: string };
+
+function getArtistName(a: any): string {
+  if (!a) return "Unknown";
+  if (typeof a === "string") return a;
+  return a.artistName || a.user?.name || "Unknown";
+}
 
 const TRENDING_SEARCHES = [
   "Eddy Kenzo", "Sheebah", "Bobi Wine", "Rema", "Vinka",
@@ -65,7 +71,7 @@ function SongCard({ song, onPlay }: { song: Song; onPlay: (song: Song) => void }
         {song.title}
       </Text>
       <Text style={styles.songArtist} numberOfLines={1}>
-        {song.artist}
+        {getArtistName(song.artist)}
       </Text>
       <TouchableOpacity
         style={styles.songPlayBtn}
@@ -89,22 +95,23 @@ export default function DiscoverScreen() {
   const [trendingLoading, setTrendingLoading] = useState(true);
 
   useEffect(() => {
-    trpc.music.getNewReleases
-      .query({ limit: 10 })
-      .then((data: Song[]) => setNewReleases(data))
-      .catch(() => setNewReleases([]))
-      .finally(() => setNrLoading(false));
-
-    trpc.music.getTrending
-      .query({ limit: 10 })
-      .then((data: Song[]) => setTrending(data))
-      .catch(() => setTrending([]))
-      .finally(() => setTrendingLoading(false));
+    (async () => {
+      const token = await getStoredToken();
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      try {
+        const res = await fetch("https://theugmusic.com/api/mobile/home", { headers });
+        const data = await res.json();
+        if (Array.isArray(data.newReleases)) setNewReleases(data.newReleases);
+        if (Array.isArray(data.trending)) setTrending(data.trending);
+      } catch {}
+      setNrLoading(false);
+      setTrendingLoading(false);
+    })();
   }, []);
 
   const handlePlaySong = useCallback(
     (song: Song) => {
-      setQueue([{ id: song.id, title: song.title, artist: song.artist, url: song.url, duration: song.duration, coverUrl: song.coverUrl }]);
+      setQueue([{ id: song.id, title: song.title, artist: getArtistName(song.artist), url: song.fileUrl || song.hlsUrl || "", duration: song.duration || 180, coverUrl: song.coverUrl, artistId: song.artist?.id }]);
     },
     [setQueue],
   );
@@ -182,6 +189,7 @@ export default function DiscoverScreen() {
                 key={item.label}
                 style={styles.browseCard}
                 activeOpacity={0.7}
+                onPress={() => navigation.navigate("CategoryPlaylist", { category: item.label })}
               >
                 <Text style={styles.browseEmoji}>{item.emoji}</Text>
                 <Text style={styles.browseLabel} numberOfLines={2}>
@@ -208,7 +216,6 @@ export default function DiscoverScreen() {
               snapToInterval={CARD_W + GAP}
               decelerationRate="fast"
               contentContainerStyle={styles.horizontalList}
-              scrollEnabled={false}
             />
           )}
         </View>
@@ -229,7 +236,6 @@ export default function DiscoverScreen() {
               snapToInterval={CARD_W + GAP}
               decelerationRate="fast"
               contentContainerStyle={styles.horizontalList}
-              scrollEnabled={false}
             />
           )}
         </View>
@@ -348,9 +354,8 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   horizontalList: {
-    flexDirection: "row",
     gap: GAP,
-    paddingHorizontal: H_PAD,
+    paddingHorizontal: 0,
   },
   loader: {
     marginVertical: 16,

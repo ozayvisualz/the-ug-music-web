@@ -146,7 +146,7 @@ export default function LibraryScreen() {
       <TouchableOpacity
         style={styles.playlistRow}
         activeOpacity={0.7}
-        onPress={() => navigation.navigate("PlaylistScreen", { playlist: item })}
+        onPress={() => navigation.navigate("Playlist", { playlist: item })}
       >
         <View style={styles.playlistIcon}>
           <ListMusic size={20} color={COLORS.bg} />

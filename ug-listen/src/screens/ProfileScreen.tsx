@@ -91,7 +91,7 @@ export default function ProfileScreen() {
       icon: <Crown size={18} color={COLORS.gold} />,
       label: "Premium Plans",
       color: COLORS.gold,
-      onPress: () => navigation.navigate("PremiumScreen"),
+      onPress: () => navigation.navigate("Premium"),
     },
     {
       icon: <Clock size={18} color={COLORS.text} />,
@@ -131,7 +131,7 @@ export default function ProfileScreen() {
     {
       icon: <HelpCircle size={18} color={COLORS.text} />,
       label: "Support",
-      onPress: () => navigation.navigate("SupportScreen"),
+      onPress: () => navigation.navigate("Support"),
     },
     {
       icon: <LogOut size={18} color={COLORS.red} />,

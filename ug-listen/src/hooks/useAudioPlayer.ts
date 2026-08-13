@@ -1,14 +1,34 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
+import { createAudioPlayer, setAudioModeAsync, AudioPlayer } from "expo-audio";
 import { useQueueStore, Track } from "../store/playerStore";
+import { getStoredToken } from "../api/auth";
+
+const STREAM_THRESHOLD = 30;
+let recordedStreams = new Set<string>();
+
+async function recordStream(songId: string, durationListened: number) {
+  if (recordedStreams.has(songId)) return;
+  recordedStreams.add(songId);
+  try {
+    const token = await getStoredToken();
+    await fetch(`https://theugmusic.com/api/trpc/streaming.trackStream?batch=1`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify({ "0": { json: { songId, durationListened } } }),
+    });
+  } catch {}
+}
 
 export function useAudioPlayer() {
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const playerRef = useRef<AudioPlayer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [playbackRate, setPlaybackRate] = useState(1);
   const [error, setError] = useState("");
+  const seekingRef = useRef(false);
   const positionInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentTrackId = useRef<string | null>(null);
 
@@ -21,13 +41,11 @@ export function useAudioPlayer() {
   const currentTrack: Track | null = currentIndex >= 0 && currentIndex < queue.length ? queue[currentIndex] : null;
 
   useEffect(() => {
-    Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: true,
-      interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-      interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-      shouldDuckAndroid: true,
-    });
+    setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: true,
+      interruptionMode: "doNotMix",
+    }).catch(() => {});
   }, []);
 
   const stopPositionTimer = useCallback(() => {
@@ -36,18 +54,25 @@ export function useAudioPlayer() {
 
   const startPositionTimer = useCallback(() => {
     stopPositionTimer();
-    positionInterval.current = setInterval(async () => {
-      if (soundRef.current) {
+    positionInterval.current = setInterval(() => {
+      const p = playerRef.current;
+      if (p) {
         try {
-          const status = await soundRef.current.getStatusAsync();
-          if (status.isLoaded) setPosition(status.positionMillis / 1000);
+          const pos = p.currentTime;
+          if (!seekingRef.current) setPosition(pos);
+          if (pos >= STREAM_THRESHOLD && currentTrackId.current) {
+            recordStream(currentTrackId.current, Math.floor(pos));
+          }
         } catch {}
       }
     }, 500);
   }, [stopPositionTimer]);
 
   useEffect(() => {
-    return () => { soundRef.current?.unloadAsync(); stopPositionTimer(); };
+    return () => {
+      playerRef.current?.remove();
+      stopPositionTimer();
+    };
   }, [stopPositionTimer]);
 
   useEffect(() => {
@@ -56,7 +81,7 @@ export function useAudioPlayer() {
     setError("");
 
     (async () => {
-      if (soundRef.current) { await soundRef.current.unloadAsync(); }
+      if (playerRef.current) playerRef.current.remove();
       stopPositionTimer();
       setIsLoaded(false);
       setIsPlaying(false);
@@ -67,54 +92,68 @@ export function useAudioPlayer() {
       if (!audioUrl) { setError("No audio URL"); return; }
 
       try {
-        const { sound, status } = await Audio.Sound.createAsync(
-          { uri: audioUrl },
-          { shouldPlay: true, progressUpdateIntervalMillis: 500 },
-          onPlaybackStatusUpdate
-        );
-        soundRef.current = sound;
-        if (status.isLoaded) {
-          setDuration((status.durationMillis || currentTrack.duration * 1000) / 1000);
-          setIsLoaded(true);
-          setIsPlaying(true);
-          startPositionTimer();
-        } else {
-          setError("Failed to load audio");
-        }
+        const player = createAudioPlayer({ uri: audioUrl });
+        playerRef.current = player;
+
+        player.addListener("playbackStatusUpdate", (status: any) => {
+          if (status.isLoaded) {
+            setIsLoaded(true);
+            setIsBuffering(false);
+            setDuration(status.duration || currentTrack.duration);
+          }
+        });
+
+        player.play();
+        setIsPlaying(true);
+        startPositionTimer();
       } catch (e: any) {
         setError(e?.message || "Audio load error");
       }
     })();
   }, [currentTrack?.id]);
 
-  const onPlaybackStatusUpdate = useCallback((status: any) => {
-    if (!status.isLoaded) return;
-    if (status.didJustFinish && status.isLoaded) next();
-  }, [next]);
-
-  const togglePlay = useCallback(async () => {
-    if (!soundRef.current) return;
+  const togglePlay = useCallback(() => {
+    const p = playerRef.current;
+    if (!p) return;
     try {
-      const status = await soundRef.current.getStatusAsync();
-      if (!status.isLoaded) return;
-      if (status.isPlaying) {
-        await soundRef.current.pauseAsync();
+      if (p.playing) {
+        p.pause();
         setIsPlaying(false);
         stopPositionTimer();
       } else {
-        await soundRef.current.playAsync();
+        p.play();
         setIsPlaying(true);
         startPositionTimer();
       }
     } catch {}
   }, [startPositionTimer, stopPositionTimer]);
 
-  const seek = useCallback(async (seconds: number) => {
-    if (!soundRef.current) return;
+  const seek = useCallback((seconds: number) => {
+    const p = playerRef.current;
+    if (!p) return;
+    const clamped = Math.max(0, Math.min(seconds, duration || seconds));
+    seekingRef.current = true;
     try {
-      await soundRef.current.setPositionAsync(seconds * 1000);
-      setPosition(seconds);
+      p.seekTo(clamped);
+      setPosition(clamped);
+    } catch {} finally {
+      seekingRef.current = false;
+    }
+  }, [duration]);
+
+  const setRate = useCallback((rate: number) => {
+    const p = playerRef.current;
+    if (!p) return;
+    try {
+      p.setPlaybackRate(rate);
+      setPlaybackRate(rate);
     } catch {}
+  }, []);
+
+  const setVolume = useCallback((volume: number) => {
+    const p = playerRef.current;
+    if (!p) return;
+    try { p.volume = volume; } catch {}
   }, []);
 
   const skipNext = useCallback(() => {
@@ -123,12 +162,17 @@ export function useAudioPlayer() {
   }, [next, stopPositionTimer]);
 
   const skipPrev = useCallback(() => {
+    if (position > 3) {
+      seek(0);
+      return;
+    }
     const t = prev();
-    if (!t) { setIsPlaying(false); stopPositionTimer(); }
-  }, [prev, stopPositionTimer]);
+    if (!t) seek(0);
+  }, [prev, seek, position]);
 
-  const stopPlayback = useCallback(async () => {
-    if (soundRef.current) { await soundRef.current.unloadAsync(); }
+  const stopPlayback = useCallback(() => {
+    playerRef.current?.remove();
+    playerRef.current = null;
     stopPositionTimer();
     setIsPlaying(false);
     setIsLoaded(false);
@@ -142,10 +186,14 @@ export function useAudioPlayer() {
     position,
     duration,
     isLoaded,
+    isBuffering,
+    playbackRate,
     togglePlay,
     seek,
     skipNext,
     skipPrev,
     stopPlayback,
+    setRate,
+    setVolume,
   };
 }

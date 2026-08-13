@@ -44,7 +44,7 @@ import { useTheme } from "../theme/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SW = SCREEN_WIDTH;
-const HERO_WIDTH = Math.min(SW * 0.85, SCREEN_WIDTH - 32);
+const HERO_WIDTH = SW - 24;
 const H_PAD = 16;
 const GAP = 10;
 const CARD_W = (SW - H_PAD * 2 - GAP * 3) / 4;
@@ -257,7 +257,7 @@ export default function HomeScreen() {
   );
 
   const onHeroScroll = useCallback((e: any) => {
-    const idx = Math.round(e.nativeEvent.contentOffset.x / (HERO_WIDTH + 12));
+    const idx = Math.round(e.nativeEvent.contentOffset.x / SW);
     if (idx >= 0 && idx < heroSongs.length) setHeroIndex(idx);
   }, [heroSongs.length]);
 
@@ -328,7 +328,6 @@ export default function HomeScreen() {
                 keyExtractor={(item: any) => item.id}
                 horizontal
                 pagingEnabled
-                snapToInterval={HERO_WIDTH + 12}
                 decelerationRate="fast"
                 showsHorizontalScrollIndicator={false}
                 onScroll={onHeroScroll}
@@ -433,7 +432,7 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <SectionHeader
             title="Trending Now"
-            onSeeAll={() => navigation.navigate("Trending")}
+            onSeeAll={() => navigation.navigate("CategoryPlaylist", { category: "Trending Now" })}
           />
           {trendingLoading ? (
             <View style={styles.skeletonRow}>
@@ -691,12 +690,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   heroList: {
-    paddingRight: SPACING.lg,
-    gap: SPACING.md,
+    paddingHorizontal: 0,
+    gap: 0,
   },
   heroCard: {
     width: HERO_WIDTH,
     height: 180,
+    marginHorizontal: 12,
     borderRadius: RADIUS.lg,
     overflow: "hidden",
     backgroundColor: COLORS.surface,

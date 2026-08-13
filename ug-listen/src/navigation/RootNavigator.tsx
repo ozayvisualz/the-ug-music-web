@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
+import { navigationRef } from "./navigationRef";
 import { View, StyleSheet } from "react-native";
 import { Home, Compass, Library, User } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
@@ -86,7 +87,7 @@ export default function RootNavigator() {
   const { colors } = useTheme();
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <Tab.Navigator
           screenOptions={({ route }) => ({
             headerShown: false,

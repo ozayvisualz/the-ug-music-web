@@ -13,8 +13,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { ArrowLeft, Crown, Check } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
-import { trpc } from "../api/client";
 import { useTheme } from "../theme/ThemeContext";
+import { getStoredToken } from "../api/auth";
 
 const SW = Dimensions.get("window").width;
 
@@ -80,31 +80,42 @@ export default function PremiumScreen() {
 
   useEffect(() => {
     setSubLoading(true);
-    trpc.payments.checkSubscription
-      .query()
-      .then((data: Subscription | null) => {
-        setSubscription(data);
-        setActivePlan(data?.plan ?? null);
-      })
-      .catch(() => {
-        setSubscription(null);
-        setActivePlan(null);
-      })
-      .finally(() => setSubLoading(false));
+    (async () => {
+      const token = await getStoredToken();
+      const url = token ? `https://theugmusic.com/api/mobile/premium?token=${encodeURIComponent(token)}` : "https://theugmusic.com/api/mobile/premium";
+      fetch(url)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.subscription) {
+            setSubscription(data.subscription);
+            setActivePlan(data.subscription.plan);
+          } else {
+            setSubscription(null);
+            setActivePlan(null);
+          }
+        })
+        .catch(() => { setSubscription(null); setActivePlan(null); })
+        .finally(() => setSubLoading(false));
+    })();
   }, []);
 
   const handleSubscribe = useCallback(async (plan: Plan) => {
     if (subscribing) return;
     setSubscribing(plan.id);
     try {
-      await trpc.payments.initiateSubscription.mutate({ plan: plan.id });
+      const token = await getStoredToken();
+      const planId = plan.id.toUpperCase();
+      const url = `https://theugmusic.com/api/mobile/premium?action=subscribe&plan=${planId}&token=${encodeURIComponent(token || "")}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
       Alert.alert(
         "Payment",
-        "Redirecting to Flutterwave for payment. (Placeholder - integrate Flutterwave SDK here)",
+        `Redirecting to Flutterwave to complete your ${plan.name} subscription (UGX ${plan.price}).`,
         [{ text: "OK" }],
       );
-    } catch {
-      Alert.alert("Error", "Failed to initiate subscription. Please try again.");
+    } catch (e: any) {
+      Alert.alert("Error", e.message || "Failed to initiate subscription. Please try again.");
     } finally {
       setSubscribing(null);
     }
