@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import jwt from "jsonwebtoken";
 
 function getAdmin(req: NextRequest) {
-  const auth = req.headers.get("authorization");
+  const authHeader = req.headers.get("authorization");
   let token: string | null = null;
-  if (auth?.startsWith("Bearer ")) token = auth.slice(7);
+  if (authHeader?.startsWith("Bearer ")) token = authHeader.slice(7);
   if (!token) {
     const cookie = req.headers.get("cookie") || "";
     const match = cookie.match(/(?:^|;\s*)auth-token=([^;]*)/);
@@ -16,7 +17,12 @@ function getAdmin(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  const admin = getAdmin(req);
+  const decoded = getAdmin(req);
+  let admin: any = decoded;
+  if (!admin) {
+    const session = await auth();
+    if (session?.user && (session.user as any).role === "ADMIN") admin = session.user;
+  }
   if (!admin || admin.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const status = req.nextUrl.searchParams.get("status") || "pending";
@@ -42,7 +48,12 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const admin = getAdmin(req);
+  const decoded = getAdmin(req);
+  let admin: any = decoded;
+  if (!admin) {
+    const session = await auth();
+    if (session?.user && (session.user as any).role === "ADMIN") admin = session.user;
+  }
   if (!admin || admin.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { action, artistId, reason } = await req.json();

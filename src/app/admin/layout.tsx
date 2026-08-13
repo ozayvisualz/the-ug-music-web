@@ -9,7 +9,7 @@ import {
   Flag, Star, TrendingUp, DollarSign, Banknote, CreditCard,
   Megaphone, Ticket, Bell, Shield, Copyright, Headphones,
   UserCog, History, Settings, ChevronLeft, ChevronRight,
-  Menu, LogOut, Search, Home, FileText, Radio,
+  Menu, LogOut, Search, Home, FileText, Radio, ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth, signOut } from "@/lib/client-auth";
@@ -34,6 +34,7 @@ const menuGroups: MenuGroup[] = [
       { href: "/admin/songs", icon: Music2, label: "Songs" },
       { href: "/admin/albums", icon: Disc3, label: "Albums" },
       { href: "/admin/artists", icon: Mic2, label: "Artists" },
+      { href: "/admin/verification", icon: ShieldCheck, label: "Verification" },
       { href: "/admin/users", icon: Users, label: "Users" },
       { href: "/admin/playlists", icon: ListMusic, label: "Playlists" },
       { href: "/admin/genres", icon: Flag, label: "Genres" },

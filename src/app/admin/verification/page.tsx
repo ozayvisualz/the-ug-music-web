@@ -22,12 +22,12 @@ export default function AdminVerificationPage() {
   useEffect(() => { load(); }, [tab, search]);
 
   const act = async (action: string, artistId: string, reason?: string) => {
-    const token = document.cookie.match(/(?:^|;\s*)auth-token=([^;]*)/)?.[1] || "";
     try {
       const res = await fetch("/api/admin/verification", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action, artistId, reason }),
+        credentials: "include",
       });
       const data = await res.json();
       if (res.ok) { toast.success(`${action} successful`); load(); }
