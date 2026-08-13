@@ -9,7 +9,7 @@ export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const { user } = useAuth();
 
   return (
-    <header className="lg:hidden sticky top-0 z-30 h-14 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 flex items-center justify-between px-4">
+    <header className="lg:hidden sticky top-0 z-30 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 flex items-center justify-between px-4 pt-[env(safe-area-inset-top)] min-h-[3.5rem]">
       <div className="flex items-center gap-3">
         <button onClick={onMenuClick} className="p-1.5 hover:bg-zinc-800 rounded-lg">
           <Menu className="w-5 h-5" />

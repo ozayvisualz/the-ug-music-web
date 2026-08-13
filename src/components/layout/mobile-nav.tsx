@@ -106,7 +106,7 @@ export function MobileNav() {
       )}
 
       {/* Main header — visible on ALL screen sizes */}
-      <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 flex items-center justify-between px-4">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 flex items-center justify-between px-4 pt-[env(safe-area-inset-top)] min-h-[3.5rem]">
         {/* Left: Hamburger + Logo */}
         <div className="flex items-center gap-2">
           <button onClick={() => setOpen(true)} className="p-2 -ml-2 hover:bg-zinc-800 rounded-lg lg:hidden">
@@ -192,7 +192,7 @@ export function MobileNav() {
       </header>
 
       {/* Spacer for fixed header */}
-      <div className="h-14" />
+      <div className="h-[calc(3.5rem+env(safe-area-inset-top))]" />
 
       {/* Mobile slide-out menu */}
       {open && (
