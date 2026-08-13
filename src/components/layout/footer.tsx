@@ -9,7 +9,7 @@ export function AppFooter() {
           </p>
         </div>
 
-        <div className="flex flex-col items-center justify-center gap-5">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
           <a
             href="https://apps.apple.com/app/idYOUR_APP_ID"
             target="_blank"
@@ -19,9 +19,25 @@ export function AppFooter() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/app-buttons.png"
-              alt="App Store and Google Play download buttons"
-              className="w-auto max-w-[240px] h-auto object-contain"
+              src="/app-store-button.png"
+              alt="Download on the App Store"
+              className="w-auto h-12 md:h-14 object-contain"
+              loading="lazy"
+            />
+          </a>
+
+          <a
+            href="https://play.google.com/store/apps/details?id=com.theugmusic.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block transition-all duration-200 ease-out hover:scale-[1.03] active:scale-[0.98] hover:drop-shadow-[0_0_12px_rgba(234,179,8,0.35)]"
+            aria-label="Get it on Google Play"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/google-play-button.png"
+              alt="Get it on Google Play"
+              className="w-auto h-12 md:h-14 object-contain"
               loading="lazy"
             />
           </a>
