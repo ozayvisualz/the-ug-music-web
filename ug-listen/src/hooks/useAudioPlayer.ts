@@ -81,7 +81,12 @@ export function useAudioPlayer() {
     setError("");
 
     (async () => {
-      if (playerRef.current) playerRef.current.remove();
+      const oldPlayer = playerRef.current;
+      if (oldPlayer) {
+        try { oldPlayer.pause(); } catch {}
+        try { oldPlayer.remove(); } catch {}
+        playerRef.current = null;
+      }
       stopPositionTimer();
       setIsLoaded(false);
       setIsPlaying(false);
@@ -92,14 +97,19 @@ export function useAudioPlayer() {
       if (!audioUrl) { setError("No audio URL"); return; }
 
       try {
-        const player = createAudioPlayer({ uri: audioUrl });
+        const player = createAudioPlayer({ uri: audioUrl }, { downloadFirst: false, updateInterval: 200 });
         playerRef.current = player;
 
+        let started = false;
         player.addListener("playbackStatusUpdate", (status: any) => {
           if (status.isLoaded) {
             setIsLoaded(true);
             setIsBuffering(false);
             setDuration(status.duration || currentTrack.duration);
+            if (!started && !status.playing) {
+              started = true;
+              try { player.play(); } catch {}
+            }
           }
         });
 
@@ -171,7 +181,11 @@ export function useAudioPlayer() {
   }, [prev, seek, position]);
 
   const stopPlayback = useCallback(() => {
-    playerRef.current?.remove();
+    const p = playerRef.current;
+    if (p) {
+      try { p.pause(); } catch {}
+      try { p.remove(); } catch {}
+    }
     playerRef.current = null;
     stopPositionTimer();
     setIsPlaying(false);
