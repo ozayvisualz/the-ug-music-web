@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Music2, Upload, Disc3, TrendingUp,
   DollarSign, Banknote, Users, MessageCircle, User,
-  Settings, Headphones, Mic2, Menu, ChevronLeft, ChevronRight, LogOut,
+  Settings, Headphones, Mic2,   Menu, ChevronLeft, ChevronRight, LogOut, Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth, signOut } from "@/lib/client-auth";
@@ -29,6 +29,16 @@ export default function ArtistLayout({ children }: { children: React.ReactNode }
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [verificationStatus, setVerificationStatus] = useState<string>("approved");
+
+  useEffect(() => {
+    fetch("/api/artist/apply")
+      .then((r) => r.json())
+      .then((d) => { if (d?.verificationStatus) setVerificationStatus(d.verificationStatus); })
+      .catch(() => {});
+  }, []);
+
+  const isPending = verificationStatus !== "approved" && verificationStatus !== "suspended";
 
   const sidebar = (
     <aside className={cn("flex flex-col h-full bg-[#0B0B0D] border-r border-zinc-800/60 transition-all duration-300", collapsed ? "w-16" : "w-56")}>
@@ -74,7 +84,15 @@ export default function ArtistLayout({ children }: { children: React.ReactNode }
             <div className="absolute left-0 top-0 bottom-0 w-56 bg-[#0B0B0D]" onClick={(e) => e.stopPropagation()}>{sidebar}</div>
           </div>
         )}
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto">
+          {isPending && (
+            <div className="bg-yellow-500/10 border-b border-yellow-500/30 px-6 py-3 flex items-center gap-2">
+              <Lock className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+              <p className="text-sm text-yellow-500">Verification required before you can upload music. <Link href="/artist/pending" className="underline font-semibold">View status</Link></p>
+            </div>
+          )}
+          {children}
+        </main>
       </div>
     </div>
   );
