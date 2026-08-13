@@ -162,6 +162,7 @@ model Artist {
   country        String?
   city           String?
   dateOfBirth    String?
+  photoUrl       String?
   idDocument     String?
   selfieDocument String?
   socialLinks    String?

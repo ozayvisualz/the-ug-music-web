@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/trpc/client";
-import { Music, Mail, Lock, User, Phone, Loader2, MapPin, Calendar, Globe } from "lucide-react";
+import { Music, Mail, Lock, User, Phone, Loader2, Upload } from "lucide-react";
+import { uploadToFirebase } from "@/lib/firebase-storage";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -12,6 +13,10 @@ export default function RegisterPage() {
     artistName: "", legalName: "", country: "", city: "", dateOfBirth: "", genre: "", bio: "", socialLinks: "",
     musicLinks: "", recordLabel: "", managementContact: "", accepted: false,
   });
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [idUrl, setIdUrl] = useState("");
+  const [selfieUrl, setSelfieUrl] = useState("");
+  const [uploading, setUploading] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
   const registerMut = trpc.auth.register.useMutation({
@@ -27,6 +32,8 @@ export default function RegisterPage() {
               dateOfBirth: form.dateOfBirth, bio: form.bio, genre: form.genre,
               socialLinks: form.socialLinks.split(",").map((s) => s.trim()).filter(Boolean),
               musicLinks: form.musicLinks, recordLabel: form.recordLabel, managementContact: form.managementContact,
+              idDocument: idUrl || undefined, selfieDocument: selfieUrl || undefined,
+              photoUrl: photoUrl || undefined,
             }),
           });
           router.push("/artist/pending");
@@ -41,6 +48,23 @@ export default function RegisterPage() {
   });
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleUpload = async (field: "photo" | "id" | "selfie", file: File) => {
+    if (!file) return;
+    setUploading(field);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `verification/${Date.now()}-${field}.${ext}`;
+      const url = await uploadToFirebase(file, path);
+      if (field === "photo") setPhotoUrl(url);
+      else if (field === "id") setIdUrl(url);
+      else setSelfieUrl(url);
+    } catch {
+      setError(`Failed to upload ${field === "id" ? "ID document" : field}`);
+    } finally {
+      setUploading("");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,6 +196,28 @@ export default function RegisterPage() {
                     className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2.5 px-3 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-500 text-sm" />
                 </div>
               </div>
+
+              <div>
+                <label className="block text-sm text-zinc-400 mb-1.5">Artist Photo</label>
+                <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload("photo", e.target.files[0])}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2 px-3 text-white text-sm file:mr-2 file:bg-zinc-700 file:text-white file:rounded file:px-2 file:py-1 file:border-0" />
+                {photoUrl && <p className="text-xs text-emerald-400 mt-1">Photo uploaded ✓</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm text-zinc-400 mb-1.5">National ID / Passport / Driver's License</label>
+                <input type="file" accept="image/*,.pdf" onChange={(e) => e.target.files?.[0] && handleUpload("id", e.target.files[0])}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2 px-3 text-white text-sm file:mr-2 file:bg-zinc-700 file:text-white file:rounded file:px-2 file:py-1 file:border-0" />
+                {idUrl && <p className="text-xs text-emerald-400 mt-1">ID uploaded ✓</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm text-zinc-400 mb-1.5">Selfie Holding ID</label>
+                <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload("selfie", e.target.files[0])}
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2 px-3 text-white text-sm file:mr-2 file:bg-zinc-700 file:text-white file:rounded file:px-2 file:py-1 file:border-0" />
+                {selfieUrl && <p className="text-xs text-emerald-400 mt-1">Selfie uploaded ✓</p>}
+              </div>
+
               <div>
                 <label className="block text-sm text-zinc-400 mb-1.5">Social Media Links (comma separated)</label>
                 <input type="text" value={form.socialLinks} onChange={(e) => set("socialLinks", e.target.value)}

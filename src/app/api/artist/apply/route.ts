@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
         musicLinks: body.musicLinks,
         recordLabel: body.recordLabel,
         managementContact: body.managementContact,
+        photoUrl: body.photoUrl,
         idDocument: body.idDocument,
         selfieDocument: body.selfieDocument,
         verificationStatus: "pending",
