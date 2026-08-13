@@ -69,7 +69,13 @@ export default function DiscoverPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {trending?.length ? trending.slice(0, 10).map((s: any) => (
             <Link key={s.id} href={`/song/${s.id}`} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 hover:border-yellow-500/30 transition group">
-              <div className="w-full aspect-square rounded-lg bg-yellow-500/10 flex items-center justify-center mb-2 text-3xl">🎵</div>
+              <div className="w-full aspect-square rounded-lg overflow-hidden bg-yellow-500/10 flex items-center justify-center mb-2">
+                {s.coverUrl || s.album?.coverUrl ? (
+                  <img src={s.coverUrl || s.album?.coverUrl} alt={s.title} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl">🎵</span>
+                )}
+              </div>
               <p className="text-sm font-semibold truncate">{s.title}</p>
               <p className="text-xs text-zinc-500 truncate">{getArtistName(s.artist)}</p>
             </Link>
@@ -83,7 +89,13 @@ export default function DiscoverPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {newReleases?.length ? newReleases.slice(0, 10).map((s: any) => (
             <Link key={s.id} href={`/song/${s.id}`} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 hover:border-yellow-500/30 transition group">
-              <div className="w-full aspect-square rounded-lg bg-yellow-500/10 flex items-center justify-center mb-2 text-3xl">🎵</div>
+              <div className="w-full aspect-square rounded-lg overflow-hidden bg-yellow-500/10 flex items-center justify-center mb-2">
+                {s.coverUrl || s.album?.coverUrl ? (
+                  <img src={s.coverUrl || s.album?.coverUrl} alt={s.title} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl">🎵</span>
+                )}
+              </div>
               <p className="text-sm font-semibold truncate">{s.title}</p>
               <p className="text-xs text-zinc-500 truncate">{getArtistName(s.artist)}</p>
             </Link>
