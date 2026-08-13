@@ -19,10 +19,9 @@ export function AppFooter() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/app-store-button.png"
+              src="/app-store-button-small.png"
               alt="Download on the App Store"
-              className="w-auto h-12 md:h-14 object-contain"
-              loading="lazy"
+              className="w-40 md:w-44 h-auto object-contain"
             />
           </a>
 
@@ -35,10 +34,9 @@ export function AppFooter() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/google-play-button.png"
+              src="/google-play-button-small.png"
               alt="Get it on Google Play"
-              className="w-auto h-12 md:h-14 object-contain"
-              loading="lazy"
+              className="w-40 md:w-44 h-auto object-contain"
             />
           </a>
         </div>
