@@ -156,6 +156,22 @@ model Artist {
   totalDownloads Int      @default(0)
   totalEarnings  Int      @default(0)
   labelId        String?
+  verificationStatus String @default("pending")
+  legalName      String?
+  phone          String?
+  country        String?
+  city           String?
+  dateOfBirth    String?
+  idDocument     String?
+  selfieDocument String?
+  socialLinks    String?
+  musicLinks     String?
+  recordLabel    String?
+  managementContact String?
+  rejectionReason String?
+  submittedAt    DateTime @default(now())
+  reviewedAt     DateTime?
+  reviewedBy     String?
   createdAt      DateTime @default(now())
 
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -124,9 +124,12 @@ export const musicRouter = router({
       })
     )
     .query(async ({ input, ctx }) => {
-      const where: any = {};
+      const where: any = { verificationStatus: "approved" };
       if (input.search) {
-        where.user = { name: { contains: input.search, mode: "insensitive" } };
+        where.OR = [
+          { artistName: { contains: input.search, mode: "insensitive" } },
+          { user: { name: { contains: input.search, mode: "insensitive" } } },
+        ];
       }
       if (input.genre) where.genre = input.genre;
 

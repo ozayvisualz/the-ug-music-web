@@ -1,0 +1,75 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/lib/db";
+import jwt from "jsonwebtoken";
+
+function getAdmin(req: NextRequest) {
+  const auth = req.headers.get("authorization");
+  let token: string | null = null;
+  if (auth?.startsWith("Bearer ")) token = auth.slice(7);
+  if (!token) {
+    const cookie = req.headers.get("cookie") || "";
+    const match = cookie.match(/(?:^|;\s*)auth-token=([^;]*)/);
+    if (match) token = match[1];
+  }
+  if (!token) return null;
+  try { return jwt.verify(token, process.env.AUTH_SECRET || "default-secret") as any; } catch { return null; }
+}
+
+export async function GET(req: NextRequest) {
+  const admin = getAdmin(req);
+  if (!admin || admin.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const status = req.nextUrl.searchParams.get("status") || "pending";
+  const search = req.nextUrl.searchParams.get("search") || "";
+
+  const where: any = { verificationStatus: status };
+  if (search) {
+    where.OR = [
+      { artistName: { contains: search, mode: "insensitive" } },
+      { legalName: { contains: search, mode: "insensitive" } },
+      { user: { email: { contains: search, mode: "insensitive" } } },
+    ];
+  }
+
+  const artists = await db.artist.findMany({
+    where,
+    include: { user: { select: { name: true, email: true } } },
+    orderBy: { submittedAt: "desc" },
+    take: 100,
+  });
+
+  return NextResponse.json(artists);
+}
+
+export async function POST(req: NextRequest) {
+  const admin = getAdmin(req);
+  if (!admin || admin.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { action, artistId, reason } = await req.json();
+  if (!action || !artistId) return NextResponse.json({ error: "Action and artistId required" }, { status: 400 });
+
+  if (action === "approve") {
+    await db.artist.update({
+      where: { id: artistId },
+      data: { verificationStatus: "approved", verified: true, reviewedAt: new Date(), reviewedBy: admin.id, rejectionReason: null },
+    });
+  } else if (action === "reject") {
+    if (!reason) return NextResponse.json({ error: "Rejection reason required" }, { status: 400 });
+    await db.artist.update({
+      where: { id: artistId },
+      data: { verificationStatus: "rejected", verified: false, reviewedAt: new Date(), reviewedBy: admin.id, rejectionReason: reason },
+    });
+  } else if (action === "suspend") {
+    await db.artist.update({
+      where: { id: artistId },
+      data: { verificationStatus: "suspended", verified: false, reviewedAt: new Date(), reviewedBy: admin.id },
+    });
+  } else if (action === "request_info") {
+    await db.artist.update({
+      where: { id: artistId },
+      data: { verificationStatus: "pending", rejectionReason: reason || "Additional information requested" },
+    });
+  }
+
+  return NextResponse.json({ success: true });
+}

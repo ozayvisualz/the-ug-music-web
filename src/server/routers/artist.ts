@@ -33,6 +33,9 @@ export const artistRouter = router({
         where: { userId: (ctx.session!.user as any).id },
       });
       if (!artist) throw new Error("Artist profile not found");
+      if (artist.verificationStatus !== "approved") {
+        throw new Error("Verification required before you can upload music.");
+      }
 
       return ctx.db.song.create({
         data: {
