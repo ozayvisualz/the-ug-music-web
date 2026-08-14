@@ -3,24 +3,37 @@
 import { trpc } from "@/trpc/client";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
-import { Music2, Play, Download, Send, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Play, Download, Send, Loader2 } from "lucide-react";
 import { formatDuration, getArtistName } from "@/lib/utils";
 
 export default function SongPage() {
   const params = useParams<{ id: string }>();
-  const { data: song, isLoading } = trpc.music.getById.useQuery(params.id);
-  const { data: comments, refetch: refetchComments } = trpc.social.getComments.useQuery({ songId: params.id as string });
+  const songId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const { data: song, isLoading } = trpc.music.getById.useQuery(songId);
+  const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
-  const addCommentMut = trpc.social.addComment.useMutation({
-    onSuccess: () => { setCommentText(""); refetchComments(); },
-  });
 
-  const handlePost = () => {
+  useEffect(() => {
+    if (!songId) return;
+    fetch(`/api/mobile/comments?songId=${encodeURIComponent(songId)}`)
+      .then((r) => r.json())
+      .then((d) => setComments(Array.isArray(d) ? d : []))
+      .catch(() => setComments([]));
+  }, [songId]);
+
+  const handlePost = async () => {
     if (!commentText.trim() || posting) return;
     setPosting(true);
-    addCommentMut.mutate({ songId: params.id as string, content: commentText.trim() }, { onSettled: () => setPosting(false) });
+    try {
+      const res = await fetch(`/api/mobile/comments?action=add&songId=${encodeURIComponent(songId)}&content=${encodeURIComponent(commentText.trim())}`, { credentials: "include" });
+      const data = await res.json();
+      if (res.ok && data.comment) {
+        setComments((c) => [data.comment, ...c]);
+        setCommentText("");
+      }
+    } catch {} finally { setPosting(false); }
   };
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" /></div>;
@@ -53,13 +66,13 @@ export default function SongPage() {
       )}
 
       <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-        <h2 className="font-bold mb-4">Comments ({comments?.length || 0})</h2>
+        <h2 className="font-bold mb-4">Comments ({comments.length})</h2>
         <div className="space-y-3 mb-4">
-          {comments?.length ? comments.map((c: any) => (
+          {comments.length ? comments.map((c: any) => (
             <div key={c.id} className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-xs font-bold text-yellow-500 flex-shrink-0">{(c.user?.name || "U").charAt(0)}</div>
+              <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-xs font-bold text-yellow-500 flex-shrink-0">{(c.userName || "U").charAt(0)}</div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2"><span className="text-sm font-semibold">{c.user?.name || "Unknown"}</span><span className="text-xs text-zinc-600">{new Date(c.createdAt).toLocaleDateString()}</span></div>
+                <div className="flex items-center gap-2"><span className="text-sm font-semibold">{c.userName || "Unknown"}</span><span className="text-xs text-zinc-600">{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : ""}</span></div>
                 <p className="text-sm text-zinc-400">{c.content}</p>
               </div>
             </div>
