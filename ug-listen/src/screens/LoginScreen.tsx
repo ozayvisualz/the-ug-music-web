@@ -322,7 +322,7 @@ export default function LoginScreen() {
   return (
     <View style={styles.root}>
       {/* Animated background */}
-      <Animated.View style={[StyleSheet.absoluteFill, bgStyle]}>
+      <Animated.View style={[StyleSheet.absoluteFill, bgStyle]} pointerEvents="none">
         <View style={styles.bgBase} />
         <FloatingNotes reduceMotion={reduceMotion} />
         <LinearGradient colors={["transparent", "rgba(234,179,8,0.07)"]} style={StyleSheet.absoluteFill} pointerEvents="none" />
@@ -333,7 +333,7 @@ export default function LoginScreen() {
           <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false} bounces={false}>
             <Animated.View style={[styles.cardWrap, cardStyle]}>
               <View style={styles.card}>
-                <View style={styles.cardInner}>
+                <View style={styles.cardInner} pointerEvents="none">
                   <BlurView intensity={28} tint={glass.blurTint} style={StyleSheet.absoluteFill} />
                   <LinearGradient colors={glass.cardColors} style={StyleSheet.absoluteFill} />
                   <LinearGradient
