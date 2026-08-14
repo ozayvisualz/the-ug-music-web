@@ -274,6 +274,8 @@ model Album {
   releaseDate DateTime?
   approved    Boolean  @default(false)
   published   Boolean  @default(false)
+  totalStreams Int     @default(0)
+  playCount    Int     @default(0)
   createdAt   DateTime @default(now())
 
   artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)

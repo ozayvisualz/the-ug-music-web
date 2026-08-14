@@ -47,9 +47,16 @@ export async function GET(req: NextRequest) {
     // Play count increments on every playback start
     await db.song.update({ where: { id: songId }, data: { playCount: { increment: 1 } } });
 
+    if (song.albumId) {
+      await db.album.update({ where: { id: song.albumId }, data: { playCount: { increment: 1 } } }).catch(() => {});
+    }
+
     // Artist total streams only for eligible streams
     if (revenueEligible) {
       await db.artist.update({ where: { id: song.artistId }, data: { totalStreams: { increment: 1 } } });
+      if (song.albumId) {
+        await db.album.update({ where: { id: song.albumId }, data: { totalStreams: { increment: 1 } } }).catch(() => {});
+      }
     }
 
     return NextResponse.json({ eligible: revenueEligible, reason: revenueEligible ? "Revenue eligible" : `Below ${MIN_LISTEN_SECONDS}s threshold` });

@@ -90,12 +90,28 @@ export const StreamingEngine = {
       data: { playCount: { increment: 1 } },
     });
 
+    // Update album play count if song belongs to an album
+    if (song.albumId) {
+      await db.album.update({
+        where: { id: song.albumId },
+        data: { playCount: { increment: 1 } },
+      }).catch(() => {});
+    }
+
     // 7. Update artist total streams only for revenue-eligible streams
     if (revenueEligible) {
       await db.artist.update({
         where: { id: song.artistId },
         data: { totalStreams: { increment: 1 } },
       });
+
+      // Update album streams for eligible streams
+      if (song.albumId) {
+        await db.album.update({
+          where: { id: song.albumId },
+          data: { totalStreams: { increment: 1 } },
+        }).catch(() => {});
+      }
     }
 
     return {
