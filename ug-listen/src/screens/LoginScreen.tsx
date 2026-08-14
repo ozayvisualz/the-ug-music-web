@@ -33,6 +33,7 @@ import * as Haptics from "expo-haptics";
 import { COLORS, SPRING } from "../constants/theme";
 import { login, register } from "../api/auth";
 import { useAuthStore } from "../store/authStore";
+import { useTheme } from "../theme/ThemeContext";
 
 const { width: SW, height: SH } = Dimensions.get("window");
 const CARD_MAX = 384;
@@ -142,6 +143,7 @@ function FloatingNotes({ reduceMotion }: { reduceMotion: boolean }) {
 type GlassInputProps = TextInputProps & { label: string };
 
 function GlassInput({ label, value, onChangeText, ...rest }: GlassInputProps) {
+  const { isDark } = useTheme();
   const [focused, setFocused] = useState(false);
   const float = useSharedValue(0);
   const active = focused || (value ? value.length > 0 : false);
@@ -159,12 +161,18 @@ function GlassInput({ label, value, onChangeText, ...rest }: GlassInputProps) {
   }));
 
   return (
-    <View style={[styles.inputWrap, focused && styles.inputWrapFocused]}>
-      <Animated.Text style={[styles.inputLabel, { color: focused ? COLORS.gold : COLORS.textMuted }, labelStyle]}>
+    <View
+      style={[
+        styles.inputWrap,
+        { borderColor: isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.12)", backgroundColor: isDark ? "rgba(0,0,0,0.22)" : "rgba(255,255,255,0.22)" },
+        focused && styles.inputWrapFocused,
+      ]}
+    >
+      <Animated.Text style={[styles.inputLabel, { color: focused ? COLORS.gold : isDark ? COLORS.textMuted : "rgba(0,0,0,0.5)" }, labelStyle]}>
         {label}
       </Animated.Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, { color: isDark ? "#FFFFFF" : "#101013" }]}
         value={value}
         onChangeText={onChangeText}
         placeholderTextColor="transparent"
@@ -192,6 +200,7 @@ export default function LoginScreen() {
   const [reduceMotion, setReduceMotion] = useState(false);
   const [segWidth, setSegWidth] = useState(0);
   const setUser = useAuthStore((s) => s.setUser);
+  const { isDark } = useTheme();
 
   // Entry animation values
   const bg = useSharedValue(0);
@@ -298,6 +307,18 @@ export default function LoginScreen() {
 
   const isRegister = tab === "register";
 
+  const glass = {
+    blurTint: (isDark ? "dark" : "light") as "dark" | "light",
+    cardColors: (isDark ? ["rgba(30,30,36,0.5)", "rgba(16,16,20,0.62)"] : ["rgba(255,255,255,0.55)", "rgba(240,240,245,0.72)"]) as [string, string],
+    title: isDark ? "#FFFFFF" : "#101013",
+    segInactive: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.5)",
+    toggleBg: isDark ? "rgba(0,0,0,0.25)" : "rgba(255,255,255,0.18)",
+    roleText: isDark ? "rgba(255,255,255,0.55)" : "rgba(0,0,0,0.55)",
+    roleBorder: isDark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.12)",
+    roleBg: isDark ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.2)",
+    guestText: isDark ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.55)",
+  };
+
   return (
     <View style={styles.root}>
       {/* Animated background */}
@@ -313,8 +334,8 @@ export default function LoginScreen() {
             <Animated.View style={[styles.cardWrap, cardStyle]}>
               <View style={styles.card}>
                 <View style={styles.cardInner}>
-                  <BlurView intensity={28} tint="dark" style={StyleSheet.absoluteFill} />
-                  <LinearGradient colors={["rgba(30,30,36,0.5)", "rgba(16,16,20,0.62)"]} style={StyleSheet.absoluteFill} />
+                  <BlurView intensity={28} tint={glass.blurTint} style={StyleSheet.absoluteFill} />
+                  <LinearGradient colors={glass.cardColors} style={StyleSheet.absoluteFill} />
                   <LinearGradient
                     colors={["rgba(255,255,255,0.14)", "rgba(255,255,255,0)"]}
                     start={{ x: 0, y: 0 }}
@@ -339,22 +360,22 @@ export default function LoginScreen() {
 
                   {/* Title */}
                   <Animated.View style={titleStyle}>
-                    <Text style={styles.brand}>TheUgMusic</Text>
+                    <Text style={[styles.brand, { color: glass.title }]}>TheUgMusic</Text>
                   </Animated.View>
 
                   {/* Segmented toggle */}
                   <Animated.View
-                    style={[styles.toggleWrap, toggleStyle]}
+                    style={[styles.toggleWrap, { backgroundColor: glass.toggleBg }, toggleStyle]}
                     onLayout={(e) => setSegWidth(e.nativeEvent.layout.width)}
                   >
                     <Animated.View style={[styles.segIndicator, { width: segWidth > 0 ? (segWidth - 6) / 2 : 0 }, segIndicatorStyle]}>
                       <LinearGradient colors={["#F5C518", "#D9A208"]} style={StyleSheet.absoluteFill} />
                     </Animated.View>
                     <TouchableOpacity style={styles.segBtn} onPress={() => setTab("signin")} activeOpacity={0.8}>
-                      <Text style={[styles.segText, tab === "signin" && styles.segTextActive]}>Sign In</Text>
+                      <Text style={[styles.segText, { color: glass.segInactive }, tab === "signin" && styles.segTextActive]}>Sign In</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.segBtn} onPress={() => setTab("register")} activeOpacity={0.8}>
-                      <Text style={[styles.segText, tab === "register" && styles.segTextActive]}>Register</Text>
+                      <Text style={[styles.segText, { color: glass.segInactive }, tab === "register" && styles.segTextActive]}>Register</Text>
                     </TouchableOpacity>
                   </Animated.View>
 
@@ -371,11 +392,11 @@ export default function LoginScreen() {
                         {(["LISTENER", "ARTIST"] as const).map((r) => (
                           <TouchableOpacity
                             key={r}
-                            style={[styles.rolePill, role === r && styles.rolePillActive]}
+                            style={[styles.rolePill, { borderColor: glass.roleBorder, backgroundColor: glass.roleBg }, role === r && styles.rolePillActive]}
                             onPress={() => setRole(r)}
                             activeOpacity={0.8}
                           >
-                            <Text style={[styles.rolePillText, role === r && styles.rolePillTextActive]}>{r === "LISTENER" ? "Listener" : "Artist"}</Text>
+                            <Text style={[styles.rolePillText, { color: glass.roleText }, role === r && styles.rolePillTextActive]}>{r === "LISTENER" ? "Listener" : "Artist"}</Text>
                           </TouchableOpacity>
                         ))}
                       </View>
@@ -408,7 +429,7 @@ export default function LoginScreen() {
                   {/* Guest */}
                   <Animated.View style={guestStyle}>
                     <TouchableOpacity style={styles.guestBtn} onPress={handleGuest} activeOpacity={0.7}>
-                      <Text style={styles.guestText}>Continue as Guest</Text>
+                      <Text style={[styles.guestText, { color: glass.guestText }]}>Continue as Guest</Text>
                     </TouchableOpacity>
                   </Animated.View>
                 </View>
