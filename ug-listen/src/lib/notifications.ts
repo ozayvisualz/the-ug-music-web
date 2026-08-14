@@ -1,61 +1,20 @@
 import { Platform } from "react-native";
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
 import { getStoredToken } from "../api/auth";
 
-try {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
-  });
-} catch {}
+// Push notifications are currently disabled until Firebase (google-services.json)
+// is configured for the Android build. These entry points are kept as safe
+// no-ops so existing callers never crash.
 
-export async function registerForPushNotifications() {
-  if (!Device.isDevice) return null;
+export function setupNotificationListeners() {
+  // no-op — push is disabled
+}
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-  if (existingStatus !== "granted") {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-  if (finalStatus !== "granted") return null;
-
-  try {
-    const projectId = "the-ug-music";
-    const token = await Notifications.getExpoPushTokenAsync({ projectId });
-    return token.data;
-  } catch {
-    return null;
-  }
+export async function registerForPushNotifications(): Promise<string | null> {
+  return null;
 }
 
 export async function registerPushToken() {
-  try {
-    const token = await registerForPushNotifications();
-    if (!token) return;
-
-    const authToken = await getStoredToken();
-    await fetch(`https://theugmusic.com/api/mobile/push-token?token=${encodeURIComponent(authToken || "")}&pushToken=${encodeURIComponent(token)}`);
-  } catch {}
-}
-
-export function setupNotificationListeners() {
-  try {
-    if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#EAB308",
-      });
-    }
-  } catch {}
+  // no-op — push is disabled
 }
 
 export async function markNotificationOpened(notificationId: string): Promise<number | null> {
@@ -69,7 +28,7 @@ export async function markNotificationOpened(notificationId: string): Promise<nu
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           notificationId,
-          device: Device.modelName || "unknown",
+          device: "unknown",
           platform: Platform.OS,
         }),
       }
