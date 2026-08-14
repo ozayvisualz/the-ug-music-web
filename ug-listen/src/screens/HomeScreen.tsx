@@ -219,7 +219,6 @@ export default function HomeScreen() {
         if (data.newReleases) setNewReleases(data.newReleases);
         if (data.forYou) setForYou(data.forYou);
         if (data.continueListening) setContinueListening(Array.isArray(data.continueListening) ? data.continueListening : [data.continueListening]);
-        if (data.artists) setArtists(data.artists);
       })
       .catch(() => {})
       .finally(() => {
@@ -227,7 +226,6 @@ export default function HomeScreen() {
         setTrendingLoading(false);
         setNrLoading(false);
         setClLoading(false);
-        setArtistsLoading(false);
       });
   }, [user]);
 
