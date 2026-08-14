@@ -142,4 +142,24 @@ export const ProfileEngine = {
 
     return profile;
   },
+
+  /** Privacy: wipe behavioral history and reset the learned vector. */
+  async clearHistory(userId: string) {
+    await db.userEvent.deleteMany({ where: { userId } });
+    await db.listenerProfile.update({
+      where: { userId },
+      data: { genres: {}, moods: {}, artists: {}, songs: {}, hourOfDay: {}, dayOfWeek: {}, skipRate: 0, completionRate: 0, totalPlays: 0 },
+    });
+    return { success: true };
+  },
+
+  /** Privacy: toggle personalization on/off. */
+  async setPersonalization(userId: string, enabled: boolean) {
+    await db.listenerProfile.upsert({
+      where: { userId },
+      update: { personalizationEnabled: enabled },
+      create: { userId, personalizationEnabled: enabled },
+    });
+    return { personalizationEnabled: enabled };
+  },
 };

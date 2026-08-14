@@ -9,6 +9,8 @@ import { SmartQueueEngine } from "./queue";
 import { ArtistInsightsEngine } from "./artist-insights";
 import { PlaylistGenerator } from "./playlist-generator";
 import { FraudEngine } from "./fraud";
+import { AdminAssistant } from "./assistant";
+import { IntelligenceCache } from "./cache";
 
 /**
  * Unified Intelligence Engine — the single facade powering the entire platform.
@@ -26,6 +28,8 @@ export const IntelligenceEngine = {
   artistInsights: ArtistInsightsEngine,
   playlists: PlaylistGenerator,
   fraud: FraudEngine,
+  assistant: AdminAssistant,
+  cache: IntelligenceCache,
 };
 
 export {
@@ -40,6 +44,8 @@ export {
   ArtistInsightsEngine,
   PlaylistGenerator,
   FraudEngine,
+  AdminAssistant,
+  IntelligenceCache,
 };
 
 export type { EventType, EventInput } from "./events";

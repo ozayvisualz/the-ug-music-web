@@ -1,5 +1,6 @@
 import { db } from "../../db";
 import { ProfileEngine } from "./profile";
+import { IntelligenceCache } from "./cache";
 
 export type MixSection =
   | "made-for-you"
@@ -69,7 +70,13 @@ function parseMoods(moods: string | null): string[] {
 export const RecommendationEngine = {
   async recommend(userId: string, opts: { section?: MixSection; limit?: number; contextGenres?: string[] } = {}) {
     const { section = "made-for-you", limit = 20 } = opts;
+
     const profile = await ProfileEngine.getProfile(userId).catch(() => null);
+
+    // Privacy: if personalization is disabled, serve a generic (non-personal) feed.
+    if (profile && (profile as any).personalizationEnabled === false) {
+      return this._genericTrending(limit);
+    }
 
     const profileGenres: Record<string, number> = (profile?.genres as Record<string, number>) || {};
     const profileArtists: Record<string, number> = (profile?.artists as Record<string, number>) || {};
@@ -164,13 +171,37 @@ export const RecommendationEngine = {
 
   /** Return a bundle of context-aware sections for the home "For You" feed. */
   async getForYouFeed(userId: string, limitPerSection = 8) {
-    const sectionKeys: MixSection[] = ["made-for-you", "new-music-mix", "chill", "workout", "party", "late-night"];
-    const results = await Promise.all(
-      sectionKeys.map(async (key) => ({
-        section: key,
-        songs: await this.recommend(userId, { section: key, limit: limitPerSection }).catch(() => []),
-      }))
-    );
-    return results.filter((r) => r.songs.length > 0);
+    return IntelligenceCache.getOrSet(`for-you:${userId}:${limitPerSection}`, 10 * 60 * 1000, async () => {
+      const sectionKeys: MixSection[] = ["made-for-you", "new-music-mix", "chill", "workout", "party", "late-night"];
+      const results = await Promise.all(
+        sectionKeys.map(async (key) => ({
+          section: key,
+          songs: await this.recommend(userId, { section: key, limit: limitPerSection }).catch(() => []),
+        }))
+      );
+      return results.filter((r) => r.songs.length > 0);
+    });
+  },
+
+  async _genericTrending(limit: number) {
+    const songs = await db.song.findMany({
+      where: { approved: true, published: true },
+      include: { artist: { include: { user: { select: { name: true } } } } },
+      orderBy: [{ playCount: "desc" }, { createdAt: "desc" }],
+      take: limit,
+    });
+    return songs.map((song) => ({
+      id: song.id,
+      title: song.title,
+      artist: song.artist?.user?.name || song.artist?.artistName || "Unknown",
+      artistId: song.artistId,
+      genre: song.genre,
+      duration: song.duration,
+      coverUrl: song.coverUrl,
+      hlsUrl: song.hlsUrl,
+      fileUrl: song.fileUrl,
+      playCount: song.playCount,
+      reason: 0,
+    }));
   },
 };

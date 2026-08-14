@@ -1,4 +1,5 @@
 import { db } from "../../db";
+import { IntelligenceCache } from "./cache";
 
 /**
  * Trend Detection Engine — detects viral songs, rising artists, emerging
@@ -93,24 +94,26 @@ export const TrendEngine = {
 
   /** Weighted "Trending Now" — recent activity across streams, likes, downloads. */
   async getTrendingNow(limit = 20) {
-    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const [streams, likes, downloads] = await Promise.all([
-      db.stream.groupBy({ by: ["songId"], where: { createdAt: { gte: since } }, _count: true }),
-      db.like.groupBy({ by: ["songId"], where: { createdAt: { gte: since } }, _count: true }),
-      db.download.groupBy({ by: ["songId"], where: { createdAt: { gte: since } }, _count: true }),
-    ]);
+    return IntelligenceCache.getOrSet(`trending-now:${limit}`, 5 * 60 * 1000, async () => {
+      const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const [streams, likes, downloads] = await Promise.all([
+        db.stream.groupBy({ by: ["songId"], where: { createdAt: { gte: since } }, _count: true }),
+        db.like.groupBy({ by: ["songId"], where: { createdAt: { gte: since } }, _count: true }),
+        db.download.groupBy({ by: ["songId"], where: { createdAt: { gte: since } }, _count: true }),
+      ]);
 
-    const score: Record<string, number> = {};
-    for (const s of streams) score[s.songId] = (score[s.songId] || 0) + s._count;
-    for (const l of likes) score[l.songId] = (score[l.songId] || 0) + l._count * 5;
-    for (const d of downloads) score[d.songId] = (score[d.songId] || 0) + d._count * 8;
+      const score: Record<string, number> = {};
+      for (const s of streams) score[s.songId] = (score[s.songId] || 0) + s._count;
+      for (const l of likes) score[l.songId] = (score[l.songId] || 0) + l._count * 5;
+      for (const d of downloads) score[d.songId] = (score[d.songId] || 0) + d._count * 8;
 
-    const topIds = Object.entries(score)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, limit)
-      .map(([id]) => id);
+      const topIds = Object.entries(score)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, limit)
+        .map(([id]) => id);
 
-    return this._hydrateSongs(topIds.map((id) => ({ id, score: score[id] })));
+      return this._hydrateSongs(topIds.map((id) => ({ id, score: score[id] })));
+    });
   },
 
   async _hydrateSongs(items: Array<{ id: string; [k: string]: any }>) {

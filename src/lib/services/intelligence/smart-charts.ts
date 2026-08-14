@@ -1,4 +1,5 @@
 import { db } from "../../db";
+import { IntelligenceCache } from "./cache";
 
 /**
  * Smart Charts — weighted, manipulation-resistant ranking.
@@ -21,6 +22,10 @@ const WEIGHTS = {
 
 export const SmartChartsEngine = {
   async getTopSongs(days = 7, limit = 50) {
+    return IntelligenceCache.getOrSet(`charts:songs:${days}:${limit}`, 5 * 60 * 1000, async () => this._computeTopSongs(days, limit));
+  },
+
+  async _computeTopSongs(days: number, limit: number) {
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
 
     const [streamRows, downloads, playlistSaves, shares, radioPlays, recentStreams, priorStreams] = await Promise.all([

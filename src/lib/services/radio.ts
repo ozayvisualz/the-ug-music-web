@@ -1,5 +1,6 @@
 import { db } from "../db";
 import { GENRES } from "../utils";
+import { ProfileEngine } from "./intelligence/profile";
 
 interface RadioStation {
   id: string;
@@ -167,12 +168,19 @@ export const RadioService = {
         take: queueSize * 3,
       });
 
+      // Learn from listener behavior to personalize the station in real time.
+      const profile = await ProfileEngine.getProfile(userId).catch(() => null);
+      const profileGenres: Record<string, number> = (profile?.genres as Record<string, number>) || {};
+      const profileArtists: Record<string, number> = (profile?.artists as Record<string, number>) || {};
+
       songs.sort((a, b) => {
-        const aLiked = likedSongIds.includes(a.id) ? 0 : 1;
-        const bLiked = likedSongIds.includes(b.id) ? 0 : 1;
-        const aRecent = recentSongIds.includes(a.id) ? 1 : 0;
-        const bRecent = recentSongIds.includes(b.id) ? 1 : 0;
-        return aLiked - bLiked || aRecent - bRecent || Math.random() - 0.5;
+        const aLiked = likedSongIds.includes(a.id) ? 1 : 0;
+        const bLiked = likedSongIds.includes(b.id) ? 1 : 0;
+        const aRecent = recentSongIds.includes(a.id) ? -2 : 0;
+        const bRecent = recentSongIds.includes(b.id) ? -2 : 0;
+        const aAff = (profileGenres[a.genre] || 0) * 1.2 + (profileArtists[a.artistId] || 0) * 0.8;
+        const bAff = (profileGenres[b.genre] || 0) * 1.2 + (profileArtists[b.artistId] || 0) * 0.8;
+        return bLiked - aLiked || bAff - aAff || bRecent - aRecent || b.playCount - a.playCount || Math.random() - 0.5;
       });
 
       songs = songs.slice(0, queueSize);

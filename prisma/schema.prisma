@@ -812,19 +812,20 @@ model UserEvent {
 }
 
 model ListenerProfile {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  genres         Json?
-  moods          Json?
-  artists        Json?
-  songs          Json?
-  hourOfDay      Json?
-  dayOfWeek      Json?
-  skipRate       Float    @default(0)
-  completionRate Float    @default(0)
-  totalPlays     Int      @default(0)
-  updatedAt      DateTime @updatedAt
-  createdAt      DateTime @default(now())
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  genres                Json?
+  moods                 Json?
+  artists               Json?
+  songs                 Json?
+  hourOfDay             Json?
+  dayOfWeek             Json?
+  skipRate              Float    @default(0)
+  completionRate        Float    @default(0)
+  totalPlays            Int      @default(0)
+  personalizationEnabled Boolean  @default(true)
+  updatedAt             DateTime @updatedAt
+  createdAt             DateTime @default(now())
 }
 
 model AiPlaylist {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, protectedProcedure, artistProcedure, router } from "../trpc";
+import { publicProcedure, protectedProcedure, artistProcedure, adminProcedure, router } from "../trpc";
 import {
   RecommendationEngine,
   SmartSearchEngine,
@@ -12,6 +12,7 @@ import {
   IntelligenceEvents,
   PlaylistGenerator,
   FraudEngine,
+  AdminAssistant,
 } from "@/lib/services/intelligence";
 
 export const intelligenceRouter = router({
@@ -41,6 +42,18 @@ export const intelligenceRouter = router({
     await ProfileEngine.computeProfile(userId);
     return { success: true };
   }),
+
+  clearHistory: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = (ctx.session!.user as any).id;
+    return ProfileEngine.clearHistory(userId);
+  }),
+
+  setPersonalization: protectedProcedure
+    .input(z.object({ enabled: z.boolean() }))
+    .mutation(async ({ input, ctx }) => {
+      const userId = (ctx.session!.user as any).id;
+      return ProfileEngine.setPersonalization(userId, input.enabled);
+    }),
 
   // --- Smart search ---
   search: publicProcedure
@@ -125,4 +138,7 @@ export const intelligenceRouter = router({
 
   // --- Anti-fraud (admin review) ---
   getFraudAnomalies: publicProcedure.input(z.object({ limit: z.number().default(20) })).query(async ({ input }) => FraudEngine.detectAnomalies(input.limit)),
+
+  // --- Admin AI assistant ---
+  assistant: adminProcedure.input(z.object({ question: z.string().min(1) })).mutation(async ({ input }) => AdminAssistant.answer(input.question)),
 });
