@@ -5,13 +5,22 @@ import { IntelligenceEvents } from "@/lib/services/intelligence/events";
 export const playlistRouter = router({
   getMyPlaylists: protectedProcedure.query(async ({ ctx }) => {
     const userId = (ctx.session!.user as any).id;
-    return ctx.db.playlist.findMany({
-      where: { userId },
-      include: {
-        songs: { include: { song: { select: { id: true, title: true, coverUrl: true, duration: true } } } },
-      },
-      orderBy: { updatedAt: "desc" },
-    });
+      return ctx.db.playlist.findMany({
+        where: { userId },
+        include: {
+          songs: {
+            include: {
+              song: {
+                select: {
+                  id: true, title: true, coverUrl: true, duration: true, fileUrl: true, hlsUrl: true,
+                  artist: { select: { artistName: true, user: { select: { name: true } } } },
+                },
+              },
+            },
+          },
+        },
+        orderBy: { updatedAt: "desc" },
+      });
   }),
 
   create: protectedProcedure

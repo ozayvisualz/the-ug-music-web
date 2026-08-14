@@ -22,9 +22,12 @@ const SW = Dimensions.get("window").width;
 type Song = {
   id: string;
   title: string;
-  artist: string;
+  artist?: string;
+  artistId?: string;
   duration: number;
-  url: string;
+  url?: string;
+  fileUrl?: string;
+  hlsUrl?: string;
   coverUrl?: string;
 };
 
@@ -97,8 +100,8 @@ export default function ArtistScreen() {
       const tracks = artist.songs.map((s) => ({
         id: s.id,
         title: s.title,
-        artist: s.artist,
-        url: s.url,
+        artist: (s as any).artist?.artistName || (s as any).artist?.user?.name || artist.name || "Unknown",
+        url: (s as any).fileUrl || (s as any).hlsUrl || (s as any).url || "",
         duration: s.duration,
         coverUrl: s.coverUrl,
       }));

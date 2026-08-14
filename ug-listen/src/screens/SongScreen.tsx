@@ -29,7 +29,9 @@ type Song = {
   artist: string;
   artistId?: string;
   duration: number;
-  url: string;
+  url?: string;
+  fileUrl?: string;
+  hlsUrl?: string;
   coverUrl?: string;
   genre?: string;
   plays?: number;
@@ -107,7 +109,7 @@ export default function SongScreen() {
         id: song.id,
         title: song.title,
         artist: song.artist,
-        url: song.url,
+        url: song.fileUrl || song.hlsUrl || song.url || "",
         duration: song.duration,
         coverUrl: song.coverUrl,
       },

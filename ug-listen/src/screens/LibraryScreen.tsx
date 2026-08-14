@@ -30,6 +30,19 @@ function formatDuration(d: number): string {
   return Math.floor(d / 60) + ":" + (d % 60).toString().padStart(2, "0");
 }
 
+function toSong(x: any): Song {
+  const s = x?.song ?? x;
+  const artist = s?.artist?.user?.name || s?.artist?.artistName || (typeof s?.artist === "string" ? s.artist : "Unknown");
+  return {
+    id: s?.id,
+    title: s?.title || "Unknown",
+    artist,
+    duration: s?.duration || 0,
+    url: s?.fileUrl || s?.hlsUrl || s?.url || "",
+    coverUrl: s?.coverUrl,
+  };
+}
+
 function SongRow({ song, onPlay }: { song: Song; onPlay: (song: Song) => void }) {
   const { colors } = useTheme();
   return (
@@ -88,7 +101,7 @@ export default function LibraryScreen() {
       setLikedLoading(true);
       trpc.social.getLikedSongs
         .query()
-        .then((data: Song[]) => setLiked(data))
+        .then((data: any[]) => setLiked(data.map(toSong)))
         .catch(() => setLiked([]))
         .finally(() => setLikedLoading(false));
     }
@@ -97,7 +110,7 @@ export default function LibraryScreen() {
       setHistoryLoading(true);
       trpc.streaming.getListeningHistory
         .query()
-        .then((data: Song[]) => setHistory(data))
+        .then((data: any[]) => setHistory(data.map(toSong)))
         .catch(() => setHistory([]))
         .finally(() => setHistoryLoading(false));
     }

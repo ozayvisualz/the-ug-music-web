@@ -49,7 +49,9 @@ type QueueSong = {
   title: string;
   artist: string;
   duration: number;
-  url: string;
+  url?: string;
+  fileUrl?: string;
+  hlsUrl?: string;
   coverUrl?: string;
 };
 
@@ -106,7 +108,7 @@ export default function RadioScreen() {
       id: s.id,
       title: s.title,
       artist: s.artist,
-      url: s.url,
+      url: s.fileUrl || s.hlsUrl || s.url || "",
       duration: s.duration,
       coverUrl: s.coverUrl,
     }));

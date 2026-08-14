@@ -218,7 +218,10 @@ export default function HomeScreen() {
         if (data.trending) { setHeroSongs(data.trending); setTrending(data.trending); }
         if (data.newReleases) setNewReleases(data.newReleases);
         if (data.forYou) setForYou(data.forYou);
-        if (data.continueListening) setContinueListening(Array.isArray(data.continueListening) ? data.continueListening : [data.continueListening]);
+        if (data.continueListening) {
+          const cl = Array.isArray(data.continueListening) ? data.continueListening : [data.continueListening];
+          setContinueListening(cl.map((s: any) => (s?.song ? { ...s.song, id: s.song.id, position: s.position } : s)).filter(Boolean));
+        }
       })
       .catch(() => {})
       .finally(() => {

@@ -28,7 +28,8 @@ type Song = {
 
 type Playlist = {
   id: string;
-  name: string;
+  name?: string;
+  title?: string;
   songs: Song[];
 };
 
@@ -42,7 +43,18 @@ export default function PlaylistScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
   const playlist: Playlist = route.params.playlist;
-  const songs: Song[] = playlist.songs ?? [];
+  const songs: Song[] = (playlist.songs ?? []).map((ps: any) => {
+    const s = ps?.song ?? ps;
+    return {
+      id: s.id,
+      title: s.title,
+      artist: s.artist?.artistName || s.artist?.user?.name || (typeof s.artist === "string" ? s.artist : "Unknown"),
+      duration: s.duration || 0,
+      url: s.fileUrl || s.hlsUrl || s.url || "",
+      coverUrl: s.coverUrl,
+    };
+  });
+  const playlistName = playlist.name || playlist.title || "Playlist";
   const setQueue = useQueueStore((s) => s.setQueue);
   const { colors } = useTheme();
 
@@ -101,7 +113,7 @@ export default function PlaylistScreen() {
           </View>
         </View>
 
-        <Text style={[styles.title, { color: colors.white }]}>{playlist.name}</Text>
+        <Text style={[styles.title, { color: colors.white }]}>{playlistName}</Text>
         <Text style={styles.byYouLabel}>By You</Text>
         <Text style={styles.songCount}>{songs.length} songs</Text>
 
