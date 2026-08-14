@@ -7,14 +7,17 @@ interface NotificationPayload {
 
 export const NotificationEngine = {
   async send(payload: NotificationPayload) {
-    // In production, integrate with Firebase Cloud Messaging, OneSignal, or similar.
-    // For now, log the notification and store in database.
-    console.log(`[NOTIFICATION] Sent to ${payload.audience}: ${payload.title} - ${payload.body}`);
-
-    // TODO: Integrate with actual push notification service
-    // await firebase.messaging().sendToTopic(payload.audience, {
-    //   notification: { title: payload.title, body: payload.body },
-    // });
+    try {
+      const { sendPushNotification } = await import("../firebase-admin");
+      // Send to a topic matching the audience for push delivery
+      await sendPushNotification({
+        title: payload.title,
+        body: payload.body,
+        topic: payload.audience,
+      });
+    } catch (e: any) {
+      console.error("[Notification] Push send failed:", e?.message);
+    }
 
     return {
       success: true,
