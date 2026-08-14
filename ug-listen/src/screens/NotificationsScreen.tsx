@@ -31,7 +31,7 @@ import { trpc } from "../api/client";
 import { useQueueStore } from "../store/playerStore";
 import { useNotificationStore } from "../store/notificationStore";
 import { markNotificationOpened } from "../lib/notifications";
-import { navigationRef } from "../navigation/navigationRef";
+import { navigate } from "../navigation/navigationRef";
 import GlassNotificationModal, { type NotificationItem, type OriginRect } from "../components/GlassNotificationModal";
 
 const CARD_SPRING = { damping: 18, stiffness: 320 };
@@ -221,9 +221,7 @@ export default function NotificationsScreen() {
 
   const handleOpenTicket = () => {
     closeModal();
-    if (navigationRef.isReady()) {
-      navigationRef.navigate("Profile" as never, { screen: "Support" } as never);
-    }
+    navigate("Profile", { screen: "Support" });
   };
 
   if (loading) {

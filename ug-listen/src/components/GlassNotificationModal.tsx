@@ -195,7 +195,7 @@ export default function GlassNotificationModal({
         { scale: interpolate(t, [0, 1], [0.97, 1], Extrapolation.CLAMP) },
         { rotateX: interpolate(t, [0, 1], [7, 0], Extrapolation.CLAMP) },
       ],
-    };
+    } as any;
   });
 
   const floatStyle = useAnimatedStyle(() => ({
