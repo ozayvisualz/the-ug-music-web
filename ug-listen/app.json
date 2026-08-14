@@ -12,23 +12,35 @@
       "backgroundColor": "#09090B"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.theugmusic.app"
     },
     "android": {
+      "package": "com.theugmusic.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-secure-store",
-      "expo-audio",
-      "expo-notifications"
-    ]
+      "expo-audio"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "888cf62a-258e-4ebb-b360-22abb2541850"
+      }
+    },
+    "owner": "ozay_visualz"
   }
 }
