@@ -91,7 +91,7 @@ export const adminRouter = router({
     .input(z.object({ search: z.string().optional(), role: z.string().optional(), limit: z.number().default(50), offset: z.number().default(0) }))
     .query(async ({ input, ctx }) => {
       const where: any = {};
-      if (input.search) where.OR = [{ name: { contains: input.search, mode: "insensitive" } }, { email: { contains: input.search, mode: "insensitive" } }];
+      if (input.search) where.OR = [{ name: { contains: input.search, mode: "insensitive" } }, { email: { contains: input.search, mode: "insensitive" } }, { userId: { contains: input.search, mode: "insensitive" } }];
       if (input.role) where.role = input.role;
       const [users, total] = await Promise.all([
         ctx.db.user.findMany({ where, select: { id: true, userId: true, name: true, email: true, phone: true, role: true, accountStatus: true, banReason: true, banExpiresAt: true, createdAt: true }, orderBy: { createdAt: "desc" }, take: input.limit, skip: input.offset }),

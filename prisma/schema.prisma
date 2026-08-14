@@ -107,6 +107,8 @@ model User {
   auditLogs       AuditLog[]
   moderationLogs  ModerationLog[]  @relation("ModerationUser")
   adminActions    ModerationLog[]  @relation("ModerationAdmin")
+
+  @@index([accountType])
 }
 
 model Account {
