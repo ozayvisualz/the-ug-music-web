@@ -18,6 +18,10 @@ export default function NotificationsScreen() {
         const res = await fetch(url);
         const data = await res.json();
         if (Array.isArray(data)) setNotifications(data);
+        // Mark all as read
+        if (token) {
+          fetch(`https://theugmusic.com/api/admin/notifications?markRead=1&token=${encodeURIComponent(token)}`).catch(() => {});
+        }
       } catch {}
       setLoading(false);
     })();

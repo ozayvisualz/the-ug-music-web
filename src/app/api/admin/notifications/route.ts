@@ -71,6 +71,16 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const user = getUserId(req);
+
+    // Mark all as read
+    if (req.nextUrl.searchParams.get("markRead") === "1" && user?.id) {
+      await db.notification.updateMany({
+        where: { userId: user.id, read: false },
+        data: { read: true },
+      });
+      return NextResponse.json({ success: true });
+    }
+
     if (user?.role === "ADMIN") {
       const notifications = await db.notification.findMany({
         orderBy: { createdAt: "desc" },

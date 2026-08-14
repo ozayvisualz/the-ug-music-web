@@ -41,6 +41,7 @@ import { trpc } from "../api/client";
 import { useAuthStore } from "../store/authStore";
 import { useQueueStore } from "../store/playerStore";
 import { useTheme } from "../theme/ThemeContext";
+import { getStoredToken } from "../api/auth";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const SW = SCREEN_WIDTH;
@@ -197,6 +198,7 @@ export default function HomeScreen() {
   const [nrLoading, setNrLoading] = useState(true);
   const [continueListening, setContinueListening] = useState<any[]>([]);
   const [clLoading, setClLoading] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const [heroIndex, setHeroIndex] = useState(0);
   const heroFlatRef = useRef<FlatList>(null);
@@ -223,6 +225,19 @@ export default function HomeScreen() {
         setClLoading(false);
         setArtistsLoading(false);
       });
+  }, [user]);
+
+  useEffect(() => {
+    (async () => {
+      const token = await getStoredToken();
+      if (!token) return;
+      fetch(`https://theugmusic.com/api/admin/notifications?token=${encodeURIComponent(token)}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (Array.isArray(d)) setUnreadCount(d.filter((n: any) => !n.read).length);
+        })
+        .catch(() => {});
+    })();
   }, [user]);
 
   useEffect(() => {
@@ -302,6 +317,11 @@ export default function HomeScreen() {
             hitSlop={HIT_SLOP}
           >
             <Bell size={20} color={COLORS.white} />
+            {unreadCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.notificationBadgeText}>{unreadCount > 9 ? "9+" : unreadCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.headerIcon}
@@ -612,6 +632,23 @@ const styles = StyleSheet.create({
   },
   headerIcon: {
     padding: SPACING.xs,
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.red,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+  },
+  notificationBadgeText: {
+    color: "#FFFFFF",
+    fontSize: 9,
+    fontWeight: "700",
   },
   avatar: {
     width: 32,
