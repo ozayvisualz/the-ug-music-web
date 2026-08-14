@@ -15,10 +15,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { Music2, Play, Send, Heart, MessageCircle } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
-import { trpc } from "../api/client";
 import { useQueueStore } from "../store/playerStore";
 import { useAuthStore } from "../store/authStore";
 import { useTheme } from "../theme/ThemeContext";
+import { getStoredToken } from "../api/auth";
 
 const SW = Dimensions.get("window").width;
 const ARTWORK_SIZE = Math.min(SW * 0.55, 220);
@@ -86,16 +86,16 @@ export default function SongScreen() {
 
   useEffect(() => {
     setSongLoading(true);
-    trpc.music.getById
-      .query(songId)
-      .then((data: Song) => setSong(data))
+    fetch(`https://theugmusic.com/api/mobile/song?id=${encodeURIComponent(songId)}`)
+      .then((r) => r.json())
+      .then((data) => setSong(data.error ? null : data))
       .catch(() => setSong(null))
       .finally(() => setSongLoading(false));
 
     setCommentsLoading(true);
-    trpc.social.getComments
-      .query({ songId })
-      .then((data: Comment[]) => setComments(data))
+    fetch(`https://theugmusic.com/api/mobile/comments?songId=${encodeURIComponent(songId)}`)
+      .then((r) => r.json())
+      .then((data) => setComments(Array.isArray(data) ? data : []))
       .catch(() => setComments([]))
       .finally(() => setCommentsLoading(false));
   }, [songId]);
@@ -119,10 +119,14 @@ export default function SongScreen() {
     if (!content || sending) return;
     setSending(true);
     try {
-      await trpc.social.addComment.mutate({ songId, content });
-      setCommentText("");
-      const updated = await trpc.social.getComments.query({ songId });
-      setComments(updated);
+      const token = await getStoredToken();
+      const url = `https://theugmusic.com/api/mobile/comments?action=add&songId=${encodeURIComponent(songId)}&content=${encodeURIComponent(content)}&token=${encodeURIComponent(token || "")}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (res.ok && data.comment) {
+        setCommentText("");
+        setComments((prev) => [data.comment, ...prev]);
+      }
     } catch {
     } finally {
       setSending(false);
