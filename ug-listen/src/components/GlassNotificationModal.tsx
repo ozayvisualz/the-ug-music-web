@@ -24,7 +24,6 @@ import Animated, {
   runOnJS,
   Extrapolation,
 } from "react-native-reanimated";
-import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -193,7 +192,7 @@ export default function GlassNotificationModal({
         { translateX: interpolate(t, [0, 1], [fromX.value, 0], Extrapolation.CLAMP) },
         { translateY: interpolate(t, [0, 1], [fromY.value, 0], Extrapolation.CLAMP) },
         { scale: interpolate(t, [0, 1], [0.97, 1], Extrapolation.CLAMP) },
-        { rotateX: interpolate(t, [0, 1], ["7deg", "0deg"], Extrapolation.CLAMP) },
+        { rotateX: `${interpolate(t, [0, 1], [7, 0], Extrapolation.CLAMP)}deg` },
       ],
     } as any;
   });
@@ -298,9 +297,7 @@ export default function GlassNotificationModal({
   return (
     <Modal visible transparent animationType="none" onRequestClose={dismiss} statusBarTranslucent>
       <View style={styles.root}>
-        <Animated.View style={[StyleSheet.absoluteFill, blurStyle]} pointerEvents="none">
-          <BlurView intensity={28} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
-        </Animated.View>
+        <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(12,12,16,0.7)" }, blurStyle]} pointerEvents="none" />
 
         <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: "rgba(0,0,0,0.5)" }, backdropStyle]} />
 

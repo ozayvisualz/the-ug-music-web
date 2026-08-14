@@ -27,7 +27,6 @@ import Animated, {
   Easing,
   Extrapolation,
 } from "react-native-reanimated";
-import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { COLORS, SPRING } from "../constants/theme";
@@ -334,7 +333,6 @@ export default function LoginScreen() {
             <Animated.View style={[styles.cardWrap, cardStyle]}>
               <View style={styles.card}>
                 <View style={styles.cardInner} pointerEvents="none">
-                  <BlurView intensity={28} tint={glass.blurTint} style={StyleSheet.absoluteFill} />
                   <LinearGradient colors={glass.cardColors} style={StyleSheet.absoluteFill} />
                   <LinearGradient
                     colors={["rgba(255,255,255,0.14)", "rgba(255,255,255,0)"]}
