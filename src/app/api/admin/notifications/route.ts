@@ -60,6 +60,17 @@ export async function POST(req: NextRequest) {
       await db.notification.createMany({
         data: userIds.map((userId) => ({ userId, title, body, audience })),
       });
+
+      // Send push notifications to users with registered tokens
+      const usersWithTokens = await db.user.findMany({
+        where: { id: { in: userIds }, pushToken: { not: null } },
+        select: { pushToken: true },
+      });
+      const tokens = usersWithTokens.map((u) => u.pushToken).filter(Boolean) as string[];
+      if (tokens.length > 0) {
+        const { sendPushNotification } = await import("@/lib/firebase-admin");
+        await sendPushNotification({ title, body, tokens });
+      }
     }
 
     return NextResponse.json({ success: true, count: userIds.length || "global" });

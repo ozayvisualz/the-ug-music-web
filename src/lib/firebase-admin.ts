@@ -53,20 +53,30 @@ export async function createCustomToken(userId: string): Promise<string> {
   return getAuth(app).createCustomToken(userId);
 }
 
-export async function sendPushNotification(payload: { title: string; body: string; userId?: string; topic?: string; data?: Record<string, string> }): Promise<void> {
+export async function sendPushNotification(payload: { title: string; body: string; userId?: string; topic?: string; tokens?: string[]; data?: Record<string, string> }): Promise<void> {
   try {
     const app = getAdminApp();
     const { getMessaging } = await import("firebase-admin/messaging");
     const messaging = getMessaging(app);
 
-    const message: any = {
-      notification: { title: payload.title, body: payload.body },
-      data: payload.data || {},
-    };
+    if (payload.tokens && payload.tokens.length > 0) {
+      const validTokens = payload.tokens.filter(Boolean);
+      if (validTokens.length > 0) {
+        await messaging.sendEachForMulticast({
+          tokens: validTokens,
+          notification: { title: payload.title, body: payload.body },
+          data: payload.data || {},
+        });
+      }
+      return;
+    }
 
     if (payload.topic) {
-      message.topic = payload.topic;
-      await messaging.send(message);
+      await messaging.send({
+        topic: payload.topic,
+        notification: { title: payload.title, body: payload.body },
+        data: payload.data || {},
+      });
     }
   } catch (e: any) {
     console.error("[FCM] Push notification failed:", e?.message);

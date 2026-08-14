@@ -10,6 +10,7 @@ import ErrorBoundary from "./src/components/ErrorBoundary";
 import { getStoredToken, getStoredUser, setAuthToken } from "./src/api/auth";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import { PlayerProvider } from "./src/components/PlayerContext";
+import { registerPushToken, setupNotificationListeners } from "./src/lib/notifications";
 
 function AppContent() {
   const { user, loading, setUser, setLoading } = useAuthStore();
@@ -21,10 +22,13 @@ function AppContent() {
         const token = await getStoredToken();
         if (token) {
           const stored = await getStoredUser();
-          if (stored) { setAuthToken(token); setUser(stored); return; }
+          if (stored) { setAuthToken(token); setUser(stored); }
         }
       } catch {}
       setLoading(false);
+      // Setup push notifications
+      setupNotificationListeners();
+      registerPushToken();
     })();
   }, []);
 
