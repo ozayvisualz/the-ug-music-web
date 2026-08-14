@@ -14,9 +14,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { ArrowLeft, HelpCircle, ChevronDown, ChevronUp } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
-import { trpc } from "../api/client";
 import { useAuthStore } from "../store/authStore";
 import { useTheme } from "../theme/ThemeContext";
+import { getStoredToken } from "../api/auth";
 
 const SW = Dimensions.get("window").width;
 
@@ -77,11 +77,14 @@ export default function SupportScreen() {
 
   useEffect(() => {
     setTicketsLoading(true);
-    trpc.business.getTickets
-      .query()
-      .then((data: Ticket[]) => setTickets(data))
-      .catch(() => setTickets([]))
-      .finally(() => setTicketsLoading(false));
+    (async () => {
+      const token = await getStoredToken();
+      fetch(`https://theugmusic.com/api/mobile/support?token=${encodeURIComponent(token || "")}`)
+        .then((r) => r.json())
+        .then((data) => setTickets(Array.isArray(data) ? data : []))
+        .catch(() => setTickets([]))
+        .finally(() => setTicketsLoading(false));
+    })();
   }, []);
 
   const handleSubmit = useCallback(async () => {
@@ -96,16 +99,16 @@ export default function SupportScreen() {
     }
     setSubmitting(true);
     try {
-      await trpc.business.createTicket.mutate({
-        userId: user.id,
-        subject: trimmed,
-        category,
-      });
+      const token = await getStoredToken();
+      const url = `https://theugmusic.com/api/mobile/support?action=create&subject=${encodeURIComponent(trimmed)}&category=${encodeURIComponent(category)}&token=${encodeURIComponent(token || "")}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed");
       Alert.alert("Success", "Your ticket has been submitted.");
       setSubject("");
       setCategory("General");
-      const updated = await trpc.business.getTickets.query();
-      setTickets(updated as Ticket[]);
+      const updated = await fetch(`https://theugmusic.com/api/mobile/support?token=${encodeURIComponent(token || "")}`).then((r) => r.json());
+      setTickets(Array.isArray(updated) ? updated : []);
     } catch {
       Alert.alert("Error", "Failed to submit ticket. Please try again.");
     } finally {

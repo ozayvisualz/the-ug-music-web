@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { adminProcedure, router } from "../trpc";
+import { adminProcedure, protectedProcedure, router } from "../trpc";
 import { BusinessService } from "@/lib/services/business";
 import { db } from "@/lib/db";
 
@@ -40,7 +40,14 @@ export const businessRouter = router({
   getPromotions: adminProcedure.query(async () => BusinessService.getPromotions()),
 
   // Support
-  createTicket: adminProcedure.input(z.object({ userId: z.string(), subject: z.string(), category: z.string() })).mutation(async ({ input }) => BusinessService.createSupportTicket(input)),
+  createTicket: protectedProcedure.input(z.object({ subject: z.string().min(1), category: z.string() })).mutation(async ({ input, ctx }) => {
+    const userId = (ctx.session!.user as any).id;
+    return BusinessService.createSupportTicket({ userId, subject: input.subject, category: input.category });
+  }),
+  getMyTickets: protectedProcedure.query(async ({ ctx }) => {
+    const userId = (ctx.session!.user as any).id;
+    return db.supportTicket.findMany({ where: { userId }, orderBy: { createdAt: "desc" }, take: 50 });
+  }),
   getTickets: adminProcedure.input(z.object({ status: z.string().optional() })).query(async ({ input }) => BusinessService.getSupportTickets(input.status)),
   updateTicket: adminProcedure.input(z.object({ id: z.string(), status: z.string() })).mutation(async ({ input }) => BusinessService.updateTicketStatus(input.id, input.status)),
 
