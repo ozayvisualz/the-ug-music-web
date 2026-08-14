@@ -84,14 +84,14 @@ export const StreamingEngine = {
       },
     });
 
-    // 6. Update song play count
-    if (revenueEligible) {
-      await db.song.update({
-        where: { id: songId },
-        data: { playCount: { increment: 1 } },
-      });
+    // 6. Update play count on EVERY playback start (play count vs stream count are separate)
+    await db.song.update({
+      where: { id: songId },
+      data: { playCount: { increment: 1 } },
+    });
 
-      // Update artist total streams
+    // 7. Update artist total streams only for revenue-eligible streams
+    if (revenueEligible) {
       await db.artist.update({
         where: { id: song.artistId },
         data: { totalStreams: { increment: 1 } },
