@@ -34,6 +34,16 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-6 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+        <div className="flex items-center justify-between bg-zinc-800/50 rounded-lg p-3">
+          <div>
+            <p className="text-xs text-zinc-500 uppercase tracking-wider">Listener ID</p>
+            <p className="text-base font-mono font-bold text-yellow-500">{(user as any).userId || "—"}</p>
+          </div>
+          <button onClick={() => { navigator.clipboard?.writeText((user as any).userId || ""); toast.success("Listener ID copied"); }}
+            className="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-300 text-xs hover:bg-zinc-700 transition">
+            Copy ID
+          </button>
+        </div>
         <div>
           <label className="block text-sm text-zinc-400 mb-1.5">Full Name</label>
           <div className="relative">
