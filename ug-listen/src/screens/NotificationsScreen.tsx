@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Pressable,
   Share,
+  Dimensions,
   type View as RNView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -152,16 +153,22 @@ export default function NotificationsScreen() {
   const openNotification = (n: NotificationItem) => {
     const el = cardRefs.current[n.id];
     const wasUnread = !n.read;
-    el?.measureInWindow((x, y, width, height) => {
-      setActive({ n, origin: { x, y, width, height }, wasUnread });
-    });
-    if (wasUnread) {
-      const next = notifications.map((p) => (p.id === n.id ? { ...p, read: true } : p));
-      setNotifications(next);
-      setUnreadCount(next.filter((p) => !p.read).length);
-      markNotificationOpened(n.id).then((unread) => {
-        if (typeof unread === "number") setUnreadCount(unread);
-      });
+    const open = (origin: OriginRect) => {
+      setActive({ n, origin, wasUnread });
+      if (wasUnread) {
+        const next = notifications.map((p) => (p.id === n.id ? { ...p, read: true } : p));
+        setNotifications(next);
+        setUnreadCount(next.filter((p) => !p.read).length);
+        markNotificationOpened(n.id).then((unread) => {
+          if (typeof unread === "number") setUnreadCount(unread);
+        });
+      }
+    };
+    if (el) {
+      el.measureInWindow((x, y, width, height) => open({ x, y, width, height }));
+    } else {
+      const { width: w, height: h } = Dimensions.get("window");
+      open({ x: (w - 320) / 2, y: h / 2 - 80, width: 320, height: 160 });
     }
   };
 
