@@ -29,7 +29,37 @@ export const adminRouter = router({
   }),
 
   // === SONGS ===
-  approveSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => ctx.db.song.update({ where: { id: input }, data: { approved: true, status: "approved" } })),
+  approveSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => {
+    const song = await ctx.db.song.findUnique({ where: { id: input }, include: { artist: { select: { artistName: true } } } });
+    if (!song) throw new Error("Song not found");
+    await ctx.db.song.update({ where: { id: input }, data: { approved: true, status: "approved" } });
+
+    // Notify followers of the artist about the new release
+    try {
+      const followers = await ctx.db.follow.findMany({ where: { artistId: song.artistId }, select: { followerId: true } });
+      const followerIds = followers.map((f) => f.followerId);
+      if (followerIds.length > 0) {
+        const artistName = song.artist?.artistName || "An artist";
+        await ctx.db.notification.createMany({
+          data: followerIds.map((userId) => ({
+            userId,
+            title: `${artistName} released new music!`,
+            body: `Listen to "${song.title}" now on TheUgMusic.`,
+            audience: "followers",
+          })),
+        });
+
+        const usersWithTokens = await ctx.db.user.findMany({ where: { id: { in: followerIds }, pushToken: { not: null } }, select: { pushToken: true } });
+        const tokens = usersWithTokens.map((u) => u.pushToken).filter(Boolean) as string[];
+        if (tokens.length > 0) {
+          const { sendPushNotification } = await import("@/lib/firebase-admin");
+          await sendPushNotification({ title: `${artistName} released new music!`, body: `Listen to "${song.title}" now on TheUgMusic.`, tokens });
+        }
+      }
+    } catch {}
+
+    return song;
+  }),
   rejectSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => ctx.db.song.update({ where: { id: input }, data: { approved: false, published: false, status: "rejected" } })),
   featureSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => { const s = await ctx.db.song.findUnique({ where: { id: input } }); return ctx.db.song.update({ where: { id: input }, data: { approved: true, published: !s?.published } }); }),
   deleteSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => ctx.db.song.delete({ where: { id: input } })),
