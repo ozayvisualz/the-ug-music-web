@@ -94,7 +94,7 @@ export const adminRouter = router({
       if (input.search) where.OR = [{ name: { contains: input.search, mode: "insensitive" } }, { email: { contains: input.search, mode: "insensitive" } }];
       if (input.role) where.role = input.role;
       const [users, total] = await Promise.all([
-        ctx.db.user.findMany({ where, select: { id: true, name: true, email: true, phone: true, role: true, accountStatus: true, banReason: true, banExpiresAt: true, createdAt: true }, orderBy: { createdAt: "desc" }, take: input.limit, skip: input.offset }),
+        ctx.db.user.findMany({ where, select: { id: true, userId: true, name: true, email: true, phone: true, role: true, accountStatus: true, banReason: true, banExpiresAt: true, createdAt: true }, orderBy: { createdAt: "desc" }, take: input.limit, skip: input.offset }),
         ctx.db.user.count({ where }),
       ]);
       return { users, total };

@@ -1,8 +1,15 @@
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { randomBytes } from "crypto";
 import { publicProcedure, protectedProcedure, router } from "../trpc";
 import { TRPCError } from "@trpc/server";
+
+function generateUserId(role: string): string {
+  const prefix = role === "ARTIST" ? "ART" : "LST";
+  const hex = randomBytes(6).toString("hex").toUpperCase();
+  return `${prefix}-${hex.slice(0, 4)}-${hex.slice(4, 8)}-${hex.slice(8, 12)}`;
+}
 
 export const authRouter = router({
   login: publicProcedure
@@ -54,6 +61,8 @@ export const authRouter = router({
           password: hashedPassword,
           phone: input.phone,
           role: input.role as any,
+          userId: generateUserId(input.role),
+          accountType: input.role === "ARTIST" ? "artist" : "listener",
           ...(input.role === "ARTIST"
             ? {
                 artist: {
@@ -67,7 +76,7 @@ export const authRouter = router({
         include: { artist: true },
       });
 
-      return { id: user.id, email: user.email, artistName: user.artist?.artistName ?? null };
+      return { id: user.id, userId: user.userId, email: user.email, artistName: user.artist?.artistName ?? null };
     }),
 
   me: protectedProcedure.query(async ({ ctx }) => {

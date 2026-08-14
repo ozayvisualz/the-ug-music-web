@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { randomBytes } from "crypto";
+
+function generateUserId(role: string): string {
+  const prefix = role === "ARTIST" ? "ART" : "LST";
+  const hex = randomBytes(6).toString("hex").toUpperCase();
+  return `${prefix}-${hex.slice(0, 4)}-${hex.slice(4, 8)}-${hex.slice(8, 12)}`;
+}
 
 function respond(data: any, status = 200) {
   return NextResponse.json(data, {
@@ -34,6 +41,8 @@ export async function POST(req: NextRequest) {
         email,
         password: hashed,
         role: role === "ARTIST" ? "ARTIST" : "LISTENER",
+        userId: generateUserId(role === "ARTIST" ? "ARTIST" : "LISTENER"),
+        accountType: role === "ARTIST" ? "artist" : "listener",
         ...(role === "ARTIST" ? { artist: { create: { artistName: (artistName || name).trim() } } } : {}),
       },
     });

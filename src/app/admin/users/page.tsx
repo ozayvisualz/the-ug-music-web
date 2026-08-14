@@ -83,6 +83,7 @@ export default function UsersPage() {
                     <div className="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-xs font-bold text-yellow-500">{user.name?.charAt(0) || "?"}</div>
                     <div>
                       <p className="text-sm font-medium text-white">{user.name || "Unnamed"}</p>
+                      <p className="text-[10px] text-zinc-600 font-mono">{user.userId || user.id}</p>
                       <p className="text-xs text-zinc-500">{user.email}</p>
                     </div>
                   </div>

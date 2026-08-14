@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
 
     return respond({
       token,
-      user: { id: user.id, name: user.name, email: user.email, phone: user.phone, image: user.image, role: user.role, artist: user.artist || null },
+      user: { id: user.id, userId: user.userId, name: user.name, email: user.email, phone: user.phone, image: user.image, role: user.role, artist: user.artist || null },
     });
   } catch (error: any) {
     return respond({ error: error?.message || "Login failed" }, 500);
