@@ -9,6 +9,8 @@ interface StreamParams {
   quality?: "low" | "medium" | "high";
   ipAddress?: string;
   userAgent?: string;
+  region?: string;
+  language?: string;
 }
 
 interface StreamResult {
@@ -38,7 +40,7 @@ export const StreamingEngine = {
    * determines revenue eligibility, and updates song play counts.
    */
   async recordStream(params: StreamParams): Promise<StreamResult> {
-    const { songId, userId, durationListened, deviceType, quality, ipAddress, userAgent } = params;
+    const { songId, userId, durationListened, deviceType, quality, ipAddress, userAgent, region, language } = params;
 
     // 1. Validate song exists
     const song = await db.song.findUnique({ where: { id: songId } });
@@ -115,6 +117,9 @@ export const StreamingEngine = {
       }
     }
 
+    // Feed the intelligence engine (non-blocking) with device/geo/language signals.
+    this.learnFromStream(userId, songId, durationListened, song.duration || undefined, { device: deviceType, region, language });
+
     return {
       streamId: stream.id,
       eligible: revenueEligible,
@@ -124,19 +129,27 @@ export const StreamingEngine = {
 
   /**
    * Feed the intelligence engine from a stream event (non-blocking).
-   * Called by mobile stream ingestion to capture skip/complete behavior.
    */
-  learnFromStream(userId: string, songId: string, durationListened: number, songDuration?: number) {
+  learnFromStream(
+    userId: string,
+    songId: string,
+    durationListened: number,
+    songDuration?: number,
+    extra?: { device?: string; region?: string; language?: string }
+  ) {
     IntelligenceEvents.record({
       userId,
       type: "stream",
       songId,
+      device: extra?.device,
+      region: extra?.region,
+      language: extra?.language,
       metadata: { durationListened, songDuration },
     });
     if (songDuration && durationListened < 10) {
-      IntelligenceEvents.record({ userId, type: "skip", songId });
+      IntelligenceEvents.record({ userId, type: "skip", songId, device: extra?.device, region: extra?.region, language: extra?.language });
     } else if (songDuration && songDuration > 0 && durationListened >= songDuration * 0.8) {
-      IntelligenceEvents.record({ userId, type: "complete", songId });
+      IntelligenceEvents.record({ userId, type: "complete", songId, device: extra?.device, region: extra?.region, language: extra?.language });
     }
   },
 

@@ -803,12 +803,16 @@ model UserEvent {
   playlistId String?
   query      String?
   context    String? // device / platform / source
+  device     String?
+  region     String?
+  language   String?
   metadata   Json?
   createdAt  DateTime @default(now())
 
   @@index([userId, createdAt])
   @@index([type, createdAt])
   @@index([songId, createdAt])
+  @@index([region, createdAt])
 }
 
 model ListenerProfile {
@@ -820,6 +824,9 @@ model ListenerProfile {
   songs                 Json?
   hourOfDay             Json?
   dayOfWeek             Json?
+  devices               Json?
+  regions               Json?
+  languages             Json?
   skipRate              Float    @default(0)
   completionRate        Float    @default(0)
   totalPlays            Int      @default(0)

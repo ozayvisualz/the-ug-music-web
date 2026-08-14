@@ -24,6 +24,9 @@ export interface EventInput {
   playlistId?: string;
   query?: string;
   context?: string;
+  device?: string;
+  region?: string;
+  language?: string;
   metadata?: any;
 }
 
@@ -55,6 +58,9 @@ async function flush() {
         playlistId: e.playlistId ?? null,
         query: e.query ?? null,
         context: e.context ?? null,
+        device: e.device ?? null,
+        region: e.region ?? null,
+        language: e.language ?? null,
         metadata: e.metadata ?? undefined,
       })),
     });

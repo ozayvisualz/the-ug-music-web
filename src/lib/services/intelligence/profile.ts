@@ -47,7 +47,7 @@ export const ProfileEngine = {
   async computeProfile(userId: string) {
     const since = new Date(Date.now() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
 
-    const [streams, likes, follows, downloads] = await Promise.all([
+    const [streams, likes, follows, downloads, events] = await Promise.all([
       db.stream.findMany({
         where: { userId, createdAt: { gte: since } },
         select: { songId: true, durationListened: true, createdAt: true, song: { select: { genre: true, moods: true, artistId: true, duration: true } } },
@@ -63,6 +63,11 @@ export const ProfileEngine = {
         where: { userId, createdAt: { gte: since } },
         select: { songId: true, createdAt: true, song: { select: { genre: true, moods: true, artistId: true } } },
       }),
+      db.userEvent.findMany({
+        where: { userId, createdAt: { gte: since }, OR: [{ device: { not: null } }, { region: { not: null } }, { language: { not: null } }] },
+        select: { device: true, region: true, language: true, createdAt: true },
+        take: 1000,
+      }),
     ]);
 
     const genres: WeightedMap = {};
@@ -71,6 +76,9 @@ export const ProfileEngine = {
     const songs: WeightedMap = {};
     const hourOfDay: WeightedMap = {};
     const dayOfWeek: WeightedMap = {};
+    const devices: WeightedMap = {};
+    const regions: WeightedMap = {};
+    const languages: WeightedMap = {};
 
     let totalPlays = 0;
     let skips = 0;
@@ -121,6 +129,14 @@ export const ProfileEngine = {
       addWeight(artists, f.artistId, 2);
     }
 
+    // Learn device, region and language signals from captured events.
+    for (const ev of events) {
+      const w = decay(ev.createdAt);
+      addWeight(devices, ev.device, w);
+      addWeight(regions, ev.region, w);
+      addWeight(languages, ev.language, w);
+    }
+
     const profile = {
       userId,
       genres: top(genres, 12),
@@ -129,6 +145,9 @@ export const ProfileEngine = {
       songs: top(songs, 25),
       hourOfDay: top(hourOfDay, 24),
       dayOfWeek: top(dayOfWeek, 7),
+      devices: top(devices, 5),
+      regions: top(regions, 8),
+      languages: top(languages, 5),
       skipRate: totalPlays ? Number((skips / totalPlays).toFixed(4)) : 0,
       completionRate: totalPlays ? Number((completionSum / totalPlays).toFixed(4)) : 0,
       totalPlays,

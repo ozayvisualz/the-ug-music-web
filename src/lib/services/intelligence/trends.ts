@@ -116,6 +116,24 @@ export const TrendEngine = {
     });
   },
 
+  /** City-level trending — songs hot in a specific region (e.g. "Kampala"). */
+  async getCityTrending(region: string, limit = 20) {
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const rows = await db.userEvent.groupBy({
+      by: ["songId"],
+      where: { type: "stream", region: { contains: region, mode: "insensitive" }, songId: { not: null }, createdAt: { gte: since } },
+      _count: true,
+    });
+
+    const scored = rows
+      .filter((r) => r.songId)
+      .sort((a, b) => b._count - a._count)
+      .slice(0, limit)
+      .map((r) => ({ id: r.songId as string, score: r._count }));
+
+    return this._hydrateSongs(scored);
+  },
+
   async _hydrateSongs(items: Array<{ id: string; [k: string]: any }>) {
     if (items.length === 0) return [];
     const songs = await db.song.findMany({

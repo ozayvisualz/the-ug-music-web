@@ -83,6 +83,9 @@ export const intelligenceRouter = router({
   getEmergingGenres: publicProcedure.input(z.object({ limit: z.number().default(8) })).query(async ({ input }) => {
     return TrendEngine.getEmergingGenres(input.limit);
   }),
+  getCityTrending: publicProcedure.input(z.object({ region: z.string(), limit: z.number().default(20) })).query(async ({ input }) => {
+    return TrendEngine.getCityTrending(input.region, input.limit);
+  }),
 
   // --- Smart charts ---
   getCharts: publicProcedure.input(z.object({ days: z.number().default(7), limit: z.number().default(50) })).query(async ({ input }) => {

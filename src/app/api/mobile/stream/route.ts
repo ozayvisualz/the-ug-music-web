@@ -60,8 +60,13 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Feed the intelligence engine (non-blocking) — skip/complete behavior learning.
-    StreamingEngine.learnFromStream(user.id, songId, durationListened, song.duration || undefined);
+    // Feed the intelligence engine (non-blocking) — skip/complete + device/geo/language learning.
+    const country = req.headers.get("x-vercel-ip-country");
+    const city = req.headers.get("x-vercel-ip-city");
+    const region = [city, country].filter(Boolean).join(", ") || undefined;
+    const language = req.headers.get("accept-language")?.split(",")[0]?.trim() || undefined;
+    const device = req.nextUrl.searchParams.get("device") || undefined;
+    StreamingEngine.learnFromStream(user.id, songId, durationListened, song.duration || undefined, { device, region, language });
 
     return NextResponse.json({ eligible: revenueEligible, reason: revenueEligible ? "Revenue eligible" : `Below ${MIN_LISTEN_SECONDS}s threshold` });
   } catch (e: any) {
