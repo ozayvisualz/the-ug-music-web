@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
+import { IntelligenceEvents } from "@/lib/services/intelligence/events";
+import { ModerationEngine } from "@/lib/services/intelligence/moderation";
 
 export const socialRouter = router({
   likeSong: protectedProcedure
@@ -11,9 +13,11 @@ export const socialRouter = router({
       });
       if (existing) {
         await ctx.db.like.delete({ where: { id: existing.id } });
+        IntelligenceEvents.record({ userId, type: "unlike", songId: input });
         return { liked: false };
       }
       await ctx.db.like.create({ data: { userId, songId: input } });
+      IntelligenceEvents.record({ userId, type: "like", songId: input });
       return { liked: true };
     }),
 
@@ -41,9 +45,11 @@ export const socialRouter = router({
       });
       if (existing) {
         await ctx.db.follow.delete({ where: { id: existing.id } });
+        IntelligenceEvents.record({ userId, type: "unfollow", artistId: input });
         return { following: false };
       }
       await ctx.db.follow.create({ data: { followerId: userId, artistId: input } });
+      IntelligenceEvents.record({ userId, type: "follow", artistId: input });
       return { following: true };
     }),
 
@@ -51,10 +57,13 @@ export const socialRouter = router({
     .input(z.object({ songId: z.string(), content: z.string().min(1).max(500) }))
     .mutation(async ({ input, ctx }) => {
       const userId = (ctx.session!.user as any).id;
-      return ctx.db.comment.create({
+      const moderation = await ModerationEngine.moderateComment(userId, input.songId, input.content);
+      IntelligenceEvents.record({ userId, type: "comment", songId: input.songId, metadata: { moderation: moderation.action } });
+      const comment = await ctx.db.comment.create({
         data: { userId, songId: input.songId, content: input.content },
         include: { user: { select: { id: true, name: true, image: true } } },
       });
+      return { ...comment, moderation };
     }),
 
   getComments: protectedProcedure

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import jwt from "jsonwebtoken";
+import { StreamingEngine } from "@/lib/services/streaming";
 
 const MIN_LISTEN_SECONDS = 30;
 const MAX_STREAMS_PER_USER_SONG_HOUR = 3;
@@ -58,6 +59,9 @@ export async function GET(req: NextRequest) {
         await db.album.update({ where: { id: song.albumId }, data: { totalStreams: { increment: 1 } } }).catch(() => {});
       }
     }
+
+    // Feed the intelligence engine (non-blocking) — skip/complete behavior learning.
+    StreamingEngine.learnFromStream(user.id, songId, durationListened, song.duration || undefined);
 
     return NextResponse.json({ eligible: revenueEligible, reason: revenueEligible ? "Revenue eligible" : `Below ${MIN_LISTEN_SECONDS}s threshold` });
   } catch (e: any) {

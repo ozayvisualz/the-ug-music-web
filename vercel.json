@@ -2,5 +2,8 @@
   "buildCommand": "prisma db push --accept-data-loss && prisma generate && npx tsx scripts/migrate-artist-names.ts && npx tsx scripts/migrate-user-ids.ts && next build",
   "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs",
-  "outputDirectory": ".next"
+  "outputDirectory": ".next",
+  "crons": [
+    { "path": "/api/cron/intelligence?secret=theugmusic-intel", "schedule": "0 2 * * *" }
+  ]
 }

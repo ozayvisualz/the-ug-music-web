@@ -791,3 +791,50 @@ model NotificationOpen {
   @@index([notificationId])
   @@index([userId])
 }
+
+// === INTELLIGENCE ENGINE ===
+
+model UserEvent {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String // stream, skip, complete, like, unlike, follow, unfollow, download, search, playlist_add, playlist_save, radio, share, comment
+  songId     String?
+  artistId   String?
+  playlistId String?
+  query      String?
+  context    String? // device / platform / source
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
+  @@index([songId, createdAt])
+}
+
+model ListenerProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  genres         Json?
+  moods          Json?
+  artists        Json?
+  songs          Json?
+  hourOfDay      Json?
+  dayOfWeek      Json?
+  skipRate       Float    @default(0)
+  completionRate Float    @default(0)
+  totalPlays     Int      @default(0)
+  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @default(now())
+}
+
+model AiPlaylist {
+  id            String   @id @default(cuid())
+  key           String   @unique // "daily-mix", "top-afrobeat-today", ...
+  title         String
+  description   String?
+  songIds       Json?
+  kind          String   @default("auto") // auto | personalized
+  regeneratedAt DateTime @default(now())
+
+  @@index([key])
+}

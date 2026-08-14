@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../trpc";
+import { IntelligenceEvents } from "@/lib/services/intelligence/events";
 
 export const playlistRouter = router({
   getMyPlaylists: protectedProcedure.query(async ({ ctx }) => {
@@ -35,6 +36,8 @@ export const playlistRouter = router({
         where: { playlistId: input.playlistId },
         orderBy: { position: "desc" },
       });
+
+      IntelligenceEvents.record({ userId, type: "playlist_add", songId: input.songId, playlistId: input.playlistId });
 
       return ctx.db.playlistSong.create({
         data: {

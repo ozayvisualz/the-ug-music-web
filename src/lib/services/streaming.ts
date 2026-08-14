@@ -1,4 +1,5 @@
 import { db } from "../db";
+import { IntelligenceEvents } from "./intelligence/events";
 
 interface StreamParams {
   songId: string;
@@ -119,6 +120,24 @@ export const StreamingEngine = {
       eligible: revenueEligible,
       reason: revenueEligible ? "Revenue eligible" : `Below ${MIN_LISTEN_SECONDS}s threshold`,
     };
+  },
+
+  /**
+   * Feed the intelligence engine from a stream event (non-blocking).
+   * Called by mobile stream ingestion to capture skip/complete behavior.
+   */
+  learnFromStream(userId: string, songId: string, durationListened: number, songDuration?: number) {
+    IntelligenceEvents.record({
+      userId,
+      type: "stream",
+      songId,
+      metadata: { durationListened, songDuration },
+    });
+    if (songDuration && durationListened < 10) {
+      IntelligenceEvents.record({ userId, type: "skip", songId });
+    } else if (songDuration && songDuration > 0 && durationListened >= songDuration * 0.8) {
+      IntelligenceEvents.record({ userId, type: "complete", songId });
+    }
   },
 
   /**
