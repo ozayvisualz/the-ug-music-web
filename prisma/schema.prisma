@@ -251,6 +251,7 @@ model Song {
   signature   String?  @unique
   signatureVersion Int @default(1)
   isDuplicate Boolean  @default(false)
+  explicit    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -829,6 +830,7 @@ model ListenerProfile {
   languages             Json?
   skipRate              Float    @default(0)
   completionRate        Float    @default(0)
+  explicitRatio         Float    @default(0)
   totalPlays            Int      @default(0)
   personalizationEnabled Boolean  @default(true)
   updatedAt             DateTime @updatedAt

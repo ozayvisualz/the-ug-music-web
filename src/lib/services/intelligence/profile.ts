@@ -50,7 +50,7 @@ export const ProfileEngine = {
     const [streams, likes, follows, downloads, events] = await Promise.all([
       db.stream.findMany({
         where: { userId, createdAt: { gte: since } },
-        select: { songId: true, durationListened: true, createdAt: true, song: { select: { genre: true, moods: true, artistId: true, duration: true } } },
+        select: { songId: true, durationListened: true, createdAt: true, song: { select: { genre: true, moods: true, artistId: true, duration: true, explicit: true } } },
         orderBy: { createdAt: "desc" },
         take: 2000,
       }),
@@ -84,6 +84,7 @@ export const ProfileEngine = {
     let skips = 0;
     let completions = 0;
     let completionSum = 0;
+    let explicitCount = 0;
 
     for (const s of streams) {
       const w = decay(s.createdAt);
@@ -98,6 +99,7 @@ export const ProfileEngine = {
         for (const m of parseMoods(s.song.moods)) addWeight(moods, m, w);
         addWeight(artists, s.song.artistId, w);
         addWeight(songs, s.songId, w);
+        if (s.song.explicit) explicitCount++;
 
         const dur = s.song.duration || 0;
         if (s.durationListened < SKIP_THRESHOLD) skips++;
@@ -150,6 +152,7 @@ export const ProfileEngine = {
       languages: top(languages, 5),
       skipRate: totalPlays ? Number((skips / totalPlays).toFixed(4)) : 0,
       completionRate: totalPlays ? Number((completionSum / totalPlays).toFixed(4)) : 0,
+      explicitRatio: totalPlays ? Number((explicitCount / totalPlays).toFixed(4)) : 0,
       totalPlays,
     };
 

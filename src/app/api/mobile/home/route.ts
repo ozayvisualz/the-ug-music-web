@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import jwt from "jsonwebtoken";
+import { RecommendationEngine } from "@/lib/services/intelligence/recommend";
 
 function getUser(req: NextRequest) {
   const auth = req.headers.get("authorization");
@@ -55,7 +56,13 @@ export async function GET(req: NextRequest) {
       continueListening = session || null;
     }
 
-    const response = NextResponse.json({ trending, newReleases, artists, continueListening, moods: preferredMoods });
+    // Personalized "Made For You" recommendations (falls back gracefully).
+    let forYou: any[] = [];
+    if (userId) {
+      forYou = await RecommendationEngine.recommend(userId, { section: "made-for-you", limit: 10 }).catch(() => []);
+    }
+
+    const response = NextResponse.json({ trending, newReleases, artists, continueListening, forYou, moods: preferredMoods });
     response.headers.set("Access-Control-Allow-Origin", "*");
     return response;
   } catch (e: any) {

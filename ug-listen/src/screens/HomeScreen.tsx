@@ -199,6 +199,7 @@ export default function HomeScreen() {
   const [nrLoading, setNrLoading] = useState(true);
   const [continueListening, setContinueListening] = useState<any[]>([]);
   const [clLoading, setClLoading] = useState(false);
+  const [forYou, setForYou] = useState<any[]>([]);
   const unreadCount = useNotificationStore((s) => s.unreadCount);
   const setUnreadCount = useNotificationStore((s) => s.setUnreadCount);
 
@@ -216,6 +217,7 @@ export default function HomeScreen() {
       .then((data) => {
         if (data.trending) { setHeroSongs(data.trending); setTrending(data.trending); }
         if (data.newReleases) setNewReleases(data.newReleases);
+        if (data.forYou) setForYou(data.forYou);
         if (data.continueListening) setContinueListening(Array.isArray(data.continueListening) ? data.continueListening : [data.continueListening]);
         if (data.artists) setArtists(data.artists);
       })
@@ -402,6 +404,53 @@ export default function HomeScreen() {
             )}
           />
         </View>
+
+        {/* ── Recommended For You ── */}
+        {forYou.length > 0 && (
+          <View style={styles.section}>
+            <SectionHeader title="Recommended For You" />
+            <FlatList
+              data={forYou}
+              keyExtractor={(item: any) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              snapToInterval={CARD_W + GAP}
+              decelerationRate="fast"
+              contentContainerStyle={styles.horizontalList}
+              renderItem={({ item }) => {
+                const coverUrl = getCoverUrl(item);
+                return (
+                  <TouchableOpacity
+                    style={[styles.trendingCard, { backgroundColor: colors.surface }]}
+                    activeOpacity={0.7}
+                    onPress={() => handlePlaySong(item)}
+                  >
+                    <View style={[styles.trendingArt, { backgroundColor: colors.surfaceHover }]}>
+                      {coverUrl ? (
+                        <Image source={{ uri: coverUrl }} style={styles.trendingArtImg} />
+                      ) : (
+                        <Music2 size={28} color={COLORS.gold} />
+                      )}
+                    </View>
+                    <Text style={[styles.trendingTitle, { color: colors.white }]} numberOfLines={2}>
+                      {item.title}
+                    </Text>
+                    <Text style={styles.trendingArtist} numberOfLines={1}>
+                      {getArtistName(item)}
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.trendingPlayBtn}
+                      onPress={() => handlePlaySong(item)}
+                      hitSlop={HIT_SLOP}
+                    >
+                      <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        )}
 
         {/* ── Continue Listening ── */}
         {user && user.id !== "guest" && (

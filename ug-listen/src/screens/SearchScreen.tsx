@@ -14,6 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Search, Music2, Play } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
+import { getStoredToken } from "../api/auth";
 import { useQueueStore } from "../store/playerStore";
 import { useTheme } from "../theme/ThemeContext";
 
@@ -89,7 +90,8 @@ export default function SearchScreen() {
     setLoading(true);
     timerRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(`https://theugmusic.com/api/search?q=${encodeURIComponent(trimmed)}`);
+        const token = await getStoredToken();
+        const res = await fetch(`https://theugmusic.com/api/mobile/search?q=${encodeURIComponent(trimmed)}&token=${encodeURIComponent(token || "")}`);
         const data = await res.json();
         setSongs(data.songs || []);
         setArtists(data.artists || []);
