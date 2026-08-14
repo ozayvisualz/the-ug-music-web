@@ -13,7 +13,7 @@ export default function AdminPayoutsPage() {
   return (
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-bold text-white">Artist Payouts</h1>
-      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-hidden">
+      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-x-auto">
         <table className="w-full">
           <thead><tr className="border-b border-zinc-800/60"><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">Amount</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">Method</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase hidden md:table-cell">Date</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">Status</th><th className="text-right p-4 text-xs font-medium text-zinc-500 uppercase">Actions</th></tr></thead>
           <tbody>

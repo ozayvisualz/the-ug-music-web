@@ -12,7 +12,7 @@ export default function AdminCopyrightPage() {
   return (
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-bold text-white">Copyright Center</h1>
-      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-hidden">
+      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-x-auto">
         <table className="w-full">
           <thead><tr className="border-b border-zinc-800/60"><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">Claim</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase hidden md:table-cell">Song</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase hidden md:table-cell">Claimant</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">Status</th><th className="text-right p-4 text-xs font-medium text-zinc-500 uppercase">Actions</th></tr></thead>
           <tbody>

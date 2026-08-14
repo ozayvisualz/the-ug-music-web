@@ -20,7 +20,7 @@ export default function AdminArtistsPage() {
         <div><h1 className="text-2xl font-bold text-white">Artists</h1><p className="text-sm text-zinc-500">{artists?.length || 0} artists</p></div>
       </div>
       <div className="relative max-w-md"><Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search artists..." className="w-full bg-[#18181D] border border-zinc-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-500/50" /></div>
-      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-hidden">
+      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-x-auto">
         <table className="w-full">
           <thead><tr className="border-b border-zinc-800/60"><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">Artist</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase hidden md:table-cell">Status</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase hidden lg:table-cell">Songs</th><th className="text-right p-4 text-xs font-medium text-zinc-500 uppercase">Actions</th></tr></thead>
           <tbody>

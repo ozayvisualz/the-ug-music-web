@@ -21,7 +21,7 @@ export default function AdminModerationPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search songs..." className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-2 pl-10 pr-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-yellow-500/50" />
       </div>
-      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-hidden">
+      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-x-auto">
         <table className="w-full">
           <thead><tr className="border-b border-zinc-800/60"><th className="text-left p-4 text-xs text-zinc-500">Song</th><th className="text-left p-4 text-xs text-zinc-500">Artist</th><th className="text-left p-4 text-xs text-zinc-500">Status</th><th className="text-right p-4 text-xs text-zinc-500">Actions</th></tr></thead>
           <tbody>

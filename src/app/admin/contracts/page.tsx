@@ -31,7 +31,7 @@ export default function ContractsPage() {
         </div>
       )}
 
-      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-hidden">
+      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-x-auto">
         <table className="w-full">
           <thead><tr className="border-b border-zinc-800/60"><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">Contract</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">Artist</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase hidden md:table-cell">Split</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase hidden md:table-cell">Dates</th><th className="text-left p-4 text-xs font-medium text-zinc-500 uppercase">Status</th></tr></thead>
           <tbody>

@@ -61,7 +61,7 @@ export default function UsersPage() {
         </select>
       </div>
 
-      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-hidden">
+      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-zinc-800/60">

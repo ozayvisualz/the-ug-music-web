@@ -18,7 +18,7 @@ export default function AdminAuditLogsPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
         <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search audit logs..." className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-2 pl-10 pr-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-yellow-500/50" />
       </div>
-      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-hidden">
+      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-x-auto">
         <div className="divide-y divide-zinc-800/30">
           {filtered.length > 0 ? filtered.map((l: any) => (
             <div key={l.id} className="flex items-center gap-4 p-4 hover:bg-zinc-800/20">

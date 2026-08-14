@@ -23,7 +23,7 @@ export default function FollowersPage() {
           </div>
         </div>
       </div>
-      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-hidden">
+      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-x-auto">
         <div className="px-6 py-4 border-b border-zinc-800/60"><h3 className="text-sm font-semibold text-white">Your Followers</h3></div>
         {data?.followers && data.followers.length > 0 ? (
           <div className="divide-y divide-zinc-800/30">
