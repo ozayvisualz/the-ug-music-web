@@ -1,5 +1,5 @@
 {
-  "buildCommand": "prisma db push --accept-data-loss && prisma generate && npx tsx scripts/migrate-artist-names.ts && next build",
+  "buildCommand": "prisma db push --accept-data-loss && prisma generate && npx tsx scripts/migrate-artist-names.ts && npx tsx scripts/migrate-user-ids.ts && next build",
   "installCommand": "npm install --legacy-peer-deps",
   "framework": "nextjs",
   "outputDirectory": ".next"
