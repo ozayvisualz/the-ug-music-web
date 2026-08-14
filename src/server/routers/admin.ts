@@ -46,6 +46,8 @@ export const adminRouter = router({
             title: `${artistName} released new music!`,
             body: `Listen to "${song.title}" now on TheUgMusic.`,
             audience: "followers",
+            type: "song",
+            targetId: song.id,
           })),
         });
 

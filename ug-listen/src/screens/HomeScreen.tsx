@@ -40,6 +40,7 @@ import { COLORS, SPACING, RADIUS, SPRING, TIMING, SHADOWS, HIT_SLOP } from "../c
 import { trpc } from "../api/client";
 import { useAuthStore } from "../store/authStore";
 import { useQueueStore } from "../store/playerStore";
+import { useNotificationStore } from "../store/notificationStore";
 import { useTheme } from "../theme/ThemeContext";
 import { getStoredToken } from "../api/auth";
 
@@ -198,7 +199,8 @@ export default function HomeScreen() {
   const [nrLoading, setNrLoading] = useState(true);
   const [continueListening, setContinueListening] = useState<any[]>([]);
   const [clLoading, setClLoading] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
+  const setUnreadCount = useNotificationStore((s) => s.setUnreadCount);
 
   const [heroIndex, setHeroIndex] = useState(0);
   const heroFlatRef = useRef<FlatList>(null);

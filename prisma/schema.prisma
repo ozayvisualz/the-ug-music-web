@@ -772,8 +772,22 @@ model Notification {
   title     String
   body      String
   audience  String   @default("all")
+  type      String   @default("system")
+  targetId  String?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
   user User? @relation(fields: [userId], references: [id])
+}
+
+model NotificationOpen {
+  id             String   @id @default(cuid())
+  notificationId String
+  userId         String?
+  openedAt       DateTime @default(now())
+  device         String?
+  platform       String?
+
+  @@index([notificationId])
+  @@index([userId])
 }
