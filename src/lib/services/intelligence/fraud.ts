@@ -118,4 +118,39 @@ export const FraudEngine = {
       ratio: Number(s.ratio.toFixed(1)),
     }));
   },
+
+  /** Payment anomalies: unusual transaction amounts + download spikes. */
+  async detectPaymentAnomalies(limit = 20) {
+    const anomalies: any[] = [];
+
+    // 1. Unusually large single transactions.
+    const largeTx = await db.transaction.findMany({
+      where: { amount: { gte: 1000000 }, status: "COMPLETED" },
+      orderBy: { amount: "desc" },
+      take: limit,
+      select: { id: true, userId: true, amount: true, reference: true, createdAt: true },
+    });
+    for (const tx of largeTx) {
+      anomalies.push({ kind: "large_transaction", id: tx.id, userId: tx.userId, amount: tx.amount, reference: tx.reference, note: "Unusually large completed transaction" });
+    }
+
+    // 2. Download spikes: last 24h downloads far exceed the trailing daily average.
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const recentDownloads = await db.download.groupBy({ by: ["songId"], where: { createdAt: { gte: dayAgo } }, _count: true });
+    const weeklyDownloads = await db.download.groupBy({ by: ["songId"], where: { createdAt: { gte: weekAgo } }, _count: true });
+
+    const weeklyMap: Record<string, number> = {};
+    for (const w of weeklyDownloads) weeklyMap[w.songId] = w._count;
+
+    for (const r of recentDownloads) {
+      const weekly = weeklyMap[r.songId] || 0;
+      const dailyAvg = weekly / 7;
+      if (r._count >= 10 && dailyAvg > 0 && r._count > dailyAvg * 5) {
+        anomalies.push({ kind: "download_spike", songId: r.songId, recent: r._count, dailyAverage: Number(dailyAvg.toFixed(1)), note: "Unusual download spike" });
+      }
+    }
+
+    return anomalies.slice(0, limit);
+  },
 };

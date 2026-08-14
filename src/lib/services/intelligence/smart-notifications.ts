@@ -15,6 +15,8 @@ export const SmartNotifications = {
     results.milestones = await this.checkMilestones().catch((e) => ({ error: e?.message }));
     results.chartEntries = await this.checkChartEntries().catch((e) => ({ error: e?.message }));
     results.fraudAlerts = await this.checkFraudAlerts().catch((e) => ({ error: e?.message }));
+    results.payouts = await this.checkPayouts().catch((e) => ({ error: e?.message }));
+    results.paymentAnomalies = await this.checkPaymentAnomalies().catch((e) => ({ error: e?.message }));
     return results;
   },
 
@@ -107,6 +109,69 @@ export const SmartNotifications = {
           body: `${anomalies.length} song(s) show stream-farm patterns. Review in the admin dashboard.`,
           audience: "admins",
           type: "fraud",
+        },
+      });
+      created++;
+    }
+
+    return { created, anomalies: anomalies.length };
+  },
+
+  /** Notify artists when their wallet balance is available for payout. */
+  async checkPayouts() {
+    const THRESHOLD = 50000; // UGX
+    const wallets = await db.artistWallet.findMany({
+      where: { availableBalance: { gte: THRESHOLD } },
+      select: { artistId: true, availableBalance: true, artist: { select: { userId: true, artistName: true, user: { select: { name: true } } } } },
+      take: 100,
+    });
+
+    let created = 0;
+    for (const w of wallets) {
+      const userId = w.artist?.userId;
+      if (!userId) continue;
+
+      const existing = await db.notification.findFirst({
+        where: { userId, type: "payout", createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
+      });
+      if (existing) continue;
+
+      const artistName = w.artist?.artistName || w.artist?.user?.name || "Artist";
+      await db.notification.create({
+        data: {
+          userId,
+          title: `Payout available 💰`,
+          body: `You have UGX ${w.availableBalance.toLocaleString()} available for withdrawal.`,
+          audience: "artists",
+          type: "payout",
+        },
+      });
+      created++;
+    }
+
+    return { created };
+  },
+
+  /** Flag payment anomalies for admin review. */
+  async checkPaymentAnomalies() {
+    const anomalies = await FraudEngine.detectPaymentAnomalies(20);
+    if (anomalies.length === 0) return { created: 0 };
+
+    const admins = await db.user.findMany({ where: { role: "ADMIN" }, select: { id: true } });
+    let created = 0;
+    for (const admin of admins) {
+      const existing = await db.notification.findFirst({
+        where: { userId: admin.id, type: "payment_anomaly", createdAt: { gte: new Date(Date.now() - 12 * 60 * 60 * 1000) } },
+      });
+      if (existing) continue;
+
+      await db.notification.create({
+        data: {
+          userId: admin.id,
+          title: `Payment anomalies detected ⚠️`,
+          body: `${anomalies.length} unusual transaction(s) or download spike(s) need review.`,
+          audience: "admins",
+          type: "payment_anomaly",
         },
       });
       created++;

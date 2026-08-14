@@ -143,6 +143,7 @@ export const intelligenceRouter = router({
 
   // --- Anti-fraud (admin review) ---
   getFraudAnomalies: publicProcedure.input(z.object({ limit: z.number().default(20) })).query(async ({ input }) => FraudEngine.detectAnomalies(input.limit)),
+  getPaymentAnomalies: publicProcedure.input(z.object({ limit: z.number().default(20) })).query(async ({ input }) => FraudEngine.detectPaymentAnomalies(input.limit)),
 
   // --- Admin AI assistant ---
   assistant: adminProcedure.input(z.object({ question: z.string().min(1) })).mutation(async ({ input }) => AdminAssistant.answer(input.question)),
