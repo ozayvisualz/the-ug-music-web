@@ -1,18 +1,26 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Bell, Send, Users, Mic2, Headphones, Crown, CheckCircle2 } from "lucide-react";
 import toast from "react-hot-toast";
-
-function getAuthToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("auth-token");
-}
 
 export default function AdminNotificationsPage() {
   const [audience, setAudience] = useState("all");
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadNotifications = useCallback(() => {
+    setLoading(true);
+    fetch("/api/admin/notifications")
+      .then((r) => r.json())
+      .then((d) => setNotifications(Array.isArray(d) ? d : []))
+      .catch(() => setNotifications([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => { loadNotifications(); }, [loadNotifications]);
 
   const handleSend = async () => {
     if (!title || !message) { toast.error("Title and message are required"); return; }
@@ -30,6 +38,7 @@ export default function AdminNotificationsPage() {
       toast.success(`Notification sent to ${audienceLabel} (${data.count || 0} recipients)`);
       setTitle("");
       setMessage("");
+      loadNotifications();
     } catch (e: any) {
       toast.error(e.message || "Failed to send notification");
     } finally {
@@ -45,7 +54,7 @@ export default function AdminNotificationsPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl">
+    <div className="p-6 space-y-6 max-w-3xl">
       <div><h1 className="text-2xl font-bold text-white">Notifications</h1><p className="text-sm text-zinc-500 mt-1">Send push notifications to targeted audiences</p></div>
 
       <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-6 space-y-5">
@@ -100,6 +109,28 @@ export default function AdminNotificationsPage() {
           </button>
           <span className="text-xs text-zinc-500">Notifications appear instantly in users&apos; notification centers</span>
         </div>
+      </div>
+
+      <div>
+        <h2 className="text-lg font-bold text-white mb-3">Recent Notifications</h2>
+        {loading ? (
+          <p className="text-zinc-500 text-sm">Loading...</p>
+        ) : notifications.length === 0 ? (
+          <p className="text-zinc-600 text-sm">No notifications sent yet</p>
+        ) : (
+          <div className="space-y-2">
+            {notifications.map((n: any) => (
+              <div key={n.id} className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-sm font-semibold text-white">{n.title}</p>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-yellow-500/10 text-yellow-500 capitalize">{n.audience}</span>
+                </div>
+                <p className="text-xs text-zinc-400">{n.body}</p>
+                <p className="text-[10px] text-zinc-600 mt-1">{n.createdAt ? new Date(n.createdAt).toLocaleString() : ""}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
