@@ -218,6 +218,7 @@ model PaymentMethod {
 
 model Song {
   id          String   @id @default(cuid())
+  songId      String?  @unique
   artistId    String
   albumId     String?
   title       String
@@ -241,6 +242,8 @@ model Song {
   lyrics      String?
   moods       String?   @default("[]")
   signature   String?  @unique
+  signatureVersion Int @default(1)
+  isDuplicate Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

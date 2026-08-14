@@ -1,9 +1,15 @@
 import { z } from "zod";
 import { artistProcedure, router } from "../trpc";
-import { randomBytes } from "crypto";
+import { randomBytes, createHash } from "crypto";
 
-function generateSignature(): string {
-  return `TUG-${Date.now().toString(36)}-${randomBytes(4).toString('hex')}`.toUpperCase();
+function generateSongId(): string {
+  const hex = randomBytes(8).toString("hex").toUpperCase();
+  return `UGM-${hex.slice(0, 4)}-${hex.slice(4, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}`;
+}
+
+function generateSignature(fileUrl: string, duration: number): string {
+  const data = `${fileUrl}|${duration}|${Date.now()}`;
+  return createHash("sha256").update(data).digest("hex").slice(0, 32).toUpperCase();
 }
 
 export const artistRouter = router({
@@ -37,13 +43,20 @@ export const artistRouter = router({
         throw new Error("Verification required before you can upload music.");
       }
 
+      const signature = generateSignature(input.fileUrl, input.duration);
+
+      const duplicate = await ctx.db.song.findUnique({ where: { signature } });
+      const isDuplicate = !!duplicate;
+
       return ctx.db.song.create({
         data: {
           ...input,
           artistId: artist.id,
           published: true,
           approved: false,
-          signature: generateSignature(),
+          songId: generateSongId(),
+          signature,
+          isDuplicate,
         },
         include: { artist: { select: { artistName: true } } },
       });
@@ -84,7 +97,7 @@ export const artistRouter = router({
           releaseDate: input.releaseDate ? new Date(input.releaseDate) : new Date(),
           published: true,
           songs: {
-            create: songs.map((s) => ({ ...s, artistId: artist.id, published: true, signature: generateSignature() })),
+            create: songs.map((s) => ({ ...s, artistId: artist.id, published: true, songId: generateSongId(), signature: generateSignature(s.fileUrl, s.duration) })),
           },
         },
         include: { songs: true, artist: { select: { artistName: true } } },
