@@ -1,0 +1,117 @@
+import { db } from "../../db";
+import { SmartChartsEngine } from "./smart-charts";
+import { FraudEngine } from "./fraud";
+
+const MILESTONES = [1000, 5000, 10000, 50000, 100000, 500000, 1000000];
+
+/**
+ * Smart Notifications — automated, event-driven notifications for artists and
+ * admins (milestones, chart entries, fraud alerts). Idempotent: a given event
+ * only ever produces one notification (de-duplicated via the Notification table).
+ */
+export const SmartNotifications = {
+  async evaluate() {
+    const results: any = {};
+    results.milestones = await this.checkMilestones().catch((e) => ({ error: e?.message }));
+    results.chartEntries = await this.checkChartEntries().catch((e) => ({ error: e?.message }));
+    results.fraudAlerts = await this.checkFraudAlerts().catch((e) => ({ error: e?.message }));
+    return results;
+  },
+
+  async checkMilestones() {
+    const notified: string[] = [];
+
+    for (const threshold of MILESTONES) {
+      const songs = await db.song.findMany({
+        where: { approved: true, published: true, playCount: { gte: threshold } },
+        select: { id: true, title: true, playCount: true, artistId: true, artist: { select: { userId: true, artistName: true, user: { select: { name: true } } } } },
+        take: 200,
+      });
+
+      for (const song of songs) {
+        const key = `milestone:${song.id}:${threshold}`;
+        const existing = await db.notification.findFirst({
+          where: { type: "milestone", targetId: song.id, title: { contains: `${threshold.toLocaleString()}` } },
+        });
+        if (existing) continue;
+
+        const userId = song.artist?.userId;
+        if (!userId) continue;
+
+        const artistName = song.artist?.artistName || song.artist?.user?.name || "An artist";
+        await db.notification.create({
+          data: {
+            userId,
+            title: `${threshold.toLocaleString()} streams reached! 🎉`,
+            body: `"${song.title}" just crossed ${threshold.toLocaleString()} streams.`,
+            audience: "artists",
+            type: "milestone",
+            targetId: song.id,
+          },
+        });
+        notified.push(key);
+      }
+    }
+
+    return { created: notified.length, notified };
+  },
+
+  async checkChartEntries() {
+    const chart = await SmartChartsEngine.getTopSongs(7, 20);
+    let created = 0;
+
+    for (const entry of chart.slice(0, 10)) {
+      const existing = await db.notification.findFirst({
+        where: { type: "chart", targetId: entry.id, createdAt: { gte: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000) } },
+      });
+      if (existing) continue;
+
+      const song = await db.song.findUnique({ where: { id: entry.id }, select: { artist: { select: { userId: true, artistName: true, user: { select: { name: true } } } } } });
+      const userId = song?.artist?.userId;
+      if (!userId) continue;
+
+      const artistName = song.artist?.artistName || song.artist?.user?.name || "An artist";
+      await db.notification.create({
+        data: {
+          userId,
+          title: `Chart entry: #${entry.rank} 🏆`,
+          body: `"${entry.title}" is #${entry.rank} on the UG Music charts.`,
+          audience: "artists",
+          type: "chart",
+          targetId: entry.id,
+        },
+      });
+      created++;
+    }
+
+    return { created };
+  },
+
+  async checkFraudAlerts() {
+    const anomalies = await FraudEngine.detectAnomalies(20);
+    if (anomalies.length === 0) return { created: 0 };
+
+    const admins = await db.user.findMany({ where: { role: "ADMIN" }, select: { id: true } });
+    let created = 0;
+
+    for (const admin of admins) {
+      const existing = await db.notification.findFirst({
+        where: { userId: admin.id, type: "fraud", createdAt: { gte: new Date(Date.now() - 12 * 60 * 60 * 1000) } },
+      });
+      if (existing) continue;
+
+      await db.notification.create({
+        data: {
+          userId: admin.id,
+          title: `Suspicious streaming detected ⚠️`,
+          body: `${anomalies.length} song(s) show stream-farm patterns. Review in the admin dashboard.`,
+          audience: "admins",
+          type: "fraud",
+        },
+      });
+      created++;
+    }
+
+    return { created, anomalies: anomalies.length };
+  },
+};

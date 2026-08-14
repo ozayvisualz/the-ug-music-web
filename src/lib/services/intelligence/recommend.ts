@@ -85,6 +85,9 @@ export const RecommendationEngine = {
 
     const contextGenres = opts.contextGenres || CONTEXT_GENRES[contextForHour(new Date().getHours())] || [];
 
+    // Collaborative signal: songs liked by listeners with similar taste.
+    const collabAffinity = await this._collaborativeAffinity(userId);
+
     // Recently played songs to de-duplicate / avoid repetition.
     const recentStreams = await db.stream.findMany({
       where: { userId, createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
@@ -112,6 +115,7 @@ export const RecommendationEngine = {
 
       // Familiarity vs discovery: known songs get a small bump for "daily mix" feel.
       const familiarity = knownSongs[song.id] ? 0.4 : 0;
+      const collabBoost = (collabAffinity[song.id] || 0) * 0.6;
 
       // Popularity + recency (log-scaled so a few mega-hits don't dominate).
       const popularity = Math.log10((song.playCount || 0) + 10) * 0.35;
@@ -126,6 +130,7 @@ export const RecommendationEngine = {
         moodAffinity * 1.5 +
         contextBoost +
         familiarity +
+        collabBoost +
         popularity +
         recency +
         noise;
@@ -203,5 +208,35 @@ export const RecommendationEngine = {
       playCount: song.playCount,
       reason: 0,
     }));
+  },
+
+  /**
+   * Collaborative affinity: songs liked by listeners who share the user's
+   * taste (i.e. liked the same songs). Cached to avoid recomputation.
+   */
+  async _collaborativeAffinity(userId: string): Promise<Record<string, number>> {
+    return IntelligenceCache.getOrSet(`collab:${userId}`, 30 * 60 * 1000, async () => {
+      const myLikes = await db.like.findMany({ where: { userId }, select: { songId: true }, take: 200 });
+      const myLikeIds = myLikes.map((l) => l.songId);
+      if (myLikeIds.length === 0) return {};
+
+      const similarUsers = await db.like.findMany({
+        where: { songId: { in: myLikeIds }, userId: { not: userId } },
+        select: { userId: true },
+        take: 500,
+      });
+      const similarUserIds = [...new Set(similarUsers.map((l) => l.userId))].slice(0, 100);
+      if (similarUserIds.length === 0) return {};
+
+      const theirLikes = await db.like.findMany({
+        where: { userId: { in: similarUserIds }, songId: { notIn: myLikeIds } },
+        select: { songId: true },
+        take: 2000,
+      });
+
+      const affinity: Record<string, number> = {};
+      for (const l of theirLikes) affinity[l.songId] = (affinity[l.songId] || 0) + 1;
+      return affinity;
+    });
   },
 };

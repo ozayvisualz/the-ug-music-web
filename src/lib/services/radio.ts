@@ -141,6 +141,93 @@ export const RadioService = {
     return this._buildQueue(where, moodId, userId, queueSize);
   },
 
+  /** Artist Radio — songs by a specific artist plus similar artists. */
+  async generateArtistQueue(artistId: string, userId?: string, queueSize = 15) {
+    const artist = await db.artist.findUnique({ where: { id: artistId }, select: { genre: true, songs: { select: { id: true } } } });
+    if (!artist) throw new Error("Artist not found");
+
+    const ownSongs = await db.song.findMany({
+      where: { artistId, approved: true, published: true },
+      include: { artist: { include: { user: { select: { name: true } } } } },
+      orderBy: { playCount: "desc" },
+      take: Math.ceil(queueSize / 2),
+    });
+
+    const similarWhere: any = { approved: true, published: true, id: { notIn: ownSongs.map((s) => s.id) } };
+    if (artist.genre) similarWhere.genre = artist.genre;
+    const similar = await db.song.findMany({
+      where: similarWhere,
+      include: { artist: { include: { user: { select: { name: true } } } } },
+      orderBy: { playCount: "desc" },
+      take: queueSize,
+    });
+
+    const merged = [...ownSongs, ...similar].slice(0, queueSize);
+    return merged.map((s) => this._shape(s));
+  },
+
+  /** Similar Songs Radio — songs sharing the seed song's genre/mood. */
+  async generateSimilarQueue(songId: string, userId?: string, queueSize = 15) {
+    const seed = await db.song.findUnique({ where: { id: songId }, select: { genre: true, artistId: true, moods: true } });
+    if (!seed) throw new Error("Song not found");
+
+    const where: any = { approved: true, published: true, id: { not: songId } };
+    if (seed.genre) where.genre = seed.genre;
+
+    const songs = await db.song.findMany({
+      where,
+      include: { artist: { include: { user: { select: { name: true } } } } },
+      orderBy: [{ playCount: "desc" }, { createdAt: "desc" }],
+      take: queueSize,
+    });
+    return songs.map((s) => this._shape(s));
+  },
+
+  /** Discovery Radio — new/rising songs outside the listener's usual genres. */
+  async generateDiscoveryQueue(userId?: string, queueSize = 15) {
+    const profile = userId ? await ProfileEngine.getProfile(userId).catch(() => null) : null;
+    const knownGenres = Object.keys((profile?.genres as Record<string, number>) || {});
+
+    const where: any = { approved: true, published: true };
+    if (knownGenres.length > 0) where.genre = { notIn: knownGenres };
+
+    const songs = await db.song.findMany({
+      where,
+      include: { artist: { include: { user: { select: { name: true } } } } },
+      orderBy: [{ createdAt: "desc" }, { playCount: "desc" }],
+      take: queueSize,
+    });
+    shuffleArray(songs);
+    return songs.map((s) => this._shape(s));
+  },
+
+  /** Hidden Gems Radio — underrated songs with strong engagement signals. */
+  async generateHiddenGemsQueue(userId?: string, queueSize = 15) {
+    const songs = await db.song.findMany({
+      where: { approved: true, published: true, playCount: { lte: 2000 } },
+      include: { artist: { include: { user: { select: { name: true } } } } },
+      orderBy: { createdAt: "desc" },
+      take: queueSize * 2,
+    });
+    shuffleArray(songs);
+    return songs.slice(0, queueSize).map((s) => this._shape(s));
+  },
+
+  _shape(s: any) {
+    return {
+      id: s.id,
+      title: s.title,
+      artist: s.artist?.user?.name || "Unknown",
+      artistId: s.artistId,
+      duration: s.duration,
+      coverUrl: s.coverUrl,
+      hlsUrl: s.hlsUrl,
+      fileUrl: s.fileUrl,
+      genre: s.genre,
+      playCount: s.playCount,
+    };
+  },
+
   async _buildQueue(where: any, sourceId: string, userId?: string, queueSize = 15) {
     let songs: any[];
 

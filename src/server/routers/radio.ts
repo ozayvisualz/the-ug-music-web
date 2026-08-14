@@ -42,4 +42,32 @@ export const radioRouter = router({
     .query(async ({ input }) => {
       return RadioService.getNextSongs(input.stationId, input.excludeIds, input.count);
     }),
+
+  generateArtistQueue: protectedProcedure
+    .input(z.object({ artistId: z.string(), queueSize: z.number().min(5).max(50).default(15) }))
+    .mutation(async ({ input, ctx }) => {
+      const userId = (ctx.session?.user as any)?.id;
+      return RadioService.generateArtistQueue(input.artistId, userId, input.queueSize);
+    }),
+
+  generateSimilarQueue: protectedProcedure
+    .input(z.object({ songId: z.string(), queueSize: z.number().min(5).max(50).default(15) }))
+    .mutation(async ({ input, ctx }) => {
+      const userId = (ctx.session?.user as any)?.id;
+      return RadioService.generateSimilarQueue(input.songId, userId, input.queueSize);
+    }),
+
+  generateDiscoveryQueue: protectedProcedure
+    .input(z.object({ queueSize: z.number().min(5).max(50).default(15) }))
+    .mutation(async ({ input, ctx }) => {
+      const userId = (ctx.session?.user as any)?.id;
+      return RadioService.generateDiscoveryQueue(userId, input.queueSize);
+    }),
+
+  generateHiddenGemsQueue: protectedProcedure
+    .input(z.object({ queueSize: z.number().min(5).max(50).default(15) }))
+    .mutation(async ({ input, ctx }) => {
+      const userId = (ctx.session?.user as any)?.id;
+      return RadioService.generateHiddenGemsQueue(userId, input.queueSize);
+    }),
 });

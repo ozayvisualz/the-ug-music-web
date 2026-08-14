@@ -11,6 +11,8 @@ import { PlaylistGenerator } from "./playlist-generator";
 import { FraudEngine } from "./fraud";
 import { AdminAssistant } from "./assistant";
 import { IntelligenceCache } from "./cache";
+import { NotificationTiming } from "./notification-timing";
+import { SmartNotifications } from "./smart-notifications";
 
 /**
  * Unified Intelligence Engine — the single facade powering the entire platform.
@@ -30,6 +32,8 @@ export const IntelligenceEngine = {
   fraud: FraudEngine,
   assistant: AdminAssistant,
   cache: IntelligenceCache,
+  notificationTiming: NotificationTiming,
+  smartNotifications: SmartNotifications,
 };
 
 export {
@@ -46,6 +50,8 @@ export {
   FraudEngine,
   AdminAssistant,
   IntelligenceCache,
+  NotificationTiming,
+  SmartNotifications,
 };
 
 export type { EventType, EventInput } from "./events";

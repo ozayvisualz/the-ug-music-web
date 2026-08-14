@@ -13,6 +13,8 @@ import {
   PlaylistGenerator,
   FraudEngine,
   AdminAssistant,
+  NotificationTiming,
+  SmartNotifications,
 } from "@/lib/services/intelligence";
 
 export const intelligenceRouter = router({
@@ -141,4 +143,13 @@ export const intelligenceRouter = router({
 
   // --- Admin AI assistant ---
   assistant: adminProcedure.input(z.object({ question: z.string().min(1) })).mutation(async ({ input }) => AdminAssistant.answer(input.question)),
+
+  // --- Notification timing ---
+  notificationTiming: protectedProcedure.query(async ({ ctx }) => {
+    const userId = (ctx.session!.user as any).id;
+    return NotificationTiming.recommendation(userId);
+  }),
+
+  // --- Automated smart notifications (admin trigger) ---
+  evaluateSmartNotifications: adminProcedure.mutation(async () => SmartNotifications.evaluate()),
 });

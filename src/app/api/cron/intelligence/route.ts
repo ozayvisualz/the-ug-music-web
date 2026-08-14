@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PlaylistGenerator } from "@/lib/services/intelligence/playlist-generator";
+import { SmartNotifications } from "@/lib/services/intelligence/smart-notifications";
 
 export async function GET(req: NextRequest) {
   const secret = req.nextUrl.searchParams.get("secret");
@@ -8,8 +9,9 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const result = await PlaylistGenerator.regenerateAll();
-    return NextResponse.json({ success: true, ...result, at: new Date().toISOString() });
+    const playlists = await PlaylistGenerator.regenerateAll().catch((e) => ({ error: e?.message }));
+    const notifications = await SmartNotifications.evaluate().catch((e) => ({ error: e?.message }));
+    return NextResponse.json({ success: true, playlists, notifications, at: new Date().toISOString() });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message || "Failed" }, { status: 500 });
   }
