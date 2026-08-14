@@ -11,11 +11,8 @@ async function recordStream(songId: string, durationListened: number) {
   recordedStreams.add(songId);
   try {
     const token = await getStoredToken();
-    await fetch(`https://theugmusic.com/api/trpc/streaming.trackStream?batch=1`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      body: JSON.stringify({ "0": { json: { songId, durationListened } } }),
-    });
+    const url = `https://theugmusic.com/api/mobile/stream?songId=${encodeURIComponent(songId)}&duration=${durationListened}&token=${encodeURIComponent(token || "")}`;
+    await fetch(url);
   } catch {}
 }
 
