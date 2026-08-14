@@ -150,14 +150,16 @@ export default function FullPlayer({ onCollapse }: Props) {
   useEffect(() => {
     if (!currentTrack?.id) return;
     (async () => {
-      const token = await getStoredToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      fetch(`https://theugmusic.com/api/trpc/music.getById?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%22${currentTrack.id}%22%7D%7D`, { headers })
+      fetch(`https://theugmusic.com/api/mobile/song?id=${encodeURIComponent(currentTrack.id)}`)
         .then((r) => r.json())
         .then((d) => {
-          const song = d?.[0]?.result?.data?.json || d?.[0]?.result?.data;
-          if (song?.lyrics) setLyrics(song.lyrics);
-          if (song?.comments) setComments(song.comments);
+          if (d?.lyrics) setLyrics(d.lyrics);
+        })
+        .catch(() => {});
+      fetch(`https://theugmusic.com/api/mobile/comments?songId=${encodeURIComponent(currentTrack.id)}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (Array.isArray(d)) setComments(d.map((c) => ({ ...c, user: { name: c.userName } })));
         })
         .catch(() => {});
     })();
@@ -168,12 +170,11 @@ export default function FullPlayer({ onCollapse }: Props) {
     setPosting(true);
     try {
       const token = await getStoredToken();
-      const res = await fetch(`https://theugmusic.com/api/trpc/social.addComment?batch=1`, {
-        method: "POST", headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ "0": { json: { songId: currentTrack.id, content: commentText.trim() } } }),
-      });
-      if (res.ok) {
-        setComments((c) => [{ id: Date.now().toString(), content: commentText.trim(), user: { name: "You" }, createdAt: new Date().toISOString() }, ...c]);
+      const url = `https://theugmusic.com/api/mobile/comments?action=add&songId=${encodeURIComponent(currentTrack.id)}&content=${encodeURIComponent(commentText.trim())}&token=${encodeURIComponent(token || "")}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (res.ok && data.comment) {
+        setComments((c) => [{ ...data.comment, user: { name: data.comment.userName } }, ...c]);
         setCommentText("");
       }
     } catch {} finally { setPosting(false); }
