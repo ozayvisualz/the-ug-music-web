@@ -48,7 +48,7 @@ export const artistRouter = router({
       const duplicate = await ctx.db.song.findUnique({ where: { signature } });
       const isDuplicate = !!duplicate;
 
-      return ctx.db.song.create({
+      const song = await ctx.db.song.create({
         data: {
           ...input,
           artistId: artist.id,
@@ -62,6 +62,32 @@ export const artistRouter = router({
         },
         include: { artist: { select: { artistName: true } } },
       });
+
+      // Notify followers of the artist about the new release
+      try {
+        const followers = await ctx.db.follow.findMany({ where: { artistId: artist.id }, select: { followerId: true } });
+        const followerIds = followers.map((f) => f.followerId);
+        if (followerIds.length > 0) {
+          const artistName = artist.artistName || "An artist";
+          await ctx.db.notification.createMany({
+            data: followerIds.map((userId) => ({
+              userId,
+              title: `${artistName} released new music!`,
+              body: `Listen to "${input.title}" now on TheUgMusic.`,
+              audience: "followers",
+            })),
+          });
+
+          const usersWithTokens = await ctx.db.user.findMany({ where: { id: { in: followerIds }, pushToken: { not: null } }, select: { pushToken: true } });
+          const tokens = usersWithTokens.map((u) => u.pushToken).filter(Boolean) as string[];
+          if (tokens.length > 0) {
+            const { sendPushNotification } = await import("@/lib/firebase-admin");
+            await sendPushNotification({ title: `${artistName} released new music!`, body: `Listen to "${input.title}" now on TheUgMusic.`, tokens });
+          }
+        }
+      } catch {}
+
+      return song;
     }),
 
   uploadAlbum: artistProcedure
