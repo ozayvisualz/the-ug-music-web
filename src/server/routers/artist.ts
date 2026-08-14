@@ -52,8 +52,10 @@ export const artistRouter = router({
         data: {
           ...input,
           artistId: artist.id,
+          uploadedBy: (ctx.session!.user as any).id,
           published: true,
           approved: false,
+          status: "pending",
           songId: generateSongId(),
           signature,
           isDuplicate,

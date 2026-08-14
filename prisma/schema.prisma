@@ -220,6 +220,7 @@ model Song {
   id          String   @id @default(cuid())
   songId      String?  @unique
   artistId    String
+  uploadedBy  String?
   albumId     String?
   title       String
   genre       String?
@@ -233,6 +234,7 @@ model Song {
   downloadCount Int    @default(0)
   approved    Boolean  @default(false)
   published   Boolean  @default(false)
+  status      String   @default("pending")
   story       String?
   releaseDate String?
   songwriters String?
@@ -257,6 +259,8 @@ model Song {
   tips      Tip[]     @relation("TipForSong")
   copyrightClaims CopyrightClaim[]
   playbackSessions PlaybackSession[]
+
+  @@index([artistId])
 }
 
 model Album {

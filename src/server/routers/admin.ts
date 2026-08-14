@@ -29,15 +29,21 @@ export const adminRouter = router({
   }),
 
   // === SONGS ===
-  approveSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => ctx.db.song.update({ where: { id: input }, data: { approved: true } })),
-  rejectSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => ctx.db.song.update({ where: { id: input }, data: { approved: false, published: false } })),
+  approveSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => ctx.db.song.update({ where: { id: input }, data: { approved: true, status: "approved" } })),
+  rejectSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => ctx.db.song.update({ where: { id: input }, data: { approved: false, published: false, status: "rejected" } })),
   featureSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => { const s = await ctx.db.song.findUnique({ where: { id: input } }); return ctx.db.song.update({ where: { id: input }, data: { approved: true, published: !s?.published } }); }),
   deleteSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => ctx.db.song.delete({ where: { id: input } })),
   getAllSongs: adminProcedure
     .input(z.object({ search: z.string().optional(), genre: z.string().optional(), limit: z.number().default(50), offset: z.number().default(0) }))
     .query(async ({ input, ctx }) => {
       const where: any = {};
-      if (input.search) where.title = { contains: input.search, mode: "insensitive" };
+      if (input.search) {
+        where.OR = [
+          { title: { contains: input.search, mode: "insensitive" } },
+          { songId: { contains: input.search, mode: "insensitive" } },
+          { signature: { contains: input.search, mode: "insensitive" } },
+        ];
+      }
       if (input.genre) where.genre = input.genre;
       const [songs, total] = await Promise.all([
         ctx.db.song.findMany({ where, include: { artist: { include: { user: { select: { name: true } } } }, album: { select: { id: true, title: true } } }, orderBy: { createdAt: "desc" }, take: input.limit, skip: input.offset }),
