@@ -61,7 +61,7 @@ export default function ProfileScreen() {
     return (
       <View style={[styles.root, { backgroundColor: colors.bg }]}>
         <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>You're not signed in</Text>
+          <Text style={[styles.emptyTitle, { color: colors.white }]}>You're not signed in</Text>
           <Text style={styles.emptySubtitle}>
             Sign in to access your profile, playlists, and more.
           </Text>
@@ -78,7 +78,7 @@ export default function ProfileScreen() {
               activeOpacity={0.8}
               onPress={() => navigation.navigate("Login")}
             >
-              <Text style={styles.authOutlineBtnText}>Register</Text>
+              <Text style={[styles.authOutlineBtnText, { color: colors.white }]}>Register</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -145,7 +145,7 @@ export default function ProfileScreen() {
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profile</Text>
+        <Text style={[styles.headerTitle, { color: colors.white }]}>Profile</Text>
       </View>
 
       <ScrollView
@@ -160,7 +160,7 @@ export default function ProfileScreen() {
               {user.name?.charAt(0).toUpperCase()}
             </Text>
           </View>
-          <Text style={styles.name}>{user.name}</Text>
+          <Text style={[styles.name, { color: colors.white }]}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
           <View
             style={[
@@ -179,24 +179,24 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        <View style={styles.statsRow}>
+          <View style={[styles.statsRow, { backgroundColor: colors.surface }]}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>0</Text>
+            <Text style={[styles.statNumber, { color: colors.white }]}>0</Text>
             <Text style={styles.statLabel}>Liked Songs</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>0</Text>
+            <Text style={[styles.statNumber, { color: colors.white }]}>0</Text>
             <Text style={styles.statLabel}>Playlists</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>0</Text>
+            <Text style={[styles.statNumber, { color: colors.white }]}>0</Text>
             <Text style={styles.statLabel}>Downloads</Text>
           </View>
         </View>
 
-        <View style={styles.menuSection}>
+        <View style={[styles.menuSection, { backgroundColor: colors.surface }]}>
           {menuItems.map((item, index) => (
             <TouchableOpacity
               key={item.label}
@@ -211,7 +211,7 @@ export default function ProfileScreen() {
               <Text
                 style={[
                   styles.menuLabel,
-                  item.color ? { color: item.color } : null,
+                  item.color ? { color: item.color } : { color: colors.white },
                 ]}
               >
                 {item.label}

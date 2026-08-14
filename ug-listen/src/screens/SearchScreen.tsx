@@ -141,7 +141,7 @@ export default function SearchScreen() {
             {(item.artistName || item.user?.name || item.name || "?").charAt(0).toUpperCase()}
           </Text>
         </View>
-        <Text style={styles.resultName} numberOfLines={1}>{item.artistName || item.user?.name || item.name || "Unknown"}</Text>
+        <Text style={[styles.resultName, { color: colors.white }]} numberOfLines={1}>{item.artistName || item.user?.name || item.name || "Unknown"}</Text>
       </TouchableOpacity>
     ),
     [navigation],
@@ -158,7 +158,7 @@ export default function SearchScreen() {
           <Music2 size={16} color={COLORS.bg} />
         </View>
         <View style={styles.songInfo}>
-          <Text style={styles.resultName} numberOfLines={1}>
+          <Text style={[styles.resultName, { color: colors.white }]} numberOfLines={1}>
             {item.title}
           </Text>
           <Text style={styles.resultSub} numberOfLines={1}>
@@ -183,10 +183,10 @@ export default function SearchScreen() {
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
-      <View style={styles.searchBar}>
+      <View style={[styles.searchBar, { backgroundColor: colors.surface }]}>
         <Search size={16} color={COLORS.textMuted} style={styles.searchIcon} />
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { color: colors.white }]}
           placeholder="Search artists and songs..."
           placeholderTextColor={COLORS.textMuted}
           value={query}
@@ -210,12 +210,12 @@ export default function SearchScreen() {
           renderItem={null}
           ListHeaderComponent={
             <View style={styles.browseContent}>
-              <Text style={styles.sectionTitle}>Trending Searches</Text>
+              <Text style={[styles.sectionTitle, { color: colors.white }]}>Trending Searches</Text>
               <View style={styles.pillRow}>
                 {TRENDING_SEARCHES.map((term) => (
                   <TouchableOpacity
                     key={term}
-                    style={styles.pill}
+                    style={[styles.pill, { backgroundColor: colors.surface }]}
                     activeOpacity={0.7}
                     onPress={() => handleTrendingPress(term)}
                   >
@@ -224,12 +224,12 @@ export default function SearchScreen() {
                 ))}
               </View>
 
-              <Text style={styles.sectionTitle}>Browse by Genre</Text>
+              <Text style={[styles.sectionTitle, { color: colors.white }]}>Browse by Genre</Text>
               <View style={styles.genreGrid}>
                 {GENRES.map((g) => (
                   <TouchableOpacity
                     key={g.label}
-                    style={styles.genreCard}
+                    style={[styles.genreCard, { backgroundColor: colors.surface }]}
                     activeOpacity={0.7}
                     onPress={() => handleGenrePress(g.label)}
                   >
@@ -260,14 +260,14 @@ export default function SearchScreen() {
                 <>
                   {artists.length > 0 && (
                     <View>
-                      <Text style={styles.sectionTitle}>Artists</Text>
+                      <Text style={[styles.sectionTitle, { color: colors.white }]}>Artists</Text>
                       {(artists as Artist[]).map((artist) => (
                         <View key={artist.id}>{renderArtistItem({ item: artist })}</View>
                       ))}
                     </View>
                   )}
                   {songs.length > 0 && (
-                    <Text style={styles.sectionTitle}>Songs</Text>
+                    <Text style={[styles.sectionTitle, { color: colors.white }]}>Songs</Text>
                   )}
                   {artists.length === 0 && songs.length === 0 && (
                     <Text style={styles.emptyText}>No results found</Text>

@@ -116,12 +116,12 @@ export default function RadioScreen() {
   const renderGenreStation = useCallback(
     ({ item }: { item: (typeof GENRE_STATIONS)[0] }) => (
       <TouchableOpacity
-        style={styles.stationCard}
+        style={[styles.stationCard, { backgroundColor: colors.surface }]}
         activeOpacity={0.7}
         onPress={() => handleGenrePress(item.id, item.name)}
       >
         <Text style={styles.stationEmoji}>{item.emoji}</Text>
-        <Text style={styles.stationName}>{item.name}</Text>
+        <Text style={[styles.stationName, { color: colors.white }]}>{item.name}</Text>
       </TouchableOpacity>
     ),
     [handleGenrePress],
@@ -130,12 +130,12 @@ export default function RadioScreen() {
   const renderMoodStation = (item: (typeof MOOD_STATIONS)[0]) => (
     <TouchableOpacity
       key={item.id}
-      style={styles.moodCard}
+      style={[styles.moodCard, { backgroundColor: colors.surface }]}
       activeOpacity={0.7}
       onPress={() => handleMoodPress(item.id, item.name)}
     >
       <Text style={styles.moodEmoji}>{item.emoji}</Text>
-      <Text style={styles.moodName}>{item.name}</Text>
+      <Text style={[styles.moodName, { color: colors.white }]}>{item.name}</Text>
     </TouchableOpacity>
   );
 
@@ -143,7 +143,7 @@ export default function RadioScreen() {
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Radio</Text>
+        <Text style={[styles.headerTitle, { color: colors.white }]}>Radio</Text>
         <Text style={styles.headerSub}>
           Endless music based on your taste
         </Text>
@@ -158,7 +158,7 @@ export default function RadioScreen() {
               <View style={styles.songBullet} />
             </View>
             <View style={styles.songInfo}>
-              <Text style={styles.songTitle} numberOfLines={1}>
+              <Text style={[styles.songTitle, { color: colors.white }]} numberOfLines={1}>
                 {item.title}
               </Text>
               <Text style={styles.songSub} numberOfLines={1}>
@@ -171,7 +171,7 @@ export default function RadioScreen() {
         ListHeaderComponent={
           <View style={styles.listHeader}>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Genre Stations</Text>
+              <Text style={[styles.sectionTitle, { color: colors.white }]}>Genre Stations</Text>
               <FlatList
                 data={GENRE_STATIONS}
                 keyExtractor={(item) => item.id}
@@ -185,7 +185,7 @@ export default function RadioScreen() {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Mood Stations</Text>
+              <Text style={[styles.sectionTitle, { color: colors.white }]}>Mood Stations</Text>
               <View style={styles.moodGrid}>
                 {MOOD_STATIONS.map(renderMoodStation)}
               </View>
@@ -200,7 +200,7 @@ export default function RadioScreen() {
 
             {generatedQueue.length > 0 && !loading && (
               <View style={styles.queueHeader}>
-                <Text style={styles.queueTitle}>{queueTitle} Queue</Text>
+                <Text style={[styles.queueTitle, { color: colors.white }]}>{queueTitle} Queue</Text>
                 <TouchableOpacity
                   style={styles.playAllBtn}
                   activeOpacity={0.8}

@@ -43,6 +43,7 @@ export const artistRouter = router({
           artistId: artist.id,
           published: true,
           approved: false,
+          signature: generateSignature(),
         },
         include: { artist: { select: { artistName: true } } },
       });
@@ -83,7 +84,7 @@ export const artistRouter = router({
           releaseDate: input.releaseDate ? new Date(input.releaseDate) : new Date(),
           published: true,
           songs: {
-            create: songs.map((s) => ({ ...s, artistId: artist.id, published: true })),
+            create: songs.map((s) => ({ ...s, artistId: artist.id, published: true, signature: generateSignature() })),
           },
         },
         include: { songs: true, artist: { select: { artistName: true } } },

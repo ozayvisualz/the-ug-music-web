@@ -132,7 +132,7 @@ export default function ArtistScreen() {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        <View style={styles.headerArea}>
+        <View style={[styles.headerArea, { backgroundColor: colors.surface }]}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
               {artist.name?.charAt(0).toUpperCase()}
@@ -140,7 +140,7 @@ export default function ArtistScreen() {
           </View>
 
           <View style={styles.nameRow}>
-            <Text style={styles.artistName}>{artist.name}</Text>
+            <Text style={[styles.artistName, { color: colors.white }]}>{artist.name}</Text>
             {artist.verified ? (
               <BadgeCheck size={18} color={COLORS.gold} />
             ) : null}
@@ -154,14 +154,14 @@ export default function ArtistScreen() {
 
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>
+              <Text style={[styles.statNumber, { color: colors.white }]}>
                 {artist.totalStreams != null ? formatNumber(artist.totalStreams) : "0"}
               </Text>
               <Text style={styles.statLabel}>Streams</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>
+              <Text style={[styles.statNumber, { color: colors.white }]}>
                 {formatNumber(artist.songs?.length ?? 0)}
               </Text>
               <Text style={styles.statLabel}>Songs</Text>
@@ -186,21 +186,21 @@ export default function ArtistScreen() {
 
         {artist.bio ? (
           <View style={styles.section}>
-            <Text style={styles.sectionHeader}>Bio</Text>
+            <Text style={[styles.sectionHeader, { color: colors.white }]}>Bio</Text>
             <Text style={styles.bioText}>{artist.bio}</Text>
           </View>
         ) : null}
 
         <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Popular Songs</Text>
+          <Text style={[styles.sectionHeader, { color: colors.white }]}>Popular Songs</Text>
           {artist.songs.length === 0 ? (
             <Text style={styles.emptySubText}>No songs yet</Text>
           ) : (
             artist.songs.map((song, index) => (
-              <View key={song.id} style={styles.songRow}>
+              <View key={song.id} style={[styles.songRow, { backgroundColor: colors.surface }]}>
                 <Text style={styles.songIndex}>{index + 1}</Text>
                 <View style={styles.songInfo}>
-                  <Text style={styles.songTitle} numberOfLines={1}>
+                  <Text style={[styles.songTitle, { color: colors.white }]} numberOfLines={1}>
                     {song.title}
                   </Text>
                 </View>
@@ -219,7 +219,7 @@ export default function ArtistScreen() {
 
         {artist.albums && artist.albums.length > 0 ? (
           <View style={styles.section}>
-            <Text style={styles.sectionHeader}>Albums</Text>
+            <Text style={[styles.sectionHeader, { color: colors.white }]}>Albums</Text>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -229,14 +229,14 @@ export default function ArtistScreen() {
               {artist.albums.map((album) => (
                 <TouchableOpacity
                   key={album.id}
-                  style={styles.albumCard}
+                  style={[styles.albumCard, { backgroundColor: colors.surface }]}
                   activeOpacity={0.7}
                   onPress={() => navigation.navigate("Album", { albumId: album.id })}
                 >
                   <View style={styles.albumIcon}>
                     <Disc3 size={26} color={COLORS.bg} />
                   </View>
-                  <Text style={styles.albumTitle} numberOfLines={1}>
+                  <Text style={[styles.albumTitle, { color: colors.white }]} numberOfLines={1}>
                     {album.title}
                   </Text>
                 </TouchableOpacity>

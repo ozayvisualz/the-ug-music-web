@@ -31,13 +31,14 @@ function formatDuration(d: number): string {
 }
 
 function SongRow({ song, onPlay }: { song: Song; onPlay: (song: Song) => void }) {
+  const { colors } = useTheme();
   return (
-    <View style={styles.songRow}>
+    <View style={[styles.songRow, { backgroundColor: colors.surface }]}>
       <View style={styles.songRowArtwork}>
         <Music2 size={18} color={COLORS.bg} />
       </View>
       <View style={styles.songRowInfo}>
-        <Text style={styles.songRowTitle} numberOfLines={1}>
+        <Text style={[styles.songRowTitle, { color: colors.white }]} numberOfLines={1}>
           {song.title}
         </Text>
         <Text style={styles.songRowArtist} numberOfLines={1}>
@@ -144,7 +145,7 @@ export default function LibraryScreen() {
   const renderPlaylistItem = useCallback(
     ({ item }: { item: Playlist }) => (
       <TouchableOpacity
-        style={styles.playlistRow}
+        style={[styles.playlistRow, { backgroundColor: colors.surface }]}
         activeOpacity={0.7}
         onPress={() => navigation.navigate("Playlist", { playlist: item })}
       >
@@ -152,7 +153,7 @@ export default function LibraryScreen() {
           <ListMusic size={20} color={COLORS.bg} />
         </View>
         <View style={styles.playlistInfo}>
-          <Text style={styles.playlistName} numberOfLines={1}>
+          <Text style={[styles.playlistName, { color: colors.white }]} numberOfLines={1}>
             {item.name}
           </Text>
           <Text style={styles.playlistCount}>
@@ -174,7 +175,7 @@ export default function LibraryScreen() {
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Your Library</Text>
+        <Text style={[styles.headerTitle, { color: colors.white }]}>Your Library</Text>
       </View>
 
       <View style={styles.tabRow}>
@@ -187,7 +188,7 @@ export default function LibraryScreen() {
           {TABS.map((t) => (
             <TouchableOpacity
               key={t}
-              style={[styles.tabPill, tab === t && styles.tabPillActive]}
+              style={[styles.tabPill, { backgroundColor: colors.surface }, tab === t && styles.tabPillActive]}
               onPress={() => setTab(t)}
             >
               <Text style={[styles.tabPillText, tab === t && styles.tabPillTextActive]}>

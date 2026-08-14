@@ -48,7 +48,7 @@ export default function AdminSongsPage() {
           <tbody>
             {songs.map((song: any) => (
               <tr key={song.id} className="border-b border-zinc-800/30 hover:bg-zinc-800/20">
-                <td className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-xs text-yellow-500">🎵</div><div><p className="text-sm font-medium text-white">{song.title}</p><p className="text-xs text-zinc-500">{getArtistName(song.artist)}</p></div></div></td>
+                <td className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center text-xs text-yellow-500">🎵</div><div><p className="text-sm font-medium text-white">{song.title}</p><p className="text-xs text-zinc-500">{getArtistName(song.artist)}</p><p className="text-[10px] text-zinc-600 font-mono">ID: {song.id}{song.signature ? ` · ${song.signature}` : ""}</p></div></div></td>
                 <td className="p-4 hidden md:table-cell"><span className="text-sm text-zinc-400">{song.genre || "—"}</span></td>
                 <td className="p-4 hidden lg:table-cell"><span className="text-xs text-zinc-500">{song.playCount} plays · {song.downloadCount} dls</span></td>
                 <td className="p-4"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${song.approved ? "bg-emerald-500/20 text-emerald-400" : "bg-yellow-500/20 text-yellow-500"}`}>{song.approved ? "Live" : "Pending"}</span></td>

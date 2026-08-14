@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator, Image } from "react-native";
 import { Music2, Play, Pause, SkipForward, X } from "lucide-react-native";
 import { COLORS, RADIUS, HIT_SLOP } from "../constants/theme";
 import { usePlayer } from "./PlayerContext";
@@ -21,7 +21,9 @@ export default function MiniPlayer({ onExpand }: Props) {
       <View style={[styles.bar, { backgroundColor: colors.gold, width: `${progress * 100}%` }]} />
       <View style={styles.row}>
         <View style={[styles.art, { backgroundColor: colors.gold }]}>
-          {isLoaded ? <Music2 size={18} color={colors.bg} /> : <ActivityIndicator size="small" color={colors.bg} />}
+          {currentTrack.coverUrl ? (
+            <Image source={{ uri: currentTrack.coverUrl }} style={styles.artImg} />
+          ) : isLoaded ? <Music2 size={18} color={colors.bg} /> : <ActivityIndicator size="small" color={colors.bg} />}
         </View>
         <View style={styles.info}>
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>{currentTrack.title}</Text>
@@ -47,7 +49,8 @@ const styles = StyleSheet.create({
   wrap: { position: "absolute", bottom: Math.min(60, SW * 0.16), left: MINI_MARGIN, right: MINI_MARGIN, height: miniHeight, borderRadius: RADIUS.lg, borderTopWidth: 0, borderWidth: 1, overflow: "hidden" },
   bar: { position: "absolute", top: 0, left: 0, height: 2 },
   row: { flex: 1, flexDirection: "row", alignItems: "center", paddingHorizontal: Math.min(SW * 0.025, 10), gap: Math.min(SW * 0.02, 10) },
-  art: { width: miniHeight - 18, height: miniHeight - 18, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  art: { width: miniHeight - 18, height: miniHeight - 18, borderRadius: 8, alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  artImg: { width: "100%", height: "100%", resizeMode: "cover" },
   info: { flex: 1, minWidth: 0 },
   title: { fontSize: SW < 360 ? 11 : 13, fontWeight: "600", flexShrink: 1 },
   artist: { fontSize: SW < 360 ? 9 : 11, marginTop: 1, flexShrink: 1 },

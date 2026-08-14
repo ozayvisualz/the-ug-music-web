@@ -120,7 +120,7 @@ export default function SupportScreen() {
 
       return (
         <TouchableOpacity
-          style={styles.ticketCard}
+          style={[styles.ticketCard, { backgroundColor: colors.surface }]}
           activeOpacity={0.7}
           onPress={() =>
             setExpandedTicket(isExpanded ? null : item.id)
@@ -128,7 +128,7 @@ export default function SupportScreen() {
         >
           <View style={styles.ticketHeader}>
             <View style={styles.ticketInfo}>
-              <Text style={styles.ticketSubject} numberOfLines={2}>
+              <Text style={[styles.ticketSubject, { color: colors.white }]} numberOfLines={2}>
                 {item.subject}
               </Text>
               <View style={styles.ticketMetaRow}>
@@ -188,7 +188,7 @@ export default function SupportScreen() {
         >
           <ArrowLeft size={22} color={COLORS.white} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Support</Text>
+        <Text style={[styles.headerTitle, { color: colors.white }]}>Support</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -198,12 +198,12 @@ export default function SupportScreen() {
         renderItem={renderTicket}
         ListHeaderComponent={
           <View style={styles.listHeader}>
-            <View style={styles.contactCard}>
+            <View style={[styles.contactCard, { backgroundColor: colors.surface }]}>
               <View style={styles.contactIconWrap}>
                 <HelpCircle size={20} color={COLORS.bg} />
               </View>
               <View style={styles.contactTextWrap}>
-                <Text style={styles.contactTitle}>Contact Support</Text>
+                <Text style={[styles.contactTitle, { color: colors.white }]}>Contact Support</Text>
                 <Text style={styles.contactSub}>
                   Need help? Contact our team
                 </Text>
@@ -211,10 +211,10 @@ export default function SupportScreen() {
             </View>
 
             <View style={styles.formSection}>
-              <Text style={styles.formTitle}>Create Ticket</Text>
+              <Text style={[styles.formTitle, { color: colors.white }]}>Create Ticket</Text>
 
               <TextInput
-                style={styles.subjectInput}
+                style={[styles.subjectInput, { backgroundColor: colors.surface, color: colors.white }]}
                 placeholder="Subject"
                 placeholderTextColor={COLORS.textMuted}
                 value={subject}
@@ -228,6 +228,7 @@ export default function SupportScreen() {
                     key={cat}
                     style={[
                       styles.categoryPill,
+                      { backgroundColor: colors.surface },
                       category === cat && styles.categoryPillActive,
                     ]}
                     activeOpacity={0.7}
@@ -262,7 +263,7 @@ export default function SupportScreen() {
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.ticketsSectionTitle}>Your Tickets</Text>
+            <Text style={[styles.ticketsSectionTitle, { color: colors.white }]}>Your Tickets</Text>
 
             {ticketsLoading && (
               <ActivityIndicator

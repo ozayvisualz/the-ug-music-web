@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Dimensions,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -53,21 +54,27 @@ const BROWSE_ALL = [
 ];
 
 function SectionHeader({ title }: { title: string }) {
-  return <Text style={styles.sectionHeader}>{title}</Text>;
+  const { colors } = useTheme();
+  return <Text style={[styles.sectionHeader, { color: colors.text }]}>{title}</Text>;
 }
 
 function SongCard({ song, onPlay }: { song: Song; onPlay: (song: Song) => void }) {
   const navigation = useNavigation<any>();
+  const { colors } = useTheme();
   return (
     <TouchableOpacity
-      style={styles.songCard}
+      style={[styles.songCard, { backgroundColor: colors.surface }]}
       activeOpacity={0.7}
       onPress={() => navigation.navigate("Song", { songId: song.id })}
     >
       <View style={styles.songArtwork}>
-        <Music2 size={20} color={COLORS.bg} />
+        {song.coverUrl ? (
+          <Image source={{ uri: song.coverUrl }} style={styles.songArtworkImg} />
+        ) : (
+          <Music2 size={20} color={COLORS.bg} />
+        )}
       </View>
-      <Text style={styles.songTitle} numberOfLines={1}>
+      <Text style={[styles.songTitle, { color: colors.white }]} numberOfLines={2}>
         {song.title}
       </Text>
       <Text style={styles.songArtist} numberOfLines={1}>
@@ -125,7 +132,7 @@ export default function DiscoverScreen() {
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Discover</Text>
+        <Text style={[styles.headerTitle, { color: colors.white }]}>Discover</Text>
       </View>
 
       <ScrollView
@@ -135,7 +142,7 @@ export default function DiscoverScreen() {
         bounces={false}
       >
         <TouchableOpacity
-          style={styles.searchBar}
+          style={[styles.searchBar, { backgroundColor: colors.surface }]}
           activeOpacity={0.7}
           onPress={() => navigation.navigate("Search")}
         >
@@ -154,7 +161,7 @@ export default function DiscoverScreen() {
             {TRENDING_SEARCHES.map((item) => (
               <TouchableOpacity
                 key={item}
-                style={styles.chip}
+                style={[styles.chip, { backgroundColor: colors.surface }]}
                 activeOpacity={0.7}
                 onPress={() => navigation.navigate("Search", { query: item })}
               >
@@ -170,12 +177,12 @@ export default function DiscoverScreen() {
             {GENRES.map((genre) => (
               <TouchableOpacity
                 key={genre.name}
-                style={styles.genreCard}
+                style={[styles.genreCard, { backgroundColor: colors.surface }]}
                 activeOpacity={0.7}
                 onPress={() => navigation.navigate("CategoryPlaylist", { category: genre.name })}
               >
                 <Text style={styles.genreEmoji}>{genre.emoji}</Text>
-                <Text style={styles.genreName}>{genre.name}</Text>
+                <Text style={[styles.genreName, { color: colors.white }]}>{genre.name}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -187,12 +194,12 @@ export default function DiscoverScreen() {
             {BROWSE_ALL.map((item) => (
               <TouchableOpacity
                 key={item.label}
-                style={styles.browseCard}
+                style={[styles.browseCard, { backgroundColor: colors.surface }]}
                 activeOpacity={0.7}
                 onPress={() => navigation.navigate("CategoryPlaylist", { category: item.label })}
               >
                 <Text style={styles.browseEmoji}>{item.emoji}</Text>
-                <Text style={styles.browseLabel} numberOfLines={2}>
+                <Text style={[styles.browseLabel, { color: colors.white }]} numberOfLines={2}>
                   {item.label}
                 </Text>
               </TouchableOpacity>
@@ -380,29 +387,35 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
+    overflow: "hidden",
+  },
+  songArtworkImg: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   songTitle: {
     color: COLORS.white,
     fontSize: SW < 360 ? 11 : 12,
     fontWeight: "600",
-    marginBottom: 1,
-    paddingRight: 32,
+    marginBottom: 2,
+    paddingRight: 30,
     flexShrink: 1,
   },
   songArtist: {
-    color: COLORS.textMuted,
+    color: COLORS.gold,
     fontSize: SW < 360 ? 9 : 10,
     marginBottom: 4,
-    paddingRight: 32,
+    paddingRight: 30,
     flexShrink: 1,
   },
   songPlayBtn: {
     position: "absolute",
-    bottom: 4,
-    right: 4,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    bottom: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",

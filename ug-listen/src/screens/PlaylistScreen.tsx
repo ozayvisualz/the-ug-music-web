@@ -101,7 +101,7 @@ export default function PlaylistScreen() {
           </View>
         </View>
 
-        <Text style={styles.title}>{playlist.name}</Text>
+        <Text style={[styles.title, { color: colors.white }]}>{playlist.name}</Text>
         <Text style={styles.byYouLabel}>By You</Text>
         <Text style={styles.songCount}>{songs.length} songs</Text>
 
@@ -115,12 +115,12 @@ export default function PlaylistScreen() {
             <Text style={styles.playAllText}>Play All</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.shuffleBtn}
+            style={[styles.shuffleBtn, { backgroundColor: colors.surface }]}
             activeOpacity={0.8}
             onPress={handleShuffle}
           >
             <Shuffle size={14} color={COLORS.white} />
-            <Text style={styles.shuffleText}>Shuffle</Text>
+            <Text style={[styles.shuffleText, { color: colors.white }]}>Shuffle</Text>
           </TouchableOpacity>
         </View>
 
@@ -130,7 +130,7 @@ export default function PlaylistScreen() {
           songs.map((song, index) => (
             <TouchableOpacity
               key={song.id}
-              style={styles.songRow}
+              style={[styles.songRow, { backgroundColor: colors.surface }]}
               activeOpacity={0.7}
               onPress={() => navigation.navigate("Song", { songId: song.id })}
             >
@@ -139,7 +139,7 @@ export default function PlaylistScreen() {
                 <Music2 size={18} color={COLORS.bg} />
               </View>
               <View style={styles.songInfo}>
-                <Text style={styles.songTitle} numberOfLines={1}>
+                <Text style={[styles.songTitle, { color: colors.white }]} numberOfLines={1}>
                   {song.title}
                 </Text>
                 <Text style={styles.songArtist} numberOfLines={1}>

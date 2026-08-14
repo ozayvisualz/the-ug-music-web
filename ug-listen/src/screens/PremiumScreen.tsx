@@ -155,9 +155,9 @@ export default function PremiumScreen() {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        <View style={styles.currentBadge}>
+        <View style={[styles.currentBadge, { backgroundColor: colors.surface }]}>
           <Text style={styles.currentLabel}>Current Plan</Text>
-          <Text style={styles.currentPlan}>
+          <Text style={[styles.currentPlan, { color: colors.white }]}>
             {subscription ? `${subscription.plan} (${subscription.status})` : "Free Plan"}
           </Text>
         </View>
@@ -171,6 +171,7 @@ export default function PremiumScreen() {
               key={plan.id}
               style={[
                 styles.planCard,
+                { backgroundColor: colors.surface },
                 isActive && styles.planCardActive,
                 plan.bestValue && styles.planCardBestValue,
               ]}
@@ -180,7 +181,7 @@ export default function PremiumScreen() {
                   <Text style={styles.bestValueText}>Best Value</Text>
                 </View>
               )}
-              <Text style={styles.planName}>{plan.name}</Text>
+              <Text style={[styles.planName, { color: colors.white }]}>{plan.name}</Text>
               <View style={styles.planPriceRow}>
                 <Text style={styles.planPrice}>{formatUGX(plan.price)}</Text>
                 <Text style={styles.planInterval}>{plan.interval}</Text>
@@ -189,7 +190,7 @@ export default function PremiumScreen() {
                 <Text style={styles.savingsText}>Save {plan.savings}%</Text>
               )}
               {isActive ? (
-                <View style={styles.activeBadge}>
+                <View style={[styles.activeBadge, { backgroundColor: colors.surface }]}>
                   <Check size={12} color={COLORS.green} />
                   <Text style={styles.activeText}>Current Plan</Text>
                 </View>
@@ -215,7 +216,7 @@ export default function PremiumScreen() {
         })}
 
         <View style={styles.featuresSection}>
-          <Text style={styles.featuresTitle}>Premium Features</Text>
+          <Text style={[styles.featuresTitle, { color: colors.white }]}>Premium Features</Text>
           {FEATURES.map((feature) => (
             <View key={feature} style={styles.featureRow}>
               <Check size={14} color={COLORS.green} />

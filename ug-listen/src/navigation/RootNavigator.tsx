@@ -40,6 +40,7 @@ function HomeStack() {
       <Stack.Screen name="Radio" component={RadioScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="CategoryPlaylist" component={CategoryPlaylistScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   );
 }

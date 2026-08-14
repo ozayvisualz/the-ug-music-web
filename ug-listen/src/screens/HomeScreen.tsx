@@ -63,7 +63,7 @@ function getArtistName(song: any): string {
 }
 
 function getCoverUrl(song: any): string | undefined {
-  return song?.coverUrl || undefined;
+  return song?.coverUrl || song?.album?.coverUrl || undefined;
 }
 
 const MIX_CARDS = [
@@ -89,6 +89,7 @@ const MADE_IN_UGANDA = [
 ];
 
 function ShimmerBlock({ width: w, height: h, borderRadius: br = 12 }: any) {
+  const { colors } = useTheme();
   const opacity = useSharedValue(0.3);
   useEffect(() => {
     opacity.value = withRepeat(withTiming(0.7, TIMING.slow), -1, true);
@@ -102,7 +103,7 @@ function ShimmerBlock({ width: w, height: h, borderRadius: br = 12 }: any) {
           width: w,
           height: h,
           borderRadius: br,
-          backgroundColor: COLORS.surfaceHover,
+          backgroundColor: colors.surfaceHover,
         },
         style,
       ]}
@@ -117,11 +118,12 @@ function SectionHeader({
   title: string;
   onSeeAll?: () => void;
 }) {
+  const { colors } = useTheme();
   return (
     <View style={styles.sectionHeaderRow}>
       <View style={styles.sectionHeaderLeft}>
         <View style={styles.goldAccent} />
-        <Text style={styles.sectionHeaderTitle}>{title}</Text>
+        <Text style={[styles.sectionHeaderTitle, { color: colors.white }]}>{title}</Text>
       </View>
       {onSeeAll && (
         <TouchableOpacity onPress={onSeeAll} hitSlop={HIT_SLOP}>
@@ -133,14 +135,15 @@ function SectionHeader({
 }
 
 function HeroCard({ song, onPlay, onSave }: { song: any; onPlay: (s: any) => void; onSave: (s: any) => void }) {
+  const { colors } = useTheme();
   const coverUrl = getCoverUrl(song);
   return (
-    <View style={styles.heroCard}>
+    <View style={[styles.heroCard, { backgroundColor: colors.surface }]}>
       <View style={styles.heroArtPlaceholder}>
         {coverUrl ? (
           <Image source={{ uri: coverUrl }} style={styles.heroArtImage} />
         ) : (
-          <View style={styles.heroArtGradient}>
+          <View style={[styles.heroArtGradient, { backgroundColor: colors.surfaceHover }]}>
             <Music2 size={32} color={COLORS.gold} />
           </View>
         )}
@@ -273,7 +276,7 @@ export default function HomeScreen() {
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
 
       {/* ── Header Bar ── */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.bg }]}>
         <View style={styles.headerLeft}>
           <View style={styles.avatar}>
             {user?.name ? (
@@ -283,11 +286,11 @@ export default function HomeScreen() {
             )}
           </View>
           <View style={styles.greetingWrap}>
-            <Text style={styles.greeting}>
+            <Text style={[styles.greeting, { color: colors.whiteMuted }]}>
               {getGreeting()}{" "}
               <Text style={styles.greetingWave}>{/* wave */}</Text>
             </Text>
-            <Text style={styles.username}>
+            <Text style={[styles.username, { color: colors.white }]}>
               {user?.name?.split(" ")[0] ?? "Listener"}
             </Text>
           </View>
@@ -398,11 +401,11 @@ export default function HomeScreen() {
                   const coverUrl = getCoverUrl(item);
                   return (
                     <TouchableOpacity
-                      style={styles.continueCard}
+                      style={[styles.continueCard, { backgroundColor: colors.surface }]}
                       activeOpacity={0.7}
                       onPress={() => handlePlaySong(item)}
                     >
-                      <View style={styles.continueArt}>
+                      <View style={[styles.continueArt, { backgroundColor: colors.surfaceHover }]}>
                         {coverUrl ? (
                           <Image source={{ uri: coverUrl }} style={styles.continueArtImg} />
                         ) : (
@@ -410,7 +413,7 @@ export default function HomeScreen() {
                         )}
                       </View>
                       <View style={styles.continueInfo}>
-                        <Text style={styles.continueTitle} numberOfLines={1}>
+                        <Text style={[styles.continueTitle, { color: colors.white }]} numberOfLines={1}>
                           {item.title}
                         </Text>
                         <Text style={styles.continueArtist} numberOfLines={1}>
@@ -455,18 +458,18 @@ export default function HomeScreen() {
                 const coverUrl = getCoverUrl(item);
                 return (
                   <TouchableOpacity
-                    style={styles.trendingCard}
+                    style={[styles.trendingCard, { backgroundColor: colors.surface }]}
                     activeOpacity={0.7}
                     onPress={() => handlePlaySong(item)}
                   >
-                    <View style={styles.trendingArt}>
+                    <View style={[styles.trendingArt, { backgroundColor: colors.surfaceHover }]}>
                       {coverUrl ? (
                         <Image source={{ uri: coverUrl }} style={styles.trendingArtImg} />
                       ) : (
                         <Music2 size={28} color={COLORS.gold} />
                       )}
                     </View>
-                    <Text style={styles.trendingTitle} numberOfLines={1}>
+                    <Text style={[styles.trendingTitle, { color: colors.white }]} numberOfLines={2}>
                       {item.title}
                     </Text>
                     <Text style={styles.trendingArtist} numberOfLines={1}>
@@ -520,11 +523,11 @@ export default function HomeScreen() {
                 const coverUrl = getCoverUrl(item);
                 return (
                   <TouchableOpacity
-                    style={styles.releaseCard}
+                    style={[styles.releaseCard, { backgroundColor: colors.surface }]}
                     activeOpacity={0.7}
                     onPress={() => handlePlaySong(item)}
                   >
-                    <View style={styles.releaseArt}>
+                    <View style={[styles.releaseArt, { backgroundColor: colors.surfaceHover }]}>
                       {coverUrl ? (
                         <Image source={{ uri: coverUrl }} style={styles.releaseArtImg} />
                       ) : (
@@ -534,7 +537,7 @@ export default function HomeScreen() {
                         <Text style={styles.newBadgeText}>NEW</Text>
                       </View>
                     </View>
-                    <Text style={styles.releaseTitle} numberOfLines={1}>
+                    <Text style={[styles.releaseTitle, { color: colors.white }]} numberOfLines={2}>
                       {item.title}
                     </Text>
                     <Text style={styles.releaseArtist} numberOfLines={1}>
@@ -557,13 +560,13 @@ export default function HomeScreen() {
             {MADE_IN_UGANDA.map((item, i) => (
               <TouchableOpacity
                 key={i}
-                style={styles.ugandaCard}
+                style={[styles.ugandaCard, { backgroundColor: colors.surface }]}
                 activeOpacity={0.7}
                 onPress={() => navigation.navigate("MadeInUganda")}
               >
                 <View style={styles.ugandaOverlay}>
                   <Text style={styles.ugandaEmoji}>{item.emoji}</Text>
-                  <Text style={styles.ugandaLabel} numberOfLines={2}>
+                  <Text style={[styles.ugandaLabel, { color: colors.white }]} numberOfLines={2}>
                     {item.label}
                   </Text>
                 </View>
@@ -879,18 +882,19 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 12,
     fontWeight: "600",
-    paddingRight: 34,
+    paddingRight: 30,
   },
   trendingArtist: {
-    color: COLORS.textMuted,
+    color: COLORS.gold,
     fontSize: 10,
-    marginBottom: 3,
-    paddingRight: 34,
+    marginTop: 2,
+    paddingRight: 30,
   },
   playCountRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 3,
+    marginTop: 2,
   },
   fireIcon: {
     fontSize: 10,
@@ -901,11 +905,11 @@ const styles = StyleSheet.create({
   },
   trendingPlayBtn: {
     position: "absolute",
-    bottom: 4,
-    right: 4,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    bottom: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
@@ -961,12 +965,13 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 12,
     fontWeight: "600",
-    paddingRight: 34,
+    paddingRight: 30,
   },
   releaseArtist: {
-    color: COLORS.textMuted,
+    color: COLORS.gold,
     fontSize: 10,
-    paddingRight: 34,
+    marginTop: 2,
+    paddingRight: 30,
   },
 
   // ── Made in Uganda ──

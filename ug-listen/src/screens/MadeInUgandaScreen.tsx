@@ -102,7 +102,7 @@ export default function MadeInUgandaScreen() {
           <ArrowLeft size={22} color={COLORS.white} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <Text style={styles.title}>
+          <Text style={[styles.title, { color: colors.white }]}>
             Made in Uganda{" "}
             <Text style={styles.flag}>{"\uD83C\uDDFA\uD83C\uDDEC"}</Text>
           </Text>
@@ -123,12 +123,12 @@ export default function MadeInUgandaScreen() {
           {CATEGORIES.map((cat) => (
             <TouchableOpacity
               key={cat.title}
-              style={styles.card}
+              style={[styles.card, { backgroundColor: colors.surface }]}
               activeOpacity={0.7}
               onPress={() => handleCategoryPress(cat.title)}
             >
               <Text style={styles.cardEmoji}>{cat.emoji}</Text>
-              <Text style={styles.cardTitle} numberOfLines={2}>
+              <Text style={[styles.cardTitle, { color: colors.white }]} numberOfLines={2}>
                 {cat.title}
               </Text>
               <Text style={styles.cardDesc} numberOfLines={2}>

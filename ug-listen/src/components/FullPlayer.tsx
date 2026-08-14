@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions, Share, TextInput, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions, Share, TextInput, ActivityIndicator, Image } from "react-native";
 import { Music2, Play, Pause, SkipBack, SkipForward, Heart, Download, ListPlus, Share2, Shuffle, Repeat, ChevronDown, Send, Repeat1, X } from "lucide-react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from "react-native-reanimated";
 import { COLORS, RADIUS, HIT_SLOP, SPRING } from "../constants/theme";
@@ -197,7 +197,11 @@ export default function FullPlayer({ onCollapse }: Props) {
         </View>
 
         <View style={[styles.artwork, { backgroundColor: colors.gold }]}>
-          <Music2 size={80} color={colors.bg} />
+          {currentTrack.coverUrl ? (
+            <Image source={{ uri: currentTrack.coverUrl }} style={styles.artworkImg} />
+          ) : (
+            <Music2 size={80} color={colors.bg} />
+          )}
         </View>
 
         <View style={styles.infoArea}>
@@ -374,7 +378,8 @@ const styles = StyleSheet.create({
   dragPill: { width: 32, height: 4, borderRadius: 2 },
   header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 },
   headerTitle: { fontSize: 16, fontWeight: "600", flex: 1, textAlign: "center" },
-  artwork: { width: ART_SIZE, height: ART_SIZE, borderRadius: RADIUS.xl, alignSelf: "center", alignItems: "center", justifyContent: "center", marginBottom: 20 },
+  artwork: { width: ART_SIZE, height: ART_SIZE, borderRadius: RADIUS.xl, alignSelf: "center", alignItems: "center", justifyContent: "center", marginBottom: 20, overflow: "hidden" },
+  artworkImg: { width: "100%", height: "100%", resizeMode: "cover" },
   infoArea: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 4, minWidth: 0 },
   trackTitle: { fontSize: isSmall ? 16 : 20, fontWeight: "700", flexShrink: 1 },
   trackArtist: { fontSize: isSmall ? 13 : 15, textAlign: "center", marginBottom: 16, fontWeight: "600" },

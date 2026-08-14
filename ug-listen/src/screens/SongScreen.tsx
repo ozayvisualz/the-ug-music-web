@@ -166,7 +166,7 @@ export default function SongScreen() {
             </View>
           </View>
 
-          <Text style={styles.title}>{song.title}</Text>
+          <Text style={[styles.title, { color: colors.white }]}>{song.title}</Text>
 
           {song.artistId ? (
             <TouchableOpacity
@@ -205,21 +205,21 @@ export default function SongScreen() {
 
           {song.story ? (
             <View style={styles.section}>
-              <Text style={styles.sectionHeader}>Behind the Song</Text>
+              <Text style={[styles.sectionHeader, { color: colors.white }]}>Behind the Song</Text>
               <Text style={styles.storyText}>{song.story}</Text>
             </View>
           ) : null}
 
           {song.lyrics ? (
             <View style={styles.section}>
-              <Text style={styles.sectionHeader}>Lyrics</Text>
+              <Text style={[styles.sectionHeader, { color: colors.white }]}>Lyrics</Text>
               <Text style={styles.lyricsText}>{song.lyrics}</Text>
             </View>
           ) : null}
 
           <View style={styles.section}>
             <View style={styles.commentsHeaderRow}>
-              <Text style={styles.sectionHeader}>Comments</Text>
+              <Text style={[styles.sectionHeader, { color: colors.white }]}>Comments</Text>
               <Text style={styles.commentCount}>{comments.length}</Text>
             </View>
 
@@ -237,7 +237,7 @@ export default function SongScreen() {
                   </View>
                   <View style={styles.commentBody}>
                     <View style={styles.commentTopRow}>
-                      <Text style={styles.commentName}>{comment.userName}</Text>
+                      <Text style={[styles.commentName, { color: colors.white }]}>{comment.userName}</Text>
                       <Text style={styles.commentTime}>
                         {timeAgo(comment.createdAt)}
                       </Text>
@@ -254,7 +254,7 @@ export default function SongScreen() {
 
         <View style={styles.commentInputBar}>
           <TextInput
-            style={styles.commentInput}
+            style={[styles.commentInput, { backgroundColor: colors.surface, color: colors.white }]}
             placeholder="Write a comment..."
             placeholderTextColor={COLORS.textMuted}
             value={commentText}
@@ -264,7 +264,7 @@ export default function SongScreen() {
             editable={!sending}
           />
           <TouchableOpacity
-            style={[styles.sendBtn, (!commentText.trim() || sending) && styles.sendBtnDisabled]}
+            style={[styles.sendBtn, (!commentText.trim() || sending) && { backgroundColor: colors.surface }]}
             activeOpacity={0.7}
             onPress={handleSendComment}
             disabled={!commentText.trim() || sending}

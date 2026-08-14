@@ -35,7 +35,7 @@ export default function ArtistMusicPage() {
           <tbody>
             {filtered.map((song: any) => (
               <tr key={song.id} className="border-b border-zinc-800/30 hover:bg-zinc-800/20">
-                <td className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-sm">🎵</div><div><p className="text-sm font-medium text-white">{song.title}</p><p className="text-xs text-zinc-500">{formatDuration(song.duration)}</p></div></div></td>
+                <td className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-sm">🎵</div><div><p className="text-sm font-medium text-white">{song.title}</p><p className="text-[10px] text-zinc-600 font-mono">ID: {song.id}</p><p className="text-xs text-zinc-500">{formatDuration(song.duration)}</p></div></div></td>
                 <td className="p-4 hidden md:table-cell"><span className="text-sm text-zinc-400">{song.genre || "-"}</span></td>
                 <td className="p-4 hidden lg:table-cell"><span className="text-xs text-zinc-500">{formatNumber(song.playCount)} plays · {song.downloadCount} dls</span></td>
                 <td className="p-4">
