@@ -228,7 +228,7 @@ export default function HomeScreen() {
   }, [user]);
 
   useEffect(() => {
-    (async () => {
+    const fetchUnread = async () => {
       const token = await getStoredToken();
       if (!token) return;
       fetch(`https://theugmusic.com/api/admin/notifications?token=${encodeURIComponent(token)}`)
@@ -237,7 +237,10 @@ export default function HomeScreen() {
           if (Array.isArray(d)) setUnreadCount(d.filter((n: any) => !n.read).length);
         })
         .catch(() => {});
-    })();
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
   }, [user]);
 
   useEffect(() => {
