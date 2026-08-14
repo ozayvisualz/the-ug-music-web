@@ -17,18 +17,20 @@ export default function MiniPlayer({ onExpand }: Props) {
   const progress = duration > 0 ? Math.min(position / duration, 1) : 0;
 
   return (
-    <TouchableOpacity style={[styles.wrap, { backgroundColor: colors.surface, borderTopColor: colors.border }]} activeOpacity={0.9} onPress={onExpand}>
+    <View style={[styles.wrap, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
       <View style={[styles.bar, { backgroundColor: colors.gold, width: `${progress * 100}%` }]} />
       <View style={styles.row}>
-        <View style={[styles.art, { backgroundColor: colors.gold }]}>
-          {currentTrack.coverUrl ? (
-            <Image source={{ uri: currentTrack.coverUrl }} style={styles.artImg} />
-          ) : isLoaded ? <Music2 size={18} color={colors.bg} /> : <ActivityIndicator size="small" color={colors.bg} />}
-        </View>
-        <View style={styles.info}>
-          <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>{currentTrack.title}</Text>
-          <Text style={[styles.artist, { color: colors.textMuted }]} numberOfLines={1}>{isLoaded ? currentTrack.artist : "Loading..."}</Text>
-        </View>
+        <TouchableOpacity style={styles.infoWrap} activeOpacity={0.9} onPress={onExpand}>
+          <View style={[styles.art, { backgroundColor: colors.gold }]}>
+            {currentTrack.coverUrl ? (
+              <Image source={{ uri: currentTrack.coverUrl }} style={styles.artImg} />
+            ) : isLoaded ? <Music2 size={18} color={colors.bg} /> : <ActivityIndicator size="small" color={colors.bg} />}
+          </View>
+          <View style={styles.info}>
+            <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>{currentTrack.title}</Text>
+            <Text style={[styles.artist, { color: colors.textMuted }]} numberOfLines={1}>{isLoaded ? currentTrack.artist : "Loading..."}</Text>
+          </View>
+        </TouchableOpacity>
         <TouchableOpacity onPress={togglePlay} hitSlop={HIT_SLOP} style={styles.btn} disabled={!isLoaded}>
           {!isLoaded ? <ActivityIndicator size="small" color={colors.gold} /> : isPlaying ? <Pause size={20} color={colors.gold} /> : <Play size={20} color={colors.gold} />}
         </TouchableOpacity>
@@ -39,7 +41,7 @@ export default function MiniPlayer({ onExpand }: Props) {
           <X size={18} color={colors.textMuted} />
         </TouchableOpacity>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -51,6 +53,7 @@ const styles = StyleSheet.create({
   row: { flex: 1, flexDirection: "row", alignItems: "center", paddingHorizontal: Math.min(SW * 0.025, 10), gap: Math.min(SW * 0.02, 10) },
   art: { width: miniHeight - 18, height: miniHeight - 18, borderRadius: 8, alignItems: "center", justifyContent: "center", overflow: "hidden" },
   artImg: { width: "100%", height: "100%", resizeMode: "cover" },
+  infoWrap: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: Math.min(SW * 0.02, 10) },
   info: { flex: 1, minWidth: 0 },
   title: { fontSize: SW < 360 ? 11 : 13, fontWeight: "600", flexShrink: 1 },
   artist: { fontSize: SW < 360 ? 9 : 11, marginTop: 1, flexShrink: 1 },

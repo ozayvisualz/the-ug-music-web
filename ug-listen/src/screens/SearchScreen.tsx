@@ -151,23 +151,25 @@ export default function SearchScreen() {
 
   const renderSongItem = useCallback(
     ({ item }: { item: Song }) => (
-      <TouchableOpacity
-        style={styles.resultRow}
-        activeOpacity={0.7}
-        onPress={() => navigation.navigate("Song", { songId: item.id })}
-      >
-        <View style={styles.songIcon}>
-          <Music2 size={16} color={COLORS.bg} />
-        </View>
-        <View style={styles.songInfo}>
-          <Text style={[styles.resultName, { color: colors.white }]} numberOfLines={1}>
-            {item.title}
-          </Text>
-          <Text style={styles.resultSub} numberOfLines={1}>
-            {typeof item.artist === "string" ? item.artist : item.artist?.artistName || item.artist?.user?.name || "Unknown"}
-          </Text>
-        </View>
-        <Text style={styles.songDuration}>{formatDuration(item.duration)}</Text>
+      <View style={styles.resultRow}>
+        <TouchableOpacity
+          style={styles.songMain}
+          activeOpacity={0.7}
+          onPress={() => navigation.navigate("Song", { songId: item.id })}
+        >
+          <View style={styles.songIcon}>
+            <Music2 size={16} color={COLORS.bg} />
+          </View>
+          <View style={styles.songInfo}>
+            <Text style={[styles.resultName, { color: colors.white }]} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.resultSub} numberOfLines={1}>
+              {typeof item.artist === "string" ? item.artist : item.artist?.artistName || item.artist?.user?.name || "Unknown"}
+            </Text>
+          </View>
+          <Text style={styles.songDuration}>{formatDuration(item.duration)}</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.playBtn}
           onPress={() => handlePlaySong(item)}
@@ -175,7 +177,7 @@ export default function SearchScreen() {
         >
           <Play size={12} color={COLORS.bg} fill={COLORS.bg} />
         </TouchableOpacity>
-      </TouchableOpacity>
+      </View>
     ),
     [navigation, handlePlaySong],
   );
@@ -392,6 +394,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 8,
+    gap: 8,
+  },
+  songMain: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   artistAvatar: {
