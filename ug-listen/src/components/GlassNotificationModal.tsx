@@ -193,7 +193,7 @@ export default function GlassNotificationModal({
         { translateX: interpolate(t, [0, 1], [fromX.value, 0], Extrapolation.CLAMP) },
         { translateY: interpolate(t, [0, 1], [fromY.value, 0], Extrapolation.CLAMP) },
         { scale: interpolate(t, [0, 1], [0.97, 1], Extrapolation.CLAMP) },
-        { rotateX: interpolate(t, [0, 1], [7, 0], Extrapolation.CLAMP) },
+        { rotateX: interpolate(t, [0, 1], ["7deg", "0deg"], Extrapolation.CLAMP) },
       ],
     } as any;
   });
