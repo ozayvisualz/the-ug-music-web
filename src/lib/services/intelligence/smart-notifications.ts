@@ -1,6 +1,7 @@
 import { db } from "../../db";
 import { SmartChartsEngine } from "./smart-charts";
 import { FraudEngine } from "./fraud";
+import { ProfileEngine } from "./profile";
 
 const MILESTONES = [1000, 5000, 10000, 50000, 100000, 500000, 1000000];
 
@@ -17,7 +18,56 @@ export const SmartNotifications = {
     results.fraudAlerts = await this.checkFraudAlerts().catch((e) => ({ error: e?.message }));
     results.payouts = await this.checkPayouts().catch((e) => ({ error: e?.message }));
     results.paymentAnomalies = await this.checkPaymentAnomalies().catch((e) => ({ error: e?.message }));
+    results.listenerRecommendations = await this.checkListenerRecommendations().catch((e) => ({ error: e?.message }));
     return results;
+  },
+
+  /** Listener smart notifications: new music matching their taste. */
+  async checkListenerRecommendations(batch = 60) {
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    // Recently-active listeners.
+    const activeUsers = await db.stream.groupBy({ by: ["userId"], where: { createdAt: { gte: since } }, _count: true });
+    const userIds = activeUsers
+      .sort((a, b) => b._count - a._count)
+      .slice(0, batch)
+      .map((u) => u.userId);
+
+    let created = 0;
+
+    for (const userId of userIds) {
+      const profile = await ProfileEngine.getProfile(userId).catch(() => null);
+      const topGenres = Object.keys((profile?.genres as Record<string, number>) || {}).slice(0, 3);
+      if (topGenres.length === 0) continue;
+
+      const recentNew = await db.song.findMany({
+        where: { approved: true, published: true, genre: { in: topGenres }, createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
+        select: { id: true, title: true },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      });
+      if (recentNew.length === 0) continue;
+
+      const song = recentNew[0];
+      const existing = await db.notification.findFirst({
+        where: { userId, type: "recommendation", targetId: song.id },
+      });
+      if (existing) continue;
+
+      await db.notification.create({
+        data: {
+          userId,
+          title: `New music you might like ✨`,
+          body: `"${song.title}" just dropped in your favorite genre.`,
+          audience: "listeners",
+          type: "recommendation",
+          targetId: song.id,
+        },
+      });
+      created++;
+    }
+
+    return { created, usersScanned: userIds.length };
   },
 
   async checkMilestones() {

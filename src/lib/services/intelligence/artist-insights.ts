@@ -88,9 +88,55 @@ export const ArtistInsightsEngine = {
       genrePerformance: this._sortMap(byGenre),
       moodPerformance: this._sortMap(byMood),
       topSongs,
+      similarArtists: await this.getSimilarArtists(artistId),
       suggestions,
       audience: { age: null, gender: null, topCities: [], note: "Demographics not tracked for privacy." },
     };
+  },
+
+  /** Co-listening similarity: "listeners who enjoy you also listen to X". */
+  async getSimilarArtists(artistId: string, limit = 5) {
+    const songIds = (await db.song.findMany({ where: { artistId }, select: { id: true } })).map((s) => s.id);
+    if (songIds.length === 0) return [];
+
+    const listeners = await db.stream.findMany({
+      where: { songId: { in: songIds } },
+      select: { userId: true },
+      distinct: ["userId"],
+      take: 2000,
+    });
+    const userIds = listeners.map((l) => l.userId);
+    if (userIds.length === 0) return [];
+
+    const streams = await db.stream.findMany({
+      where: { userId: { in: userIds }, song: { artistId: { not: artistId } } },
+      select: { song: { select: { artistId: true } } },
+      take: 5000,
+    });
+
+    const counts: Record<string, number> = {};
+    for (const s of streams) {
+      const aid = s.song?.artistId;
+      if (aid) counts[aid] = (counts[aid] || 0) + 1;
+    }
+
+    const topIds = Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit)
+      .map(([id]) => id);
+
+    const artists = await db.artist.findMany({
+      where: { id: { in: topIds } },
+      include: { user: { select: { name: true, image: true } } },
+    });
+
+    return artists.map((a) => ({
+      id: a.id,
+      name: a.user?.name || a.artistName || "Unknown",
+      image: a.user?.image,
+      genre: a.genre,
+      sharedListeners: counts[a.id] || 0,
+    }));
   },
 
   _parseMoods(moods: string | null): string[] {
