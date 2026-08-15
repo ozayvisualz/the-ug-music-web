@@ -10,6 +10,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { navigate } from "../navigation/navigationRef";
 import { trpc } from "../api/client";
 import { getStoredToken } from "../api/auth";
+import GlassDownloadModal from "./GlassDownloadModal";
 
 const SW = Dimensions.get("window").width;
 const ART_SIZE = Math.min(SW * 0.55, 260);
@@ -39,7 +40,7 @@ export default function FullPlayer({ onCollapse }: Props) {
   const [dragPos, setDragPos] = useState<number | null>(null);
   const [playlistModal, setPlaylistModal] = useState(false);
   const [playlists, setPlaylists] = useState<any[]>([]);
-  const [downloading, setDownloading] = useState(false);
+  const [downloadModal, setDownloadModal] = useState(false);
   const seekBarWidthRef = useRef<number>(SW);
 
   const scale = useSharedValue(0.92);
@@ -95,18 +96,8 @@ export default function FullPlayer({ onCollapse }: Props) {
     } catch {}
   };
 
-  const handleDownload = async () => {
-    if (downloading) return;
-    setDownloading(true);
-    try {
-      const token = await getStoredToken();
-      await fetch(`https://www.theugmusic.com/api/trpc/payments.initiateDownload?batch=1`, {
-        method: "POST", headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ "0": { json: { songId: currentTrack.id } } }),
-      });
-    } catch {} finally {
-      setTimeout(() => setDownloading(false), 1500);
-    }
+  const openDownloadModal = () => {
+    setDownloadModal(true);
   };
 
   const openPlaylistModal = async () => {
@@ -244,7 +235,7 @@ export default function FullPlayer({ onCollapse }: Props) {
         <View style={styles.actions}>
           {[
             { icon: <Heart size={18} color={liked ? colors.red : colors.textMuted} fill={liked ? colors.red : "none"} />, label: "Like", onPress: handleLike },
-            { icon: downloading ? <ActivityIndicator size="small" color={colors.textMuted} /> : <Download size={18} color={colors.textMuted} />, label: downloading ? "Saving" : "Download", onPress: handleDownload },
+            { icon: <Download size={18} color={colors.textMuted} />, label: "Download", onPress: openDownloadModal },
             { icon: <ListPlus size={18} color={colors.textMuted} />, label: "Playlist", onPress: openPlaylistModal },
             { icon: <Share2 size={18} color={colors.textMuted} />, label: "Share", onPress: handleShare },
           ].map((a, i) => (
@@ -351,6 +342,13 @@ export default function FullPlayer({ onCollapse }: Props) {
             ))}
           </View>
         </View>
+      )}
+
+      {downloadModal && currentTrack && (
+        <GlassDownloadModal
+          song={{ id: currentTrack.id, title: currentTrack.title, artist: currentTrack.artist, coverUrl: currentTrack.coverUrl }}
+          onClose={() => setDownloadModal(false)}
+        />
       )}
     </View>
   );
