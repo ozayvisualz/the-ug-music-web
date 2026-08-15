@@ -119,8 +119,12 @@ export function useAudioPlayer() {
 
       crossfadeTimer.current = setInterval(() => {
         const t = Math.min(1, (Date.now() - start) / durationMs);
-        try { oldPlayer.volume = 1 - t; } catch {}
-        try { newPlayer.volume = t; } catch {}
+        // Equal-power curve (cos² + sin² = 1) keeps perceived loudness constant
+        // through the transition, avoiding the mid-fade volume dip.
+        const fadeOut = Math.cos((t * Math.PI) / 2);
+        const fadeIn = Math.sin((t * Math.PI) / 2);
+        try { oldPlayer.volume = fadeOut; } catch {}
+        try { newPlayer.volume = fadeIn; } catch {}
         if (t >= 1) {
           if (crossfadeTimer.current) { clearInterval(crossfadeTimer.current); crossfadeTimer.current = null; }
           try { oldPlayer.remove(); } catch {}
