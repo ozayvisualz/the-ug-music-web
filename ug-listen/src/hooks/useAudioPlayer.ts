@@ -155,15 +155,42 @@ export function useAudioPlayer() {
         fadingPlayerRef.current = null;
       }
 
-      const oldPlayer = playerRef.current;
+    const oldPlayer = playerRef.current;
+    const shouldCrossfade = !!oldPlayer && crossfadeDurationMs > 0;
 
-      setPosition(0);
-      setDuration(currentTrack.duration || 0);
-      setIsLoaded(false);
-      setIsBuffering(true);
+    setPosition(0);
+    setDuration(currentTrack.duration || 0);
+    // Keep isLoaded true during crossfade so the player UI doesn't flash "Loading…"
+    // while the current track is still audibly playing.
+    if (!shouldCrossfade) setIsLoaded(false);
+    setIsBuffering(true);
 
-      try {
-        const newPlayer = createAudioPlayer({ uri: audioUrl }, { downloadFirst: false, updateInterval: 200 });
+    try {
+      const newPlayer = createAudioPlayer({ uri: audioUrl }, { downloadFirst: false, updateInterval: 200 });
+
+      if (shouldCrossfade) {
+        // Crossfade: buffer the next track silently, then fade old->new once ready.
+        newPlayer.volume = 0;
+
+        let crossfadeStarted = false;
+        newPlayer.addListener("playbackStatusUpdate", (status: any) => {
+          if (status.isLoaded && !crossfadeStarted) {
+            crossfadeStarted = true;
+            setIsLoaded(true);
+            setIsBuffering(false);
+            setDuration(status.duration || currentTrack.duration);
+            try { newPlayer.play(); } catch {}
+            crossfade(oldPlayer, newPlayer, crossfadeDurationMs);
+          }
+        });
+
+        playerRef.current = newPlayer;
+        try { newPlayer.play(); } catch {} // begin buffering silently
+        setIsPlaying(true);
+        startPositionTimer();
+      } else {
+        // First track, or crossfade disabled.
+        newPlayer.volume = 1;
 
         let started = false;
         newPlayer.addListener("playbackStatusUpdate", (status: any) => {
@@ -179,28 +206,16 @@ export function useAudioPlayer() {
         });
 
         playerRef.current = newPlayer;
-
-        if (oldPlayer && crossfadeDurationMs > 0) {
-          // Crossfade: new track starts silent, then fades in while old fades out.
-          newPlayer.volume = 0;
-          try { newPlayer.play(); } catch {}
-          setIsPlaying(true);
-          startPositionTimer();
-          crossfade(oldPlayer, newPlayer, crossfadeDurationMs);
-        } else {
-          // First track, or crossfade disabled.
-          newPlayer.volume = 1;
-          try { newPlayer.play(); } catch {}
-          setIsPlaying(true);
-          startPositionTimer();
-          if (oldPlayer) {
-            try { oldPlayer.remove(); } catch {}
-          }
-        }
-      } catch (e: any) {
-        setError(e?.message || "Audio load error");
-        setIsBuffering(false);
+        try { newPlayer.play(); } catch {}
+        setIsPlaying(true);
+        startPositionTimer();
+        if (oldPlayer) { try { oldPlayer.remove(); } catch {} }
       }
+    } catch (e: any) {
+      setError(e?.message || "Audio load error");
+      setIsBuffering(false);
+      setIsLoaded(false);
+    }
     })();
   }, [currentTrack?.id]);
 
