@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
   } else if (status === "failed" || status === "cancelled") {
     await db.transaction.update({
       where: { reference: tx_ref },
-      data: { status: status === "failed" ? "FAILED" : "CANCELLED", webhookProcessedAt: new Date(), flutterwaveId: flwRef || null },
+      data: { status: "FAILED", webhookProcessedAt: new Date(), flutterwaveId: flwRef || null },
     });
   } else if (status === "refunded" || status === "refund" || status === "chargeback") {
     await db.transaction.update({

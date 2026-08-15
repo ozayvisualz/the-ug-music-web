@@ -48,15 +48,23 @@ const GENRES = [
 type Song = {
   id: string;
   title: string;
-  artist: string;
+  artist: any;
   duration: number;
-  url: string;
+  url?: string;
+  fileUrl?: string;
+  hlsUrl?: string;
   coverUrl?: string;
+  genre?: string;
+  artistId?: string;
 };
 
 type Artist = {
   id: string;
-  name: string;
+  name?: string;
+  artistName?: string;
+  genre?: string;
+  image?: string;
+  user?: { name?: string; image?: string };
 };
 
 function formatDuration(d: number): string {

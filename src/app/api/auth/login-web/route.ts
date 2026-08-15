@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
+    const formData = (await req.formData()) as any;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
     const redirectTo = (formData.get("redirect") as string) || "/dashboard";

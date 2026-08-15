@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Home, Search, Library, Music2, Radio, Heart,
-  Download, Settings, LogOut, Compass, Disc3, Mic2, Sparkles, TrendingUp,
+  Download, Settings, LogOut, Compass, Disc3, Mic2, Sparkles, TrendingUp, Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth, signOut } from "@/lib/client-auth";

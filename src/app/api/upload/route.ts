@@ -4,7 +4,7 @@ export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
+    const formData = (await req.formData()) as any;
     const file = formData.get("file") as File;
 
     return NextResponse.json({

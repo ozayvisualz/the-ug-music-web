@@ -43,7 +43,7 @@ export default function AdminRolesPage() {
                 <td className="p-4">
                   <div className="flex items-center justify-end gap-1">
                     {ROLES.filter((r) => r !== u.role).map((role) => (
-                      <button key={role} onClick={() => promoteMut.mutate({ userId: u.id, role })} className="px-2 py-1 bg-zinc-800 text-zinc-400 rounded text-[10px] hover:bg-yellow-500/20 hover:text-yellow-500">
+                      <button key={role} onClick={() => promoteMut.mutate({ id: u.id, role })} className="px-2 py-1 bg-zinc-800 text-zinc-400 rounded text-[10px] hover:bg-yellow-500/20 hover:text-yellow-500">
                         Make {role === "ARTIST" ? "Artist" : role === "ADMIN" ? "Admin" : "Listener"}
                       </button>
                     ))}

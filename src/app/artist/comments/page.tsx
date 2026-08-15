@@ -6,6 +6,7 @@ import { formatNumber } from "@/lib/utils";
 
 export default function CommentsPage() {
   const { data, isLoading } = trpc.artist.getMyComments.useQuery();
+  const comments = (data as any)?.comments ?? (Array.isArray(data) ? data : []);
 
   return (
     <div className="p-6 space-y-6 max-w-3xl">
@@ -14,21 +15,21 @@ export default function CommentsPage() {
         <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center"><MessageSquare className="w-5 h-5 text-blue-400" /></div>
-            <div><p className="text-2xl font-bold text-white">{formatNumber(data?.length || 0)}</p><p className="text-xs text-zinc-500">Total Comments</p></div>
+            <div><p className="text-2xl font-bold text-white">{formatNumber(comments.length || 0)}</p><p className="text-xs text-zinc-500">Total Comments</p></div>
           </div>
         </div>
         <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-5">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center"><Music2 className="w-5 h-5 text-purple-400" /></div>
-            <div><p className="text-2xl font-bold text-white">{formatNumber([...new Set((data || []).map((c: any) => c.songId))].length)}</p><p className="text-xs text-zinc-500">Songs with comments</p></div>
+            <div><p className="text-2xl font-bold text-white">{formatNumber([...new Set(comments.map((c: any) => c.songId))].length)}</p><p className="text-xs text-zinc-500">Songs with comments</p></div>
           </div>
         </div>
       </div>
       <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl overflow-x-auto">
         <div className="px-6 py-4 border-b border-zinc-800/60"><h3 className="text-sm font-semibold text-white">Recent Comments</h3></div>
-        {data && data.length > 0 ? (
+        {comments.length > 0 ? (
           <div className="divide-y divide-zinc-800/30">
-            {data.map((c: any) => (
+            {comments.map((c: any) => (
               <div key={c.id} className="px-6 py-3 hover:bg-zinc-800/20">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 rounded-full bg-blue-500/15 flex items-center justify-center text-blue-400 text-xs font-bold flex-shrink-0 mt-0.5">

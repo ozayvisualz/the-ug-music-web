@@ -259,7 +259,7 @@ export const adminRouter = router({
     const totalSongs = await ctx.db.song.count();
     const pendingSongs = await ctx.db.song.count({ where: { approved: false } });
     const pendingPayouts = await ctx.db.payout.count({ where: { status: "PENDING" } });
-    const premiumUsers = await ctx.db.subscription.count({ where: { status: "ACTIVE" } });
+    const premiumUsers = await ctx.db.subscription.count({ where: { status: "COMPLETED", endDate: { gte: new Date() } } });
     const freeUsers = totalUsers - premiumUsers;
     const walletTotal = await ctx.db.artistWallet.aggregate({ _sum: { availableBalance: true, pendingBalance: true, lifetimeEarnings: true, totalWithdrawn: true } });
 

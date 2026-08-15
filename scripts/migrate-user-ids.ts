@@ -1,8 +1,9 @@
+export {};
 const { PrismaClient } = require("@prisma/client");
 const { randomBytes } = require("crypto");
 const db = new PrismaClient();
 
-function generateUserId(role) {
+function generateUserId(role: string) {
   const prefix = role === "ARTIST" ? "ART" : "LST";
   const hex = randomBytes(6).toString("hex").toUpperCase();
   return `${prefix}-${hex.slice(0, 4)}-${hex.slice(4, 8)}-${hex.slice(8, 12)}`;

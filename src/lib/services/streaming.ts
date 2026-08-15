@@ -11,6 +11,8 @@ interface StreamParams {
   userAgent?: string;
   region?: string;
   language?: string;
+  adServed?: boolean;
+  adId?: string;
 }
 
 interface StreamResult {
@@ -40,7 +42,7 @@ export const StreamingEngine = {
    * determines revenue eligibility, and updates song play counts.
    */
   async recordStream(params: StreamParams): Promise<StreamResult> {
-    const { songId, userId, durationListened, deviceType, quality, ipAddress, userAgent, region, language } = params;
+    const { songId, userId, durationListened, deviceType, quality, ipAddress, userAgent, region, language, adServed, adId } = params;
 
     // 1. Validate song exists
     const song = await db.song.findUnique({ where: { id: songId } });
@@ -83,7 +85,8 @@ export const StreamingEngine = {
         durationListened,
         revenueEligible,
         isPremium: !!premium,
-        adServed: !premium, // Show ads for free users
+        adServed: adServed ?? !premium, // Show ads for free users unless explicitly provided
+        adId: adId ?? null,
       },
     });
 

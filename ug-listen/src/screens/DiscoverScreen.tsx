@@ -104,7 +104,7 @@ export default function DiscoverScreen() {
   useEffect(() => {
     (async () => {
       const token = await getStoredToken();
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
       try {
         const res = await fetch("https://theugmusic.com/api/mobile/home", { headers });
         const data = await res.json();

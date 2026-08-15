@@ -7,7 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import ErrorBoundary from "./src/components/ErrorBoundary";
-import { getStoredToken, getStoredUser, setAuthToken } from "./src/api/auth";
+import { getStoredToken, getStoredUser } from "./src/api/auth";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import { PlayerProvider } from "./src/components/PlayerContext";
 import { registerPushToken, setupNotificationListeners } from "./src/lib/notifications";
@@ -22,7 +22,7 @@ function AppContent() {
         const token = await getStoredToken();
         if (token) {
           const stored = await getStoredUser();
-          if (stored) { setAuthToken(token); setUser(stored); }
+          if (stored) { setUser(stored); }
         }
       } catch {}
       setLoading(false);

@@ -80,6 +80,7 @@ model User {
   banExpiresAt  DateTime?
   restrictionFlags String? @default("[]")
   pushToken      String?
+  firebaseUid    String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

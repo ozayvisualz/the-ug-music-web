@@ -33,6 +33,7 @@ export const artistRouter = router({
         videoUrl: z.string().optional(),
         lyrics: z.string().optional(),
         explicit: z.boolean().optional(),
+        moods: z.string().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -237,16 +238,6 @@ export const artistRouter = router({
       });
       if (!artist) throw new Error("Artist profile not found");
 
-      if (input.artistName) {
-        await ctx.db.song.updateMany({
-          where: { artistId: artist.id },
-          data: { artistName: input.artistName },
-        });
-        await ctx.db.album.updateMany({
-          where: { artistId: artist.id },
-          data: { artistName: input.artistName },
-        });
-      }
       return ctx.db.artist.update({
         where: { id: artist.id },
         data: input,

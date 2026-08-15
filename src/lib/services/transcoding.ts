@@ -2,7 +2,7 @@ import { exec } from "child_process";
 import { readFileSync, writeFileSync, unlinkSync, readdirSync, existsSync, mkdirSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
-import { uploadFile, getPresignedUrl, getBucket, getPublicUrl } from "../minio";
+import { uploadFile, getPresignedUrl, getBucket, PUBLIC_URL } from "../minio";
 
 const TEMP_DIR = join(process.cwd(), "tmp", "transcoding");
 
@@ -79,7 +79,7 @@ export async function transcodeToHLS(objectKey: string): Promise<{ hlsUrl: strin
     unlinkSync(workDir);
   } catch {}
 
-  const publicUrl = getPublicUrl();
+  const publicUrl = PUBLIC_URL();
   const bucket = getBucket();
 
   return {

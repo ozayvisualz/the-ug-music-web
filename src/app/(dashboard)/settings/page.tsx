@@ -79,7 +79,7 @@ export default function SettingsPage() {
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
           <h3 className="font-bold mb-2">Become an Artist</h3>
           <p className="text-sm text-zinc-400 mb-4">Upload your music and start earning money from streams and downloads.</p>
-          <button onClick={() => becomeArtistMut.mutate()} disabled={becomeArtistMut.isPending}
+          <button onClick={() => becomeArtistMut.mutate({ artistName: (form.name || user.name || "New Artist").trim() })} disabled={becomeArtistMut.isPending}
             className="px-4 py-2 rounded-lg bg-yellow-500 text-black font-semibold text-sm hover:bg-yellow-400 disabled:opacity-50 transition">
             {becomeArtistMut.isPending ? "Converting..." : "Become an Artist"}
           </button>
