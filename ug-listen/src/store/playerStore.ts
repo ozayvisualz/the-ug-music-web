@@ -9,6 +9,7 @@ export type Track = {
   coverUrl?: string;
   artistId?: string;
   albumId?: string;
+  startPosition?: number;
 };
 
 type QueueState = {

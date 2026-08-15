@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import jwt from "jsonwebtoken";
 import { RecommendationEngine } from "@/lib/services/intelligence/recommend";
+import { SyncService } from "@/lib/services/sync";
 
 function getUser(req: NextRequest) {
   const auth = req.headers.get("authorization");
@@ -46,14 +47,10 @@ export async function GET(req: NextRequest) {
       }),
     ]);
 
-    let continueListening = null;
+    let continueListening: any[] = [];
     if (user) {
-      const session = await db.playbackSession.findFirst({
-        where: { userId: user.id },
-        include: { song: { include: { artist: { select: { artistName: true, user: { select: { name: true } } } } } } },
-        orderBy: { updatedAt: "desc" },
-      });
-      continueListening = session || null;
+      const items = await SyncService.getContinueListeningItems(user.id).catch(() => []);
+      continueListening = items.map((it) => ({ ...it.song, position: it.position, updatedAt: it.updatedAt }));
     }
 
     // Personalized "Made For You" recommendations (falls back gracefully).

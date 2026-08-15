@@ -2,6 +2,7 @@
 import { createAudioPlayer, setAudioModeAsync, AudioPlayer } from "expo-audio";
 import { useQueueStore, Track } from "../store/playerStore";
 import { getStoredToken } from "../api/auth";
+import { trpc } from "../api/client";
 
 const STREAM_THRESHOLD = 30;
 let recordedStreams = new Set<string>();
@@ -62,6 +63,7 @@ export function useAudioPlayer() {
   const seekingRef = useRef(false);
   const positionInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentTrackId = useRef<string | null>(null);
+  const lastPersistRef = useRef(0);
 
   const queue = useQueueStore((s) => s.queue);
   const currentIndex = useQueueStore((s) => s.currentIndex);
@@ -79,6 +81,24 @@ export function useAudioPlayer() {
     }).catch(() => {});
   }, []);
 
+  /** Persist playback position + queue to the backend for cross-device resume. */
+  const persistPosition = useCallback(() => {
+    const p = playerRef.current;
+    if (!p || !currentTrackId.current) return;
+    try {
+      const st = useQueueStore.getState();
+      trpc.sync.saveSession.mutate({
+        songId: currentTrackId.current,
+        position: p.currentTime || 0,
+        isPlaying: p.playing,
+        queue: JSON.stringify(st.queue.map((t) => ({ id: t.id, title: t.title, artist: t.artist, url: t.url, duration: t.duration, coverUrl: t.coverUrl, artistId: t.artistId, albumId: t.albumId }))),
+        repeat: st.repeat,
+        shuffle: st.shuffle,
+        speed: p.playbackRate || 1,
+      }).catch(() => {});
+    } catch {}
+  }, []);
+
   const stopPositionTimer = useCallback(() => {
     if (positionInterval.current) { clearInterval(positionInterval.current); positionInterval.current = null; }
   }, []);
@@ -94,10 +114,15 @@ export function useAudioPlayer() {
           if (pos >= STREAM_THRESHOLD && currentTrackId.current) {
             recordStream(currentTrackId.current, Math.floor(pos));
           }
+          const now = Date.now();
+          if (now - lastPersistRef.current > 10000) {
+            lastPersistRef.current = now;
+            persistPosition();
+          }
         } catch {}
       }
     }, 500);
-  }, [stopPositionTimer]);
+  }, [stopPositionTimer, persistPosition]);
 
   const clearCrossfade = useCallback(() => {
     if (crossfadeTimer.current) { clearInterval(crossfadeTimer.current); crossfadeTimer.current = null; }
@@ -138,10 +163,11 @@ export function useAudioPlayer() {
   useEffect(() => {
     return () => {
       clearCrossfade();
+      persistPosition();
       playerRef.current?.remove();
       stopPositionTimer();
     };
-  }, [stopPositionTimer, clearCrossfade]);
+  }, [stopPositionTimer, clearCrossfade, persistPosition]);
 
   useEffect(() => {
     if (!currentTrack || currentTrack.id === currentTrackId.current) return;
@@ -162,7 +188,7 @@ export function useAudioPlayer() {
     const oldPlayer = playerRef.current;
     const shouldCrossfade = !!oldPlayer && crossfadeDurationMs > 0;
 
-    setPosition(0);
+    setPosition(currentTrack.startPosition || 0);
     setDuration(currentTrack.duration || 0);
     // Keep isLoaded true during crossfade so the player UI doesn't flash "Loading…"
     // while the current track is still audibly playing.
@@ -183,6 +209,9 @@ export function useAudioPlayer() {
             setIsLoaded(true);
             setIsBuffering(false);
             setDuration(status.duration || currentTrack.duration);
+            if (currentTrack.startPosition && currentTrack.startPosition > 0) {
+              try { newPlayer.seekTo(currentTrack.startPosition); setPosition(currentTrack.startPosition); } catch {}
+            }
             try { newPlayer.play(); } catch {}
             crossfade(oldPlayer, newPlayer, crossfadeDurationMs);
           }
@@ -205,6 +234,9 @@ export function useAudioPlayer() {
             if (!started && !status.playing) {
               started = true;
               try { newPlayer.play(); } catch {}
+            }
+            if (currentTrack.startPosition && currentTrack.startPosition > 0) {
+              try { newPlayer.seekTo(currentTrack.startPosition); setPosition(currentTrack.startPosition); } catch {}
             }
           }
         });
@@ -231,13 +263,14 @@ export function useAudioPlayer() {
         p.pause();
         setIsPlaying(false);
         stopPositionTimer();
+        persistPosition();
       } else {
         p.play();
         setIsPlaying(true);
         startPositionTimer();
       }
     } catch {}
-  }, [startPositionTimer, stopPositionTimer]);
+  }, [startPositionTimer, stopPositionTimer, persistPosition]);
 
   const seek = useCallback((seconds: number) => {
     const p = playerRef.current;
@@ -283,6 +316,7 @@ export function useAudioPlayer() {
 
   const stopPlayback = useCallback(() => {
     clearCrossfade();
+    persistPosition();
     const p = playerRef.current;
     if (p) {
       try { p.pause(); } catch {}

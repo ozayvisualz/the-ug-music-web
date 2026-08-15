@@ -68,6 +68,27 @@ function getCoverUrl(song: any): string | undefined {
   return song?.coverUrl || song?.album?.coverUrl || undefined;
 }
 
+function timeAgo(d: any): string {
+  if (!d) return "";
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  return new Date(d).toLocaleDateString();
+}
+
+function formatClock(seconds: number): string {
+  if (!seconds || seconds < 0) return "0:00";
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 const MIX_CARDS = [
   { emoji: "\u{1F3B6}", label: "Daily Mix", color: "#1E1B4B" },
   { emoji: "\u{1F4C5}", label: "Weekly Mix", color: "#1A2E1A" },
@@ -116,9 +137,11 @@ function ShimmerBlock({ width: w, height: h, borderRadius: br = 12 }: any) {
 function SectionHeader({
   title,
   onSeeAll,
+  onClear,
 }: {
   title: string;
   onSeeAll?: () => void;
+  onClear?: () => void;
 }) {
   const { colors } = useTheme();
   return (
@@ -127,11 +150,18 @@ function SectionHeader({
         <View style={styles.goldAccent} />
         <Text style={[styles.sectionHeaderTitle, { color: colors.white }]}>{title}</Text>
       </View>
-      {onSeeAll && (
-        <TouchableOpacity onPress={onSeeAll} hitSlop={HIT_SLOP}>
-          <Text style={styles.seeAll}>See All</Text>
-        </TouchableOpacity>
-      )}
+      <View style={styles.sectionHeaderActions}>
+        {onClear && (
+          <TouchableOpacity onPress={onClear} hitSlop={HIT_SLOP}>
+            <Text style={styles.clearAll}>Clear</Text>
+          </TouchableOpacity>
+        )}
+        {onSeeAll && (
+          <TouchableOpacity onPress={onSeeAll} hitSlop={HIT_SLOP}>
+            <Text style={styles.seeAll}>See All</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
@@ -220,7 +250,7 @@ export default function HomeScreen() {
         if (data.forYou) setForYou(data.forYou);
         if (data.continueListening) {
           const cl = Array.isArray(data.continueListening) ? data.continueListening : [data.continueListening];
-          setContinueListening(cl.map((s: any) => (s?.song ? { ...s.song, id: s.song.id, position: s.position } : s)).filter(Boolean));
+          setContinueListening(cl.map((s: any) => (s?.song ? { ...s.song, id: s.song.id, position: s.position, updatedAt: s.updatedAt } : s)).filter(Boolean));
         }
       })
       .catch(() => {})
@@ -270,12 +300,23 @@ export default function HomeScreen() {
     url: s.fileUrl || s.hlsUrl || s.url || "",
     duration: s.duration || 0,
     coverUrl: getCoverUrl(s),
+    startPosition: typeof s.position === "number" && s.position > 0 ? s.position : undefined,
   });
 
   const handlePlaySong = useCallback(
     (song: any) => setQueue([mapTrack(song)]),
     [setQueue],
   );
+
+  const handleClearContinueListening = useCallback(() => {
+    setContinueListening([]);
+    trpc.sync.clearContinueListening.mutate().catch(() => {});
+  }, []);
+
+  const handleRemoveContinueItem = useCallback((songId: string) => {
+    setContinueListening((prev) => prev.filter((s) => s.id !== songId));
+    trpc.sync.removeContinueItem.mutate({ songId }).catch(() => {});
+  }, []);
 
   const handlePlayList = useCallback(
     (songs: any[]) => setQueue(songs.map(mapTrack)),
@@ -456,7 +497,7 @@ export default function HomeScreen() {
         {/* â”€â”€ Continue Listening â”€â”€ */}
         {user && user.id !== "guest" && (
           <View style={styles.section}>
-            <SectionHeader title="Continue Listening" />
+            <SectionHeader title="Continue Listening" onClear={handleClearContinueListening} />
             {clLoading ? (
               <View style={styles.skeletonRow}>
                 <ShimmerBlock width={CARD_W} height={Math.min(SW * 0.25, 100)} />
@@ -474,11 +515,14 @@ export default function HomeScreen() {
                 contentContainerStyle={styles.horizontalList}
                 renderItem={({ item }) => {
                   const coverUrl = getCoverUrl(item);
+                  const pos = typeof item.position === "number" ? item.position : 0;
+                  const progress = item.duration > 0 ? Math.min(pos / item.duration, 1) : 0;
                   return (
                     <TouchableOpacity
                       style={[styles.continueCard, { backgroundColor: colors.surface }]}
                       activeOpacity={0.7}
                       onPress={() => handlePlaySong(item)}
+                      onLongPress={() => handleRemoveContinueItem(item.id)}
                     >
                       <View style={[styles.continueArt, { backgroundColor: colors.surfaceHover }]}>
                         {coverUrl ? (
@@ -492,12 +536,15 @@ export default function HomeScreen() {
                           {item.title}
                         </Text>
                         <Text style={styles.continueArtist} numberOfLines={1}>
-                          {getArtistName(item)}
+                          {getArtistName(item)}{item.updatedAt ? ` · ${timeAgo(item.updatedAt)}` : ""}
                         </Text>
                       </View>
                       <View style={styles.continueBar}>
-                        <View style={styles.continueBarFill} />
+                        <View style={[styles.continueBarFill, { width: `${Math.round(progress * 100)}%` }]} />
                       </View>
+                      {progress > 0 && (
+                        <Text style={styles.continueProgress}>{formatClock(pos)} / {formatClock(item.duration)}</Text>
+                      )}
                     </TouchableOpacity>
                   );
                 }}
@@ -774,6 +821,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
   },
+  sectionHeaderActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  clearAll: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    fontWeight: "600",
+  },
 
   // â”€â”€ Section â”€â”€
   section: {
@@ -942,9 +999,20 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
   },
   continueBarFill: {
-    width: "40%",
+    width: "0%",
     height: "100%",
     backgroundColor: COLORS.gold,
+  },
+  continueProgress: {
+    position: "absolute",
+    bottom: 6,
+    right: 6,
+    fontSize: 9,
+    fontWeight: "700",
+    color: "#FFFFFF",
+    textShadowColor: "rgba(0,0,0,0.7)",
+    textShadowRadius: 3,
+    textShadowOffset: { width: 0, height: 1 },
   },
 
   // â”€â”€ Trending Now â”€â”€

@@ -42,4 +42,16 @@ export const syncRouter = router({
     const userId = (ctx.session!.user as any).id;
     return SyncService.deleteSession(userId);
   }),
+
+  clearContinueListening: protectedProcedure.mutation(async ({ ctx }) => {
+    const userId = (ctx.session!.user as any).id;
+    return SyncService.clearContinueListening(userId);
+  }),
+
+  removeContinueItem: protectedProcedure
+    .input(z.object({ songId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const userId = (ctx.session!.user as any).id;
+      return SyncService.removeContinueItem(userId, input.songId);
+    }),
 });
