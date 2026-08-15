@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+﻿import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -106,7 +106,7 @@ export default function DiscoverScreen() {
       const token = await getStoredToken();
       const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
       try {
-        const res = await fetch("https://theugmusic.com/api/mobile/home", { headers });
+        const res = await fetch("https://www.theugmusic.com/api/mobile/home", { headers });
         const data = await res.json();
         if (Array.isArray(data.newReleases)) setNewReleases(data.newReleases);
         if (Array.isArray(data.trending)) setTrending(data.trending);

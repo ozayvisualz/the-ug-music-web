@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+﻿import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -135,8 +135,8 @@ export default function NotificationsScreen() {
       setLoading(true);
       try {
         const url = token
-          ? `https://theugmusic.com/api/admin/notifications?token=${encodeURIComponent(token)}`
-          : "https://theugmusic.com/api/admin/notifications";
+          ? `https://www.theugmusic.com/api/admin/notifications?token=${encodeURIComponent(token)}`
+          : "https://www.theugmusic.com/api/admin/notifications";
         const res = await fetch(url);
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -177,7 +177,7 @@ export default function NotificationsScreen() {
     const songId = n.targetId;
     if (!songId) return;
     try {
-      const res = await fetch(`https://theugmusic.com/api/mobile/song?id=${encodeURIComponent(songId)}`);
+      const res = await fetch(`https://www.theugmusic.com/api/mobile/song?id=${encodeURIComponent(songId)}`);
       const song = await res.json();
       const url = song?.hlsUrl || song?.fileUrl;
       if (url) {

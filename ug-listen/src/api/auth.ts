@@ -1,4 +1,4 @@
-import * as SecureStore from "expo-secure-store";
+﻿import * as SecureStore from "expo-secure-store";
 import { setAuthToken, trpc } from "./client";
 
 const TOKEN_KEY = "auth_token";
@@ -23,7 +23,7 @@ async function apiPost(url: string, body: Record<string, unknown>) {
 }
 
 export async function login(email: string, password: string): Promise<AuthUser> {
-  const res = await fetch(`https://theugmusic.com/api/auth/login-get?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
+  const res = await fetch(`https://www.theugmusic.com/api/auth/login-get?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`);
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Login failed");
   await SecureStore.setItemAsync(TOKEN_KEY, data.token);
@@ -35,7 +35,7 @@ export async function login(email: string, password: string): Promise<AuthUser> 
 export async function register(name: string, email: string, password: string, role: "LISTENER" | "ARTIST" = "LISTENER", artistName?: string): Promise<AuthUser> {
   const body: any = { name, email, password, role };
   if (artistName) body.artistName = artistName;
-  await apiPost("https://theugmusic.com/api/auth/register", body);
+  await apiPost("https://www.theugmusic.com/api/auth/register", body);
   return login(email, password);
 }
 

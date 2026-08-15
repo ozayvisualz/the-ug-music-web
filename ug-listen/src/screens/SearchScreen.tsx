@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+﻿import { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -99,7 +99,7 @@ export default function SearchScreen() {
     timerRef.current = setTimeout(async () => {
       try {
         const token = await getStoredToken();
-        const res = await fetch(`https://theugmusic.com/api/mobile/search?q=${encodeURIComponent(trimmed)}&token=${encodeURIComponent(token || "")}`);
+        const res = await fetch(`https://www.theugmusic.com/api/mobile/search?q=${encodeURIComponent(trimmed)}&token=${encodeURIComponent(token || "")}`);
         const data = await res.json();
         setSongs(data.songs || []);
         setArtists(data.artists || []);
@@ -211,7 +211,7 @@ export default function SearchScreen() {
             onPress={() => setQuery("")}
             hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
           >
-            <Text style={styles.clearBtn}>✕</Text>
+            <Text style={styles.clearBtn}>âœ•</Text>
           </TouchableOpacity>
         )}
       </View>

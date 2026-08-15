@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+﻿import { useEffect, useRef, useState, useCallback } from "react";
 import { createAudioPlayer, setAudioModeAsync, AudioPlayer } from "expo-audio";
 import { useQueueStore, Track } from "../store/playerStore";
 import { getStoredToken } from "../api/auth";
@@ -11,7 +11,7 @@ async function recordStream(songId: string, durationListened: number) {
   recordedStreams.add(songId);
   try {
     const token = await getStoredToken();
-    const url = `https://theugmusic.com/api/mobile/stream?songId=${encodeURIComponent(songId)}&duration=${durationListened}&token=${encodeURIComponent(token || "")}`;
+    const url = `https://www.theugmusic.com/api/mobile/stream?songId=${encodeURIComponent(songId)}&duration=${durationListened}&token=${encodeURIComponent(token || "")}`;
     await fetch(url);
   } catch {}
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+﻿import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -88,14 +88,14 @@ export default function SongScreen() {
 
   useEffect(() => {
     setSongLoading(true);
-    fetch(`https://theugmusic.com/api/mobile/song?id=${encodeURIComponent(songId)}`)
+    fetch(`https://www.theugmusic.com/api/mobile/song?id=${encodeURIComponent(songId)}`)
       .then((r) => r.json())
       .then((data) => setSong(data.error ? null : data))
       .catch(() => setSong(null))
       .finally(() => setSongLoading(false));
 
     setCommentsLoading(true);
-    fetch(`https://theugmusic.com/api/mobile/comments?songId=${encodeURIComponent(songId)}`)
+    fetch(`https://www.theugmusic.com/api/mobile/comments?songId=${encodeURIComponent(songId)}`)
       .then((r) => r.json())
       .then((data) => setComments(Array.isArray(data) ? data : []))
       .catch(() => setComments([]))
@@ -122,7 +122,7 @@ export default function SongScreen() {
     setSending(true);
     try {
       const token = await getStoredToken();
-      const url = `https://theugmusic.com/api/mobile/comments?action=add&songId=${encodeURIComponent(songId)}&content=${encodeURIComponent(content)}&token=${encodeURIComponent(token || "")}`;
+      const url = `https://www.theugmusic.com/api/mobile/comments?action=add&songId=${encodeURIComponent(songId)}&content=${encodeURIComponent(content)}&token=${encodeURIComponent(token || "")}`;
       const res = await fetch(url);
       const data = await res.json();
       if (res.ok && data.comment) {

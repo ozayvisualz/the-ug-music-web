@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, ActivityIndicator, Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -50,7 +50,7 @@ export default function CategoryPlaylistScreen() {
   useEffect(() => {
     setLoading(true);
     const token = getAuthToken();
-    const url = `https://theugmusic.com/api/mobile/home?t=${Date.now()}`;
+    const url = `https://www.theugmusic.com/api/mobile/home?t=${Date.now()}`;
     fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
       .then((r) => r.json())
       .then((d) => {

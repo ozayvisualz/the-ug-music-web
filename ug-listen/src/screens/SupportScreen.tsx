@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -79,7 +79,7 @@ export default function SupportScreen() {
     setTicketsLoading(true);
     (async () => {
       const token = await getStoredToken();
-      fetch(`https://theugmusic.com/api/mobile/support?token=${encodeURIComponent(token || "")}`)
+      fetch(`https://www.theugmusic.com/api/mobile/support?token=${encodeURIComponent(token || "")}`)
         .then((r) => r.json())
         .then((data) => setTickets(Array.isArray(data) ? data : []))
         .catch(() => setTickets([]))
@@ -100,14 +100,14 @@ export default function SupportScreen() {
     setSubmitting(true);
     try {
       const token = await getStoredToken();
-      const url = `https://theugmusic.com/api/mobile/support?action=create&subject=${encodeURIComponent(trimmed)}&category=${encodeURIComponent(category)}&token=${encodeURIComponent(token || "")}`;
+      const url = `https://www.theugmusic.com/api/mobile/support?action=create&subject=${encodeURIComponent(trimmed)}&category=${encodeURIComponent(category)}&token=${encodeURIComponent(token || "")}`;
       const res = await fetch(url);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
       Alert.alert("Success", "Your ticket has been submitted.");
       setSubject("");
       setCategory("General");
-      const updated = await fetch(`https://theugmusic.com/api/mobile/support?token=${encodeURIComponent(token || "")}`).then((r) => r.json());
+      const updated = await fetch(`https://www.theugmusic.com/api/mobile/support?token=${encodeURIComponent(token || "")}`).then((r) => r.json());
       setTickets(Array.isArray(updated) ? updated : []);
     } catch {
       Alert.alert("Error", "Failed to submit ticket. Please try again.");

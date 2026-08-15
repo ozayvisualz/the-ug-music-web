@@ -1,4 +1,4 @@
-import { Platform } from "react-native";
+﻿import { Platform } from "react-native";
 import { getStoredToken } from "../api/auth";
 
 // Push notifications are currently disabled until Firebase (google-services.json)
@@ -6,7 +6,7 @@ import { getStoredToken } from "../api/auth";
 // no-ops so existing callers never crash.
 
 export function setupNotificationListeners() {
-  // no-op — push is disabled
+  // no-op â€” push is disabled
 }
 
 export async function registerForPushNotifications(): Promise<string | null> {
@@ -14,7 +14,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
 }
 
 export async function registerPushToken() {
-  // no-op — push is disabled
+  // no-op â€” push is disabled
 }
 
 export async function markNotificationOpened(notificationId: string): Promise<number | null> {
@@ -22,7 +22,7 @@ export async function markNotificationOpened(notificationId: string): Promise<nu
     const token = await getStoredToken();
     if (!token) return null;
     const res = await fetch(
-      `https://theugmusic.com/api/mobile/notification-open?token=${encodeURIComponent(token)}`,
+      `https://www.theugmusic.com/api/mobile/notification-open?token=${encodeURIComponent(token)}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -44,6 +44,6 @@ export async function markAllNotificationsRead() {
   try {
     const token = await getStoredToken();
     if (!token) return;
-    await fetch(`https://theugmusic.com/api/admin/notifications?markRead=1&token=${encodeURIComponent(token)}`);
+    await fetch(`https://www.theugmusic.com/api/admin/notifications?markRead=1&token=${encodeURIComponent(token)}`);
   } catch {}
 }

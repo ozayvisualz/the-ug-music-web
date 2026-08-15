@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -210,7 +210,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const token = user && user.id !== "guest" ? require("../api/client").getAuthToken() : null;
-    fetch("https://theugmusic.com/api/mobile/home", {
+    fetch("https://www.theugmusic.com/api/mobile/home", {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then((res) => res.json())
@@ -236,7 +236,7 @@ export default function HomeScreen() {
     const fetchUnread = async () => {
       const token = await getStoredToken();
       if (!token) return;
-      fetch(`https://theugmusic.com/api/admin/notifications?token=${encodeURIComponent(token)}`)
+      fetch(`https://www.theugmusic.com/api/admin/notifications?token=${encodeURIComponent(token)}`)
         .then((r) => r.json())
         .then((d) => {
           if (Array.isArray(d)) setUnreadCount(d.filter((n: any) => !n.read).length);
@@ -298,7 +298,7 @@ export default function HomeScreen() {
 
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
 
-      {/* ── Header Bar ── */}
+      {/* â”€â”€ Header Bar â”€â”€ */}
       <View style={[styles.header, { backgroundColor: colors.bg }]}>
         <View style={styles.headerLeft}>
           <View style={styles.avatar}>
@@ -347,7 +347,7 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        {/* ── Hero Carousel ── */}
+        {/* â”€â”€ Hero Carousel â”€â”€ */}
         <View style={styles.heroSection}>
           {heroLoading ? (
             <ShimmerBlock width={HERO_WIDTH} height={180} borderRadius={RADIUS.lg} />
@@ -380,7 +380,7 @@ export default function HomeScreen() {
           ) : null}
         </View>
 
-        {/* ── Made For You ── */}
+        {/* â”€â”€ Made For You â”€â”€ */}
         <View style={styles.section}>
           <SectionHeader title="Made For You" />
           <FlatList
@@ -406,7 +406,7 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* ── Recommended For You ── */}
+        {/* â”€â”€ Recommended For You â”€â”€ */}
         {forYou.length > 0 && (
           <View style={styles.section}>
             <SectionHeader title="Recommended For You" />
@@ -453,7 +453,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* ── Continue Listening ── */}
+        {/* â”€â”€ Continue Listening â”€â”€ */}
         {user && user.id !== "guest" && (
           <View style={styles.section}>
             <SectionHeader title="Continue Listening" />
@@ -506,7 +506,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {/* ── Trending Now ── */}
+        {/* â”€â”€ Trending Now â”€â”€ */}
         <View style={styles.section}>
           <SectionHeader
             title="Trending Now"
@@ -574,7 +574,7 @@ export default function HomeScreen() {
           ) : null}
         </View>
 
-        {/* ── New Releases ── */}
+        {/* â”€â”€ New Releases â”€â”€ */}
         <View style={styles.section}>
           <SectionHeader title="New Releases" />
           {nrLoading ? (
@@ -625,7 +625,7 @@ export default function HomeScreen() {
           ) : null}
         </View>
 
-        {/* ── Made in Uganda ── */}
+        {/* â”€â”€ Made in Uganda â”€â”€ */}
         <View style={styles.section}>
           <SectionHeader
             title="Made in Uganda"
@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg,
   },
 
-  // ── Header ──
+  // â”€â”€ Header â”€â”€
   header: {
     flexDirection: "row",
     alignItems: "center",
@@ -734,7 +734,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // ── Scroll ──
+  // â”€â”€ Scroll â”€â”€
   scroll: {
     flex: 1,
   },
@@ -743,7 +743,7 @@ const styles = StyleSheet.create({
     paddingTop: 0,
   },
 
-  // ── Section Header ──
+  // â”€â”€ Section Header â”€â”€
   sectionHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -775,12 +775,12 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  // ── Section ──
+  // â”€â”€ Section â”€â”€
   section: {
     marginBottom: 10,
   },
 
-  // ── Hero Carousel ──
+  // â”€â”€ Hero Carousel â”€â”€
   heroSection: {
     marginBottom: 10,
   },
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // ── Pager Dots ──
+  // â”€â”€ Pager Dots â”€â”€
   pagerWrap: {
     flexDirection: "row",
     justifyContent: "center",
@@ -875,7 +875,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.gold,
   },
 
-  // ── Made For You ──
+  // â”€â”€ Made For You â”€â”€
   mixList: {
     paddingHorizontal: H_PAD,
     gap: GAP,
@@ -900,7 +900,7 @@ const styles = StyleSheet.create({
     lineHeight: 14,
   },
 
-  // ── Continue Listening ──
+  // â”€â”€ Continue Listening â”€â”€
   continueCard: {
     width: CARD_W,
     height: Math.min(SW * 0.25, 100),
@@ -947,7 +947,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.gold,
   },
 
-  // ── Trending Now ──
+  // â”€â”€ Trending Now â”€â”€
   trendingCard: {
     width: CARD_W,
     backgroundColor: COLORS.surface,
@@ -1008,7 +1008,7 @@ const styles = StyleSheet.create({
     marginLeft: 1,
   },
 
-  // ── New Releases ──
+  // â”€â”€ New Releases â”€â”€
   releaseCard: {
     width: CARD_W,
     backgroundColor: COLORS.surface,
@@ -1059,7 +1059,7 @@ const styles = StyleSheet.create({
     paddingRight: 30,
   },
 
-  // ── Made in Uganda ──
+  // â”€â”€ Made in Uganda â”€â”€
   ugandaGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -1091,12 +1091,12 @@ const styles = StyleSheet.create({
     lineHeight: 14,
   },
 
-  // ── Skeleton ──
+  // â”€â”€ Skeleton â”€â”€
   skeletonRow: {
     flexDirection: "row",
   },
 
-  // ── Misc ──
+  // â”€â”€ Misc â”€â”€
   horizontalList: {
     paddingHorizontal: H_PAD,
     gap: GAP,

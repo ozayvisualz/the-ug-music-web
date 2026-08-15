@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+﻿import { useState, useEffect, useCallback, useRef } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions, Share, TextInput, ActivityIndicator, Image } from "react-native";
 import { Music2, Play, Pause, SkipBack, SkipForward, Heart, Download, ListPlus, Share2, Shuffle, Repeat, ChevronDown, Send, Repeat1, X } from "lucide-react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from "react-native-reanimated";
@@ -81,7 +81,7 @@ export default function FullPlayer({ onCollapse }: Props) {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Now playing: ${currentTrack.title} by ${currentTrack.artist} on TheUgMusic — https://theugmusic.com/song/${currentTrack.id}`,
+        message: `Now playing: ${currentTrack.title} by ${currentTrack.artist} on TheUgMusic â€” https://www.theugmusic.com/song/${currentTrack.id}`,
       });
     } catch {}
   };
@@ -91,7 +91,7 @@ export default function FullPlayer({ onCollapse }: Props) {
     setLiked(next);
     try {
       const token = await getStoredToken();
-      await fetch(`https://theugmusic.com/api/trpc/social.likeSong?batch=1`, { method: "POST", headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ "0": { json: currentTrack.id } }) });
+      await fetch(`https://www.theugmusic.com/api/trpc/social.likeSong?batch=1`, { method: "POST", headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ "0": { json: currentTrack.id } }) });
     } catch {}
   };
 
@@ -100,7 +100,7 @@ export default function FullPlayer({ onCollapse }: Props) {
     setDownloading(true);
     try {
       const token = await getStoredToken();
-      await fetch(`https://theugmusic.com/api/trpc/payments.initiateDownload?batch=1`, {
+      await fetch(`https://www.theugmusic.com/api/trpc/payments.initiateDownload?batch=1`, {
         method: "POST", headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
         body: JSON.stringify({ "0": { json: { songId: currentTrack.id } } }),
       });
@@ -135,13 +135,13 @@ export default function FullPlayer({ onCollapse }: Props) {
   useEffect(() => {
     if (!currentTrack?.id) return;
     (async () => {
-      fetch(`https://theugmusic.com/api/mobile/song?id=${encodeURIComponent(currentTrack.id)}`)
+      fetch(`https://www.theugmusic.com/api/mobile/song?id=${encodeURIComponent(currentTrack.id)}`)
         .then((r) => r.json())
         .then((d) => {
           if (d?.lyrics) setLyrics(d.lyrics);
         })
         .catch(() => {});
-      fetch(`https://theugmusic.com/api/mobile/comments?songId=${encodeURIComponent(currentTrack.id)}`)
+      fetch(`https://www.theugmusic.com/api/mobile/comments?songId=${encodeURIComponent(currentTrack.id)}`)
         .then((r) => r.json())
         .then((d) => {
           if (Array.isArray(d)) setComments(d.map((c) => ({ ...c, user: { name: c.userName } })));
@@ -155,7 +155,7 @@ export default function FullPlayer({ onCollapse }: Props) {
     setPosting(true);
     try {
       const token = await getStoredToken();
-      const url = `https://theugmusic.com/api/mobile/comments?action=add&songId=${encodeURIComponent(currentTrack.id)}&content=${encodeURIComponent(commentText.trim())}&token=${encodeURIComponent(token || "")}`;
+      const url = `https://www.theugmusic.com/api/mobile/comments?action=add&songId=${encodeURIComponent(currentTrack.id)}&content=${encodeURIComponent(commentText.trim())}&token=${encodeURIComponent(token || "")}`;
       const res = await fetch(url);
       const data = await res.json();
       if (res.ok && data.comment) {

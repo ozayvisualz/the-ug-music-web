@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+﻿import { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -82,7 +82,7 @@ export default function PremiumScreen() {
     setSubLoading(true);
     (async () => {
       const token = await getStoredToken();
-      const url = token ? `https://theugmusic.com/api/mobile/premium?token=${encodeURIComponent(token)}` : "https://theugmusic.com/api/mobile/premium";
+      const url = token ? `https://www.theugmusic.com/api/mobile/premium?token=${encodeURIComponent(token)}` : "https://www.theugmusic.com/api/mobile/premium";
       fetch(url)
         .then((r) => r.json())
         .then((data) => {
@@ -105,7 +105,7 @@ export default function PremiumScreen() {
     try {
       const token = await getStoredToken();
       const planId = plan.id.toUpperCase();
-      const url = `https://theugmusic.com/api/mobile/premium?action=subscribe&plan=${planId}&token=${encodeURIComponent(token || "")}`;
+      const url = `https://www.theugmusic.com/api/mobile/premium?action=subscribe&plan=${planId}&token=${encodeURIComponent(token || "")}`;
       const res = await fetch(url);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
