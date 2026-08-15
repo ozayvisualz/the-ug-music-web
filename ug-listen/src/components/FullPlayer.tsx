@@ -8,7 +8,7 @@ import { useQueueStore } from "../store/playerStore";
 import { useTheme } from "../theme/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { navigate } from "../navigation/navigationRef";
-import { getAuthToken } from "../api/client";
+import { trpc } from "../api/client";
 import { getStoredToken } from "../api/auth";
 
 const SW = Dimensions.get("window").width;
@@ -112,23 +112,14 @@ export default function FullPlayer({ onCollapse }: Props) {
   const openPlaylistModal = async () => {
     setPlaylistModal(true);
     try {
-      const token = await getStoredToken();
-      const res = await fetch(`https://theugmusic.com/api/trpc/playlist.getMyPlaylists?batch=1`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      const d = await res.json();
-      const data = d?.[0]?.result?.data?.json || d?.[0]?.result?.data || [];
+      const data = await trpc.playlist.getMyPlaylists.query();
       setPlaylists(Array.isArray(data) ? data : []);
-    } catch {}
+    } catch { setPlaylists([]); }
   };
 
   const addToPlaylist = async (playlistId: string) => {
     try {
-      const token = await getStoredToken();
-      await fetch(`https://theugmusic.com/api/trpc/playlist.addSong?batch=1`, {
-        method: "POST", headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ "0": { json: { playlistId, songId: currentTrack.id } } }),
-      });
+      await trpc.playlist.addSong.mutate({ playlistId, songId: currentTrack.id });
       setPlaylistModal(false);
     } catch {}
   };
@@ -136,13 +127,7 @@ export default function FullPlayer({ onCollapse }: Props) {
   const createPlaylist = async () => {
     const title = `Playlist ${new Date().toLocaleDateString()}`;
     try {
-      const token = await getStoredToken();
-      const res = await fetch(`https://theugmusic.com/api/trpc/playlist.create?batch=1`, {
-        method: "POST", headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-        body: JSON.stringify({ "0": { json: { title } } }),
-      });
-      const d = await res.json();
-      const created = d?.[0]?.result?.data?.json || d?.[0]?.result?.data;
+      const created = await trpc.playlist.create.mutate({ title });
       if (created?.id) { await addToPlaylist(created.id); }
     } catch {}
   };
