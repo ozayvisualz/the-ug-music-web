@@ -1,5 +1,6 @@
 import { cert, getApps, initializeApp, getApp } from "firebase-admin/app";
 import { getStorage } from "firebase-admin/storage";
+import { logger } from "./logger";
 
 function getAdminApp() {
   if (getApps().length) return getApp();
@@ -79,6 +80,6 @@ export async function sendPushNotification(payload: { title: string; body: strin
       });
     }
   } catch (e: any) {
-    console.error("[FCM] Push notification failed:", e?.message);
+    logger.error("notification:push", "Push notification failed", { message: e?.message });
   }
 }

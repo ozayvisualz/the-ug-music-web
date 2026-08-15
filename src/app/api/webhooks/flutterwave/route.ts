@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { db } from "@/lib/db";
 import { calculateSplit } from "@/lib/revenue";
+import { logger } from "@/lib/logger";
 
 function verifySignature(req: NextRequest, body: string) {
   const secret = process.env.FLW_WEBHOOK_SECRET_HASH || process.env.FLW_WEBHOOK_SECRET || "";
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
       else if (tx_ref.startsWith("TIP_")) await processTip(tx, metadata);
       // ORD_ (orders) and TIX_ (tickets) handled by their own confirm endpoints
     } catch (e: any) {
-      console.error("[Webhook] Processing error:", e?.message);
+      logger.error("payment:webhook", "Processing error", { tx_ref, status, message: e?.message });
     }
   } else if (status === "failed" || status === "cancelled") {
     await db.transaction.update({

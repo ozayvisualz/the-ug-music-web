@@ -1,4 +1,5 @@
 import { db } from "../../db";
+import { logger } from "../../logger";
 
 export type EventType =
   | "stream"
@@ -67,6 +68,7 @@ async function flush() {
   } catch (err) {
     // Re-enqueue on failure to avoid losing events (best effort, bounded).
     if (queue.length < MAX_BATCH * 4) queue = batch.concat(queue);
+    logger.error("intelligence:events", "Event flush failed", { batch: batch.length, message: (err as any)?.message });
   } finally {
     flushing = false;
   }
