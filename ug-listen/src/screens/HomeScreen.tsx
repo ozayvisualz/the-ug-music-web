@@ -444,7 +444,7 @@ export default function HomeScreen() {
                       onPress={() => handlePlaySong(item)}
                       hitSlop={HIT_SLOP}
                     >
-                      <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
+                      <Play size={14} color="#FFC107" fill="#FFC107" />
                     </TouchableOpacity>
                   </TouchableOpacity>
                 );
@@ -565,7 +565,7 @@ export default function HomeScreen() {
                       onPress={() => handlePlaySong(item)}
                       hitSlop={HIT_SLOP}
                     >
-                        <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
+                        <Play size={14} color="#FFC107" fill="#FFC107" />
                     </TouchableOpacity>
                   </TouchableOpacity>
                 );
@@ -1001,15 +1001,8 @@ const styles = StyleSheet.create({
     right: 8,
     width: 24,
     height: 24,
-    borderRadius: 12,
-    backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: COLORS.gold,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    elevation: 6,
   },
   trendingPlayIcon: {
     marginLeft: 1,

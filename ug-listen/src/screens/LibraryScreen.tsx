@@ -64,7 +64,7 @@ function SongRow({ song, onPlay }: { song: Song; onPlay: (song: Song) => void })
         onPress={() => onPlay(song)}
         hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
       >
-        <Play size={12} color={COLORS.bg} fill={COLORS.bg} />
+        <Play size={12} color="#FFC107" fill="#FFC107" />
       </TouchableOpacity>
     </View>
   );
@@ -460,8 +460,6 @@ const styles = StyleSheet.create({
   playBtn: {
     width: 26,
     height: 26,
-    borderRadius: 13,
-    backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
   },

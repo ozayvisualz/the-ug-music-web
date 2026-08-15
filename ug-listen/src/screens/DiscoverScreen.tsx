@@ -85,7 +85,7 @@ function SongCard({ song, onPlay }: { song: Song; onPlay: (song: Song) => void }
         onPress={() => onPlay(song)}
         hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
       >
-        <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
+        <Play size={14} color="#FFC107" fill="#FFC107" />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -415,15 +415,8 @@ const styles = StyleSheet.create({
     right: 8,
     width: 24,
     height: 24,
-    borderRadius: 12,
-    backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: COLORS.gold,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    elevation: 6,
   },
   bottomSpacer: {
     height: 70,
