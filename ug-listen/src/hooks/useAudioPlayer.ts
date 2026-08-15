@@ -6,6 +6,38 @@ import { getStoredToken } from "../api/auth";
 const STREAM_THRESHOLD = 30;
 let recordedStreams = new Set<string>();
 
+// ---------------------------------------------------------------------------
+// Hidden crossfade preference (infrastructure only — no UI yet).
+// ---------------------------------------------------------------------------
+export type CrossfadeSetting = "off" | "0.5" | "1.0" | "1.2" | "2.0" | "3.0" | "5.0";
+
+const CROSSFADE_DEFAULT_MS = 1200; // 1.2s default
+const CROSSFADE_OPTIONS: Record<Exclude<CrossfadeSetting, "off">, number> = {
+  "0.5": 500,
+  "1.0": 1000,
+  "1.2": 1200,
+  "2.0": 2000,
+  "3.0": 3000,
+  "5.0": 5000,
+};
+
+let crossfadeDurationMs = CROSSFADE_DEFAULT_MS;
+
+/** Configure the crossfade duration (hidden for now, exposed for future UI). */
+export function setCrossfadeDuration(value: CrossfadeSetting | number) {
+  if (typeof value === "number") {
+    crossfadeDurationMs = Math.max(0, value);
+  } else if (value === "off") {
+    crossfadeDurationMs = 0;
+  } else {
+    crossfadeDurationMs = CROSSFADE_OPTIONS[value] ?? CROSSFADE_DEFAULT_MS;
+  }
+}
+
+export function getCrossfadeDurationMs() {
+  return crossfadeDurationMs;
+}
+
 async function recordStream(songId: string, durationListened: number) {
   if (recordedStreams.has(songId)) return;
   recordedStreams.add(songId);
@@ -18,6 +50,8 @@ async function recordStream(songId: string, durationListened: number) {
 
 export function useAudioPlayer() {
   const playerRef = useRef<AudioPlayer | null>(null);
+  const fadingPlayerRef = useRef<AudioPlayer | null>(null);
+  const crossfadeTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -65,12 +99,45 @@ export function useAudioPlayer() {
     }, 500);
   }, [stopPositionTimer]);
 
+  const clearCrossfade = useCallback(() => {
+    if (crossfadeTimer.current) { clearInterval(crossfadeTimer.current); crossfadeTimer.current = null; }
+    if (fadingPlayerRef.current) {
+      try { fadingPlayerRef.current.remove(); } catch {}
+      fadingPlayerRef.current = null;
+    }
+  }, []);
+
+  /** Overlap the two players: fade out `old`, fade in `new` simultaneously. */
+  const crossfade = useCallback(
+    (oldPlayer: AudioPlayer, newPlayer: AudioPlayer, durationMs: number) => {
+      clearCrossfade();
+      fadingPlayerRef.current = oldPlayer;
+
+      const start = Date.now();
+      try { oldPlayer.volume = 1; } catch {}
+      try { newPlayer.volume = 0; } catch {}
+
+      crossfadeTimer.current = setInterval(() => {
+        const t = Math.min(1, (Date.now() - start) / durationMs);
+        try { oldPlayer.volume = 1 - t; } catch {}
+        try { newPlayer.volume = t; } catch {}
+        if (t >= 1) {
+          if (crossfadeTimer.current) { clearInterval(crossfadeTimer.current); crossfadeTimer.current = null; }
+          try { oldPlayer.remove(); } catch {}
+          fadingPlayerRef.current = null;
+        }
+      }, 40);
+    },
+    [clearCrossfade]
+  );
+
   useEffect(() => {
     return () => {
+      clearCrossfade();
       playerRef.current?.remove();
       stopPositionTimer();
     };
-  }, [stopPositionTimer]);
+  }, [stopPositionTimer, clearCrossfade]);
 
   useEffect(() => {
     if (!currentTrack || currentTrack.id === currentTrackId.current) return;
@@ -78,43 +145,61 @@ export function useAudioPlayer() {
     setError("");
 
     (async () => {
-      const oldPlayer = playerRef.current;
-      if (oldPlayer) {
-        try { oldPlayer.pause(); } catch {}
-        try { oldPlayer.remove(); } catch {}
-        playerRef.current = null;
-      }
-      stopPositionTimer();
-      setIsLoaded(false);
-      setIsPlaying(false);
-      setPosition(0);
-      setDuration(0);
-
       const audioUrl = currentTrack.url;
       if (!audioUrl) { setError("No audio URL"); return; }
 
+      // Cancel any in-progress crossfade (rapid track switching).
+      if (crossfadeTimer.current) { clearInterval(crossfadeTimer.current); crossfadeTimer.current = null; }
+      if (fadingPlayerRef.current) {
+        try { fadingPlayerRef.current.remove(); } catch {}
+        fadingPlayerRef.current = null;
+      }
+
+      const oldPlayer = playerRef.current;
+
+      setPosition(0);
+      setDuration(currentTrack.duration || 0);
+      setIsLoaded(false);
+      setIsBuffering(true);
+
       try {
-        const player = createAudioPlayer({ uri: audioUrl }, { downloadFirst: false, updateInterval: 200 });
-        playerRef.current = player;
+        const newPlayer = createAudioPlayer({ uri: audioUrl }, { downloadFirst: false, updateInterval: 200 });
 
         let started = false;
-        player.addListener("playbackStatusUpdate", (status: any) => {
+        newPlayer.addListener("playbackStatusUpdate", (status: any) => {
           if (status.isLoaded) {
             setIsLoaded(true);
             setIsBuffering(false);
             setDuration(status.duration || currentTrack.duration);
             if (!started && !status.playing) {
               started = true;
-              try { player.play(); } catch {}
+              try { newPlayer.play(); } catch {}
             }
           }
         });
 
-        player.play();
-        setIsPlaying(true);
-        startPositionTimer();
+        playerRef.current = newPlayer;
+
+        if (oldPlayer && crossfadeDurationMs > 0) {
+          // Crossfade: new track starts silent, then fades in while old fades out.
+          newPlayer.volume = 0;
+          try { newPlayer.play(); } catch {}
+          setIsPlaying(true);
+          startPositionTimer();
+          crossfade(oldPlayer, newPlayer, crossfadeDurationMs);
+        } else {
+          // First track, or crossfade disabled.
+          newPlayer.volume = 1;
+          try { newPlayer.play(); } catch {}
+          setIsPlaying(true);
+          startPositionTimer();
+          if (oldPlayer) {
+            try { oldPlayer.remove(); } catch {}
+          }
+        }
       } catch (e: any) {
         setError(e?.message || "Audio load error");
+        setIsBuffering(false);
       }
     })();
   }, [currentTrack?.id]);
@@ -178,6 +263,7 @@ export function useAudioPlayer() {
   }, [prev, seek, position]);
 
   const stopPlayback = useCallback(() => {
+    clearCrossfade();
     const p = playerRef.current;
     if (p) {
       try { p.pause(); } catch {}
@@ -189,7 +275,7 @@ export function useAudioPlayer() {
     setIsLoaded(false);
     setPosition(0);
     clear();
-  }, [stopPositionTimer, clear]);
+  }, [stopPositionTimer, clear, clearCrossfade]);
 
   return {
     currentTrack,
