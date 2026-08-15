@@ -29,9 +29,10 @@ export function WebPlayer() {
     };
     audio.onloadedmetadata = () => { setDuration(audio.duration || song.duration || 0); };
     audio.onended = () => {
-      const idx = usePlayerStore.getState().queue.findIndex((s) => s.id === song.id);
-      if (idx >= 0 && idx < usePlayerStore.getState().queue.length - 1) {
-        playTrack(usePlayerStore.getState().queue[idx + 1]);
+      const state = usePlayerStore.getState();
+      const idx = state.queue.findIndex((s) => s.id === song.id);
+      if (idx >= 0 && idx < state.queue.length - 1) {
+        setCurrentSong(state.queue[idx + 1]);
       } else {
         setIsPlaying(false);
       }

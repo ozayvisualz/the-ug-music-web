@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,12 +23,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.redirect(`https://theugmusic.com/login?error=invalid`, 303);
     }
 
-    const bcrypt = require("bcryptjs");
     if (!bcrypt.compareSync(password, user.password)) {
       return NextResponse.redirect(`https://theugmusic.com/login?error=invalid`, 303);
     }
 
-    const jwt = require("jsonwebtoken");
     const token = jwt.sign(
       { id: user.id, email: user.email, name: user.name, role: user.role },
       process.env.AUTH_SECRET || "default-secret",

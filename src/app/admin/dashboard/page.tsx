@@ -26,6 +26,10 @@ export default function AdminDashboardPage() {
   const { data: pendingPayouts } = trpc.admin.getPayouts.useQuery();
   const playSong = usePlaySong();
 
+  useEffect(() => {
+    if (!loading && !user) router.push("/login");
+  }, [user, loading]);
+
   if (dashErr && !counts) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 p-8">
@@ -35,10 +39,6 @@ export default function AdminDashboardPage() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (!loading && !user) router.push("/login");
-  }, [user, loading]);
 
   if (loading) {
     return (
