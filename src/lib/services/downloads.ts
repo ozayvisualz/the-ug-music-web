@@ -40,6 +40,49 @@ export const DownloadEngine = {
     return !!d;
   },
 
+  /**
+   * Authorize a download. Returns the download URL only if the listener is
+   * permitted (free song, purchased, or premium). Never exposes a URL the
+   * listener is not authorized to access.
+   */
+  async authorizeDownload(userId: string, songId: string) {
+    const song = await db.song.findUnique({
+      where: { id: songId },
+      include: { artist: { include: { user: { select: { name: true } } } }, album: { select: { id: true, title: true } } },
+    });
+    if (!song) return { authorized: false, reason: "not_found" };
+
+    const isFree = !song.price || song.price <= 0;
+    let authorized = isFree;
+
+    if (!authorized) {
+      const [purchased, premium] = await Promise.all([
+        this.hasPurchased(userId, songId),
+        db.subscription.findFirst({ where: { userId, status: "COMPLETED", endDate: { gte: new Date() } } }),
+      ]);
+      authorized = purchased || !!premium;
+    }
+
+    if (!authorized) {
+      return { authorized: false, reason: "payment_required", price: song.price };
+    }
+
+    const artistName = song.artist?.user?.name || song.artist?.artistName || "Artist";
+    return {
+      authorized: true,
+      songId: song.id,
+      title: song.title,
+      artist: artistName,
+      artistId: song.artistId,
+      albumId: song.albumId,
+      fileUrl: song.fileUrl,
+      hlsUrl: song.hlsUrl,
+      duration: song.duration,
+      coverUrl: song.coverUrl,
+      fileName: `${artistName} - ${song.title}.mp3`.replace(/[\\/:*?"<>|]/g, ""),
+    };
+  },
+
   async getDownloadAnalytics(artistId: string, days: number) {
     const since = new Date(); since.setDate(since.getDate() - days);
     const downloads = await db.download.findMany({

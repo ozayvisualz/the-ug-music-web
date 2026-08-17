@@ -3,6 +3,7 @@ import { createAudioPlayer, setAudioModeAsync, AudioPlayer } from "expo-audio";
 import { useQueueStore, Track } from "../store/playerStore";
 import { getStoredToken } from "../api/auth";
 import { trpc } from "../api/client";
+import { getLocalUri } from "../lib/downloads";
 
 const STREAM_THRESHOLD = 30;
 let recordedStreams = new Set<string>();
@@ -175,7 +176,9 @@ export function useAudioPlayer() {
     setError("");
 
     (async () => {
-      const audioUrl = currentTrack.url;
+      // Prefer the local downloaded file (offline playback) when available.
+      const localUri = await getLocalUri(currentTrack.id);
+      const audioUrl = localUri || currentTrack.url;
       if (!audioUrl) { setError("No audio URL"); return; }
 
       // Cancel any in-progress crossfade (rapid track switching).

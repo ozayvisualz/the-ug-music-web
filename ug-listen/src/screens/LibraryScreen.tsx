@@ -11,11 +11,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import { ListMusic, Music2, ChevronRight, Play } from "lucide-react-native";
+import { ListMusic, Music2, ChevronRight, Play, Trash2 } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
 import { useAuthStore } from "../store/authStore";
 import { useQueueStore } from "../store/playerStore";
+import { useDownloadStore } from "../store/downloadStore";
 import { useTheme } from "../theme/ThemeContext";
 
 const SW = Dimensions.get("window").width;
@@ -67,6 +68,71 @@ function SongRow({ song, onPlay }: { song: Song; onPlay: (song: Song) => void })
         <Play size={12} color="#FFC107" fill="#FFC107" />
       </TouchableOpacity>
     </View>
+  );
+}
+
+function DownloadsTab() {
+  const { colors } = useTheme();
+  const setQueue = useQueueStore((s) => s.setQueue);
+  const downloaded = useDownloadStore((s) => s.downloaded);
+  const loaded = useDownloadStore((s) => s.loaded);
+  const load = useDownloadStore((s) => s.load);
+  const remove = useDownloadStore((s) => s.remove);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const items = Object.values(downloaded);
+
+  const play = (meta: any) => {
+    setQueue([{
+      id: meta.songId,
+      title: meta.title,
+      artist: meta.artist,
+      url: "", // will resolve to the local file in the player
+      duration: meta.duration || 0,
+      coverUrl: meta.coverUrl,
+    }]);
+  };
+
+  if (!loaded) {
+    return <ActivityIndicator color={COLORS.gold} style={styles.loader} />;
+  }
+
+  if (items.length === 0) {
+    return (
+      <View style={styles.emptyState}>
+        <Text style={styles.emptyText}>No downloads yet</Text>
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      data={items}
+      keyExtractor={(item) => item.songId}
+      renderItem={({ item }) => (
+        <View style={[styles.songRow, { backgroundColor: colors.surface }]}>
+          <View style={styles.songRowArtwork}>
+            <Music2 size={18} color={COLORS.bg} />
+          </View>
+          <View style={styles.songRowInfo}>
+            <Text style={[styles.songRowTitle, { color: colors.white }]} numberOfLines={1}>{item.title}</Text>
+            <Text style={styles.songRowArtist} numberOfLines={1}>{item.artist} · Downloaded</Text>
+          </View>
+          <Text style={styles.songRowDuration}>{item.downloadedAt ? new Date(item.downloadedAt).toLocaleDateString() : ""}</Text>
+          <TouchableOpacity style={styles.playBtn} onPress={() => play(item)} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+            <Play size={12} color="#FFC107" fill="#FFC107" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.playBtn} onPress={() => remove(item.songId)} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+            <Trash2 size={14} color={colors.textMuted} />
+          </TouchableOpacity>
+        </View>
+      )}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.listContent}
+    />
   );
 }
 
@@ -255,9 +321,7 @@ export default function LibraryScreen() {
       )}
 
       {tab === "Downloads" && (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>No downloads yet</Text>
-        </View>
+        <DownloadsTab />
       )}
 
       {tab === "History" && (

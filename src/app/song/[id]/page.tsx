@@ -14,6 +14,40 @@ export default function SongPage() {
   const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
+  const [dlState, setDlState] = useState<"idle" | "downloading" | "downloaded" | "error">("idle");
+
+  const handleDownload = async () => {
+    if (!songId || dlState === "downloading") return;
+    setDlState("downloading");
+    try {
+      const res = await fetch(`/api/mobile/download?songId=${encodeURIComponent(songId)}`);
+      const auth = await res.json();
+      if (auth?.authorized && auth?.fileUrl) {
+        const fileRes = await fetch(auth.fileUrl);
+        if (!fileRes.ok) throw new Error("Download failed");
+        const blob = await fileRes.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = auth.fileName || `${song?.title || "song"}.mp3`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+        setDlState("downloaded");
+      } else if (auth?.reason === "payment_required") {
+        setDlState("idle");
+        alert(`Purchase required — UGX ${(auth.price || 0).toLocaleString()}`);
+      } else if (auth?.reason === "unauthorized") {
+        setDlState("idle");
+        alert("Please sign in to download songs.");
+      } else {
+        setDlState("error");
+      }
+    } catch {
+      setDlState("error");
+    }
+  };
 
   useEffect(() => {
     if (!songId) return;
@@ -54,7 +88,21 @@ export default function SongPage() {
         </div>
         <div className="flex justify-center gap-3">
           <button className="px-6 py-2.5 rounded-full bg-yellow-500 text-black font-semibold text-sm hover:bg-yellow-400"><Play className="w-4 h-4 inline mr-1"/>Play</button>
-          <button className="px-6 py-2.5 rounded-full bg-zinc-800 text-white font-semibold text-sm hover:bg-zinc-700"><Download className="w-4 h-4 inline mr-1"/>Download</button>
+          <button
+            onClick={handleDownload}
+            disabled={dlState === "downloading"}
+            className="px-6 py-2.5 rounded-full bg-zinc-800 text-white font-semibold text-sm hover:bg-zinc-700 disabled:opacity-50"
+          >
+            {dlState === "downloading" ? (
+              <><Loader2 className="w-4 h-4 inline mr-1 animate-spin"/>Downloading…</>
+            ) : dlState === "downloaded" ? (
+              "Downloaded ✓"
+            ) : dlState === "error" ? (
+              <><Download className="w-4 h-4 inline mr-1"/>Retry Download</>
+            ) : (
+              <><Download className="w-4 h-4 inline mr-1"/>Download</>
+            )}
+          </button>
         </div>
       </div>
 

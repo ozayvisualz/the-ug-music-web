@@ -30,6 +30,7 @@ import { X, Download, Music2 } from "lucide-react-native";
 import { useTheme } from "../theme/ThemeContext";
 import { getStoredToken } from "../api/auth";
 import { trpc } from "../api/client";
+import { useDownloadStore } from "../store/downloadStore";
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
@@ -60,6 +61,10 @@ export default function GlassDownloadModal({ song, onClose }: Props) {
   const [price, setPrice] = useState<number | null>(null);
   const [priceLoading, setPriceLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [downloadDone, setDownloadDone] = useState(false);
+  const downloadStore = useDownloadStore();
   const [reduceMotion, setReduceMotion] = useState(false);
 
   const progress = useSharedValue(0);
@@ -132,7 +137,7 @@ export default function GlassDownloadModal({ song, onClose }: Props) {
   }));
 
   const handleDownload = async () => {
-    if (purchasing) return;
+    if (purchasing || downloading) return;
     setPurchasing(true);
     try {
       const token = await getStoredToken();
@@ -141,21 +146,49 @@ export default function GlassDownloadModal({ song, onClose }: Props) {
         setPurchasing(false);
         return;
       }
-      const result = await trpc.payments.initiateDownload.mutate({ songId: song.id });
-      if (result?.alreadyPurchased) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-        Alert.alert("Already Purchased", "This song is already in your downloads.");
-        onClose();
-      } else if (result?.txRef) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-        Alert.alert(
-          "Payment",
-          `Redirecting to Flutterwave to complete your download (${formatUGX(result.amount)}).`,
-          [{ text: "OK", onPress: () => onClose() }],
+
+      // 1. Server-side authorization check (free / purchased / premium).
+      const authRes = await fetch(`https://www.theugmusic.com/api/mobile/download?songId=${encodeURIComponent(song.id)}&token=${encodeURIComponent(token)}`);
+      const auth = await authRes.json();
+
+      if (auth?.authorized && auth?.fileUrl) {
+        // 2. Authorized — download the actual audio file to the device.
+        setPurchasing(false);
+        setDownloading(true);
+        setDownloadProgress(0);
+        await downloadStore.download(
+          song.id,
+          auth.fileUrl,
+          {
+            songId: song.id,
+            title: auth.title || song.title,
+            artist: auth.artist || song.artist,
+            coverUrl: song.coverUrl,
+            duration: auth.duration || 0,
+            size: 0,
+            downloadedAt: new Date().toISOString(),
+          },
+          (pct) => setDownloadProgress(pct)
         );
+        setDownloading(false);
+        setDownloadDone(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+      } else if (auth?.reason === "payment_required") {
+        // 3. Payment required — use the existing purchase system.
+        const result = await trpc.payments.initiateDownload.mutate({ songId: song.id });
+        if (result?.txRef) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+          Alert.alert(
+            "Payment",
+            `Redirecting to Flutterwave to complete your download (${formatUGX(result.amount)}).`,
+            [{ text: "OK", onPress: () => onClose() }],
+          );
+        }
+      } else {
+        Alert.alert("Download Unavailable", auth?.reason === "not_found" ? "Song not found." : "You are not authorized to download this song.");
       }
     } catch (e: any) {
-      Alert.alert("Error", e?.message || "Failed to initiate download. Please try again.");
+      Alert.alert("Download Failed", e?.message || "Something went wrong. Tap to retry.");
     } finally {
       setPurchasing(false);
     }
@@ -245,20 +278,32 @@ export default function GlassDownloadModal({ song, onClose }: Props) {
 
                 <TouchableOpacity
                   style={styles.buyBtn}
-                  onPress={handleDownload}
+                  onPress={downloadDone ? onClose : handleDownload}
                   activeOpacity={0.85}
-                  disabled={purchasing}
+                  disabled={purchasing || downloading}
                   accessibilityRole="button"
                   accessibilityLabel="Buy and download"
                 >
-                  <LinearGradient colors={["#F5C518", "#C89108"]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
+                  <LinearGradient colors={downloadDone ? ["#10B981", "#059669"] : ["#F5C518", "#C89108"]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
                   <LinearGradient colors={["rgba(255,255,255,0.4)", "rgba(255,255,255,0)"]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.btnGloss} pointerEvents="none" />
-                  {purchasing ? (
+                  {downloading ? (
+                    <View style={styles.downloadingRow}>
+                      <Text style={styles.buyText}>Downloading… {Math.round(downloadProgress * 100)}%</Text>
+                    </View>
+                  ) : purchasing ? (
                     <ActivityIndicator color="#0A0A0A" />
+                  ) : downloadDone ? (
+                    <Text style={styles.buyText}>Downloaded ✓</Text>
                   ) : (
                     <Text style={styles.buyText}>Buy &amp; Download</Text>
                   )}
                 </TouchableOpacity>
+
+                {downloading && (
+                  <View style={styles.progressBar}>
+                    <View style={[styles.progressFill, { width: `${Math.round(downloadProgress * 100)}%` }]} />
+                  </View>
+                )}
 
                 <TouchableOpacity style={styles.cancelBtn} onPress={dismiss} activeOpacity={0.7} accessibilityRole="button">
                   <Text style={[styles.cancelText, { color: colors.textMuted }]}>Cancel</Text>
@@ -412,6 +457,22 @@ const styles = StyleSheet.create({
     color: "#0A0A0A",
     fontWeight: "800",
     fontSize: 16,
+  },
+  downloadingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  progressBar: {
+    marginTop: 10,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    backgroundColor: "#EAB308",
   },
   cancelBtn: {
     marginTop: 12,

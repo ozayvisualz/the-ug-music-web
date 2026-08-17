@@ -2,8 +2,14 @@ import { z } from "zod";
 import { publicProcedure, protectedProcedure, router } from "../trpc";
 import { generateRef } from "@/lib/utils";
 import { calculateSplit } from "@/lib/revenue";
+import { DownloadEngine } from "@/lib/services/downloads";
 
 export const paymentsRouter = router({
+  getMyDownloads: protectedProcedure.query(async ({ ctx }) => {
+    const userId = (ctx.session!.user as any).id;
+    return DownloadEngine.getUserDownloads(userId);
+  }),
+
   initiateDownload: protectedProcedure
     .input(z.object({ songId: z.string() }))
     .mutation(async ({ input, ctx }) => {
