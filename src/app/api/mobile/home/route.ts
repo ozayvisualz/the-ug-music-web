@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     let continueListening: any[] = [];
     if (user) {
       const items = await SyncService.getContinueListeningItems(user.id).catch(() => []);
-      continueListening = items.map((it) => ({ ...it.song, position: it.position, updatedAt: it.updatedAt }));
+      continueListening = items.map((it) => ({ ...it.song, position: it.position, updatedAt: it.updatedAt, queue: it.queue, repeat: it.repeat, shuffle: it.shuffle, speed: it.speed }));
     }
 
     // Personalized "Made For You" recommendations (falls back gracefully).

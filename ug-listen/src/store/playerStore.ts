@@ -17,14 +17,16 @@ type QueueState = {
   currentIndex: number;
   shuffle: boolean;
   repeat: number; // 0 = off, 1 = all, 2 = one
-  setQueue: (tracks: Track[]) => void;
+  setQueue: (tracks: Track[], index?: number) => void;
   addToQueue: (tracks: Track[]) => void;
   playNext: (track: Track) => void;
   next: () => Track | null;
   prev: () => Track | null;
   clear: () => void;
   toggleShuffle: () => void;
+  setShuffle: (shuffle: boolean) => void;
   cycleRepeat: () => number;
+  setRepeat: (repeat: number) => void;
   removeFromQueue: (index: number) => void;
   reorderQueue: (from: number, to: number) => void;
   jumpTo: (index: number) => void;
@@ -36,7 +38,7 @@ export const useQueueStore = create<QueueState>((set, get) => ({
   shuffle: false,
   repeat: 0,
 
-  setQueue: (tracks) => set({ queue: tracks, currentIndex: 0 }),
+  setQueue: (tracks, index = 0) => set({ queue: tracks, currentIndex: Math.max(-1, Math.min(index, tracks.length - 1)) }),
 
   addToQueue: (tracks) =>
     set((state) => ({ queue: [...state.queue, ...tracks] })),
@@ -87,11 +89,15 @@ export const useQueueStore = create<QueueState>((set, get) => ({
 
   toggleShuffle: () => set((state) => ({ shuffle: !state.shuffle })),
 
+  setShuffle: (shuffle) => set({ shuffle }),
+
   cycleRepeat: () => {
     const nextRepeat = (get().repeat + 1) % 3;
     set({ repeat: nextRepeat });
     return nextRepeat;
   },
+
+  setRepeat: (repeat) => set({ repeat: Math.max(0, Math.min(2, repeat)) }),
 
   removeFromQueue: (index) =>
     set((state) => {

@@ -219,6 +219,8 @@ export default function HomeScreen() {
   const navigation = useNavigation<any>();
   const user = useAuthStore((s) => s.user);
   const setQueue = useQueueStore((s) => s.setQueue);
+  const setShuffle = useQueueStore((s) => s.setShuffle);
+  const setRepeat = useQueueStore((s) => s.setRepeat);
   const { colors } = useTheme();
 
   const [heroSongs, setHeroSongs] = useState<any[]>([]);
@@ -307,6 +309,35 @@ export default function HomeScreen() {
     (song: any) => setQueue([mapTrack(song)]),
     [setQueue],
   );
+
+  const handleContinueResume = useCallback((item: any) => {
+    const resumePos = typeof item.position === "number" && item.position > 0 ? item.position : undefined;
+    let tracks: any[] = [mapTrack(item)];
+    let startIndex = 0;
+
+    // Restore the saved queue so "next"/"prev" and playlist/album order are preserved.
+    if (item.queue) {
+      try {
+        const savedQueue = JSON.parse(item.queue);
+        if (Array.isArray(savedQueue) && savedQueue.length > 0) {
+          const mapped: any[] = savedQueue.map((t: any) => ({
+            id: t.id, title: t.title, artist: t.artist, url: t.url, duration: t.duration,
+            coverUrl: t.coverUrl, artistId: t.artistId, albumId: t.albumId,
+          }));
+          const idx = mapped.findIndex((t) => t.id === item.id);
+          if (idx >= 0) {
+            mapped[idx] = { ...mapped[idx], startPosition: resumePos };
+            tracks = mapped;
+            startIndex = idx;
+          }
+        }
+      } catch {}
+    }
+
+    if (typeof item.shuffle === "boolean") setShuffle(item.shuffle);
+    if (typeof item.repeat === "number") setRepeat(item.repeat);
+    setQueue(tracks, startIndex);
+  }, [setQueue, setShuffle, setRepeat]);
 
   const handleClearContinueListening = useCallback(() => {
     setContinueListening([]);
@@ -521,7 +552,7 @@ export default function HomeScreen() {
                     <TouchableOpacity
                       style={[styles.continueCard, { backgroundColor: colors.surface }]}
                       activeOpacity={0.7}
-                      onPress={() => handlePlaySong(item)}
+                      onPress={() => handleContinueResume(item)}
                       onLongPress={() => handleRemoveContinueItem(item.id)}
                     >
                       <View style={[styles.continueArt, { backgroundColor: colors.surfaceHover }]}>

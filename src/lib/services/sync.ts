@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { ProfileEngine } from "./intelligence/profile";
 
 export const SyncService = {
   async saveSession(userId: string, data: {
@@ -47,7 +48,7 @@ export const SyncService = {
     const STALE_DAYS = 30;
     const since = new Date(Date.now() - STALE_DAYS * 24 * 60 * 60 * 1000);
 
-    const [session, streams] = await Promise.all([
+    const [session, streams, profile] = await Promise.all([
       db.playbackSession.findFirst({
         where: { userId, updatedAt: { gte: since } },
         include: { song: { select: { id: true, title: true, duration: true, coverUrl: true, fileUrl: true, hlsUrl: true, artist: { include: { user: { select: { name: true } } } } } } },
@@ -59,29 +60,51 @@ export const SyncService = {
         orderBy: { createdAt: "desc" },
         take: 25,
       }),
+      ProfileEngine.getProfile(userId).catch(() => null),
     ]);
+
+    const affinities: Record<string, number> = (profile?.songs as Record<string, number>) || {};
 
     const items: any[] = [];
     const seen = new Set<string>();
 
     const isUnfinished = (dur: number, pos: number) => (dur <= 0 ? true : pos < dur * COMPLETION_THRESHOLD);
 
+    // 1. Active session (the exact thing the listener was doing) — highest priority.
     if (session?.song && session.position > 0 && isUnfinished(session.song.duration || 0, session.position)) {
-      items.push({ type: "song", song: session.song, position: session.position, updatedAt: session.updatedAt });
+      items.push({
+        type: "song",
+        song: session.song,
+        position: session.position,
+        updatedAt: session.updatedAt,
+        queue: session.queue,
+        repeat: session.repeat,
+        shuffle: session.shuffle,
+        speed: session.speed,
+      });
       seen.add(session.song.id);
     }
 
+    // 2. Recently-started-but-unfinished songs, ordered by learned affinity then recency.
+    const streamItems: any[] = [];
     for (const s of streams) {
       if (!s.song || seen.has(s.songId)) continue;
       const dur = s.song.duration || 0;
-      // Only tracks the user actually got into but didn't finish.
       if (s.durationListened > 5 && isUnfinished(dur, s.durationListened)) {
-        items.push({ type: "song", song: s.song, position: s.durationListened, updatedAt: s.createdAt });
+        streamItems.push({
+          type: "song",
+          song: s.song,
+          position: s.durationListened,
+          updatedAt: s.createdAt,
+          affinity: affinities[s.songId] || 0,
+        });
         seen.add(s.songId);
       }
     }
+    streamItems.sort((a, b) => (b.affinity - a.affinity) || (new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
+    items.push(...streamItems);
 
-    return items.slice(0, 10);
+    return items.slice(0, 10).map(({ affinity, ...rest }) => rest);
   },
 
   async updatePosition(userId: string, position: number, isPlaying: boolean) {
