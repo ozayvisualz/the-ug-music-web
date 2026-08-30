@@ -47,8 +47,31 @@ export async function OPTIONS() {
   return new NextResponse(null, {
     headers: {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
     },
   });
+}
+
+// Register a completed download event (idempotent). Only called after the
+// file has actually finished downloading on the device/browser.
+export async function POST(req: NextRequest) {
+  const user = await getUser(req);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  let body: any = {};
+  try { body = await req.json(); } catch {}
+  const songId = body.songId || req.nextUrl.searchParams.get("songId");
+  const source = body.source || req.nextUrl.searchParams.get("source") || undefined;
+  const platform = body.platform || req.nextUrl.searchParams.get("platform") || undefined;
+  const device = body.device || req.nextUrl.searchParams.get("device") || undefined;
+
+  if (!songId) return NextResponse.json({ error: "songId required" }, { status: 400 });
+
+  try {
+    const result = await DownloadEngine.registerDownload(user.id, songId, { source, platform, device });
+    return NextResponse.json({ success: true, id: result?.id || null });
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message || "Failed" }, { status: 500 });
+  }
 }

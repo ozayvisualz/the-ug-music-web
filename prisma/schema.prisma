@@ -313,10 +313,18 @@ model Download {
   artistShare    Int
   platformShare  Int
   transactionRef String?
+  source         String? // "mobile" | "web"
+  platform       String? // "ios" | "android" | "web"
+  device         String?
   createdAt      DateTime @default(now())
 
   song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([songId])
+  @@index([createdAt])
+  @@index([source])
 }
 
 model Playlist {

@@ -35,6 +35,8 @@ export default function SongPage() {
         document.body.removeChild(a);
         URL.revokeObjectURL(blobUrl);
         setDlState("downloaded");
+        // Register the completed download event (idempotent).
+        fetch(`/api/mobile/download`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ songId, source: "web", platform: "web" }) }).catch(() => {});
       } else if (auth?.reason === "payment_required") {
         setDlState("idle");
         alert(`Purchase required — UGX ${(auth.price || 0).toLocaleString()}`);

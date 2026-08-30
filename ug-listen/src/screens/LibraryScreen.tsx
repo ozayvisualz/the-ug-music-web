@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Dimensions,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -17,6 +18,7 @@ import { trpc } from "../api/client";
 import { useAuthStore } from "../store/authStore";
 import { useQueueStore } from "../store/playerStore";
 import { useDownloadStore } from "../store/downloadStore";
+import { totalDownloadSize } from "../lib/downloads";
 import { useTheme } from "../theme/ThemeContext";
 
 const SW = Dimensions.get("window").width;
@@ -78,9 +80,12 @@ function DownloadsTab() {
   const loaded = useDownloadStore((s) => s.loaded);
   const load = useDownloadStore((s) => s.load);
   const remove = useDownloadStore((s) => s.remove);
+  const clearAll = useDownloadStore((s) => s.clearAll);
+  const [size, setSize] = useState(0);
 
   useEffect(() => {
     load();
+    totalDownloadSize().then(setSize).catch(() => {});
   }, [load]);
 
   const items = Object.values(downloaded);
@@ -96,6 +101,13 @@ function DownloadsTab() {
     }]);
   };
 
+  const confirmClearAll = () => {
+    Alert.alert("Clear All Downloads", "Remove all downloaded songs from this device?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Clear All", style: "destructive", onPress: () => { clearAll(); setSize(0); } },
+    ]);
+  };
+
   if (!loaded) {
     return <ActivityIndicator color={COLORS.gold} style={styles.loader} />;
   }
@@ -108,31 +120,41 @@ function DownloadsTab() {
     );
   }
 
+  const fmtSize = (bytes: number) => (bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
+
   return (
-    <FlatList
-      data={items}
-      keyExtractor={(item) => item.songId}
-      renderItem={({ item }) => (
-        <View style={[styles.songRow, { backgroundColor: colors.surface }]}>
-          <View style={styles.songRowArtwork}>
-            <Music2 size={18} color={COLORS.bg} />
+    <View style={{ flex: 1 }}>
+      <View style={styles.dlHeader}>
+        <Text style={[styles.dlHeaderText, { color: colors.textMuted }]}>{items.length} song{items.length === 1 ? "" : "s"} · {fmtSize(size)}</Text>
+        <TouchableOpacity onPress={confirmClearAll} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Text style={[styles.dlClear, { color: colors.red }]}>Clear All</Text>
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        data={items}
+        keyExtractor={(item) => item.songId}
+        renderItem={({ item }) => (
+          <View style={[styles.songRow, { backgroundColor: colors.surface }]}>
+            <View style={styles.songRowArtwork}>
+              <Music2 size={18} color={COLORS.bg} />
+            </View>
+            <View style={styles.songRowInfo}>
+              <Text style={[styles.songRowTitle, { color: colors.white }]} numberOfLines={1}>{item.title}</Text>
+              <Text style={styles.songRowArtist} numberOfLines={1}>{item.artist} · Available offline</Text>
+            </View>
+            <Text style={styles.songRowDuration}>{item.downloadedAt ? new Date(item.downloadedAt).toLocaleDateString() : ""}</Text>
+            <TouchableOpacity style={styles.playBtn} onPress={() => play(item)} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+              <Play size={12} color="#FFC107" fill="#FFC107" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.playBtn} onPress={() => { remove(item.songId); totalDownloadSize().then(setSize).catch(() => {}); }} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+              <Trash2 size={14} color={colors.textMuted} />
+            </TouchableOpacity>
           </View>
-          <View style={styles.songRowInfo}>
-            <Text style={[styles.songRowTitle, { color: colors.white }]} numberOfLines={1}>{item.title}</Text>
-            <Text style={styles.songRowArtist} numberOfLines={1}>{item.artist} · Downloaded</Text>
-          </View>
-          <Text style={styles.songRowDuration}>{item.downloadedAt ? new Date(item.downloadedAt).toLocaleDateString() : ""}</Text>
-          <TouchableOpacity style={styles.playBtn} onPress={() => play(item)} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
-            <Play size={12} color="#FFC107" fill="#FFC107" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.playBtn} onPress={() => remove(item.songId)} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
-            <Trash2 size={14} color={colors.textMuted} />
-          </TouchableOpacity>
-        </View>
-      )}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={styles.listContent}
-    />
+        )}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+      />
+    </View>
   );
 }
 
@@ -429,6 +451,21 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: Math.min(SW * 0.04, 16),
     paddingBottom: 70,
+  },
+  dlHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Math.min(SW * 0.04, 16),
+    paddingVertical: 8,
+  },
+  dlHeaderText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  dlClear: {
+    fontSize: 13,
+    fontWeight: "700",
   },
   playlistRow: {
     flexDirection: "row",

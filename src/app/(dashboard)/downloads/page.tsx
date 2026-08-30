@@ -21,6 +21,8 @@ async function downloadFile(songId: string, fallbackName: string) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(blobUrl);
+  // Register the completed download event (idempotent).
+  fetch(`/api/mobile/download`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ songId, source: "web", platform: "web" }) }).catch(() => {});
 }
 
 export default function DownloadsPage() {

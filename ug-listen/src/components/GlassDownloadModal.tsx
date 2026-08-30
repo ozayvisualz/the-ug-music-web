@@ -31,6 +31,7 @@ import { useTheme } from "../theme/ThemeContext";
 import { getStoredToken } from "../api/auth";
 import { trpc } from "../api/client";
 import { useDownloadStore } from "../store/downloadStore";
+import { registerDownload } from "../lib/downloads";
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
@@ -172,6 +173,7 @@ export default function GlassDownloadModal({ song, onClose }: Props) {
         );
         setDownloading(false);
         setDownloadDone(true);
+        registerDownload(song.id);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
       } else if (auth?.reason === "payment_required") {
         // 3. Payment required — use the existing purchase system.

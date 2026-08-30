@@ -1,4 +1,6 @@
 import * as FileSystem from "expo-file-system/legacy";
+import { Platform } from "react-native";
+import { getStoredToken } from "../api/auth";
 
 const DOWNLOAD_DIR = FileSystem.documentDirectory + "downloads/";
 
@@ -101,4 +103,17 @@ export async function listDownloads(): Promise<DownloadMeta[]> {
 export async function totalDownloadSize(): Promise<number> {
   const metas = await listDownloads();
   return metas.reduce((s, m) => s + (m.size || 0), 0);
+}
+
+/** Register a completed download with the backend (idempotent). */
+export async function registerDownload(songId: string) {
+  try {
+    const token = await getStoredToken();
+    if (!token) return;
+    await fetch("https://www.theugmusic.com/api/mobile/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ songId, source: "mobile", platform: Platform.OS }),
+    });
+  } catch {}
 }
