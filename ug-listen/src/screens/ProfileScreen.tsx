@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,10 @@ import {
   StyleSheet,
   Alert,
   Dimensions,
+  Share,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import {
   Crown,
   Clock,
@@ -27,6 +28,9 @@ import { COLORS } from "../constants/theme";
 import { logout } from "../api/auth";
 import { useAuthStore } from "../store/authStore";
 import { useTheme } from "../theme/ThemeContext";
+import { trpc } from "../api/client";
+import { useLikedStore } from "../store/likedStore";
+import { useDownloadStore } from "../store/downloadStore";
 
 const SW = Dimensions.get("window").width;
 
@@ -42,6 +46,24 @@ export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const { colors } = useTheme();
+
+  const likedCount = useLikedStore((s) => s.likedIds.size);
+  const downloadCount = useDownloadStore((s) => Object.keys(s.downloaded).length);
+  const loadDownloads = useDownloadStore((s) => s.load);
+  const [playlistCount, setPlaylistCount] = useState(0);
+
+  useEffect(() => {
+    loadDownloads().catch(() => {});
+  }, [loadDownloads]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return;
+      trpc.playlist.getMyPlaylists.query()
+        .then((data: any[]) => setPlaylistCount(Array.isArray(data) ? data.length : 0))
+        .catch(() => {});
+    }, [user])
+  );
 
   const handleLogout = useCallback(() => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -96,32 +118,32 @@ export default function ProfileScreen() {
     {
       icon: <Clock size={18} color={COLORS.text} />,
       label: "Listening History",
-      onPress: () => {},
+      onPress: () => navigation.navigate("Library", { screen: "LibraryMain", params: { tab: "History" } }),
     },
     {
       icon: <Heart size={18} color={COLORS.text} />,
       label: "Liked Songs",
-      onPress: () => {},
+      onPress: () => navigation.navigate("Library", { screen: "LibraryMain", params: { tab: "Liked" } }),
     },
     {
       icon: <Download size={18} color={COLORS.text} />,
       label: "Downloads",
-      onPress: () => {},
+      onPress: () => navigation.navigate("Library", { screen: "LibraryMain", params: { tab: "Downloads" } }),
     },
     {
       icon: <CreditCard size={18} color={COLORS.text} />,
       label: "Payment Methods",
-      onPress: () => {},
+      onPress: () => Alert.alert("Payment Methods", "Payment methods are managed securely during checkout."),
     },
     {
       icon: <Bell size={18} color={COLORS.text} />,
       label: "Notifications",
-      onPress: () => {},
+      onPress: () => navigation.navigate("Home", { screen: "Notifications" }),
     },
     {
       icon: <Share2 size={18} color={COLORS.text} />,
       label: "Invite Friends",
-      onPress: () => {},
+      onPress: () => Share.share({ message: "Join me on TheUgMusic — stream & download the best Ugandan music! https://www.theugmusic.com" }).catch(() => {}),
     },
     {
       icon: <Settings size={18} color={COLORS.text} />,
@@ -181,17 +203,17 @@ export default function ProfileScreen() {
 
           <View style={[styles.statsRow, { backgroundColor: colors.surface }]}>
           <View style={styles.statItem}>
-            <Text style={[styles.statNumber, { color: colors.white }]}>0</Text>
+            <Text style={[styles.statNumber, { color: colors.white }]}>{likedCount}</Text>
             <Text style={styles.statLabel}>Liked Songs</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={[styles.statNumber, { color: colors.white }]}>0</Text>
+            <Text style={[styles.statNumber, { color: colors.white }]}>{playlistCount}</Text>
             <Text style={styles.statLabel}>Playlists</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={[styles.statNumber, { color: colors.white }]}>0</Text>
+            <Text style={[styles.statNumber, { color: colors.white }]}>{downloadCount}</Text>
             <Text style={styles.statLabel}>Downloads</Text>
           </View>
         </View>

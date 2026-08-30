@@ -11,7 +11,7 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { ListMusic, Music2, ChevronRight, Play, Trash2 } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
@@ -160,11 +160,19 @@ function DownloadsTab() {
 
 export default function LibraryScreen() {
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
   const user = useAuthStore((s) => s.user);
   const setQueue = useQueueStore((s) => s.setQueue);
   const { colors } = useTheme();
 
   const [tab, setTab] = useState<Tab>("Playlists");
+
+  useEffect(() => {
+    const t = route.params?.tab;
+    if (t === "Playlists" || t === "Liked" || t === "Downloads" || t === "History") {
+      setTab(t);
+    }
+  }, [route.params?.tab]);
 
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [playlistsLoading, setPlaylistsLoading] = useState(false);
