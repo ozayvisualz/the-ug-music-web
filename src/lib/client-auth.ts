@@ -47,9 +47,20 @@ export function useAuth() {
   return { user, loading };
 }
 
-export function signOut() {
+export async function signOut() {
+  if (typeof window === "undefined") return;
+
   localStorage.removeItem("auth-token");
   localStorage.removeItem("auth-user");
+
+  document.cookie = "auth-token=; path=/; max-age=0";
   document.cookie = "auth-token=; path=/; max-age=0; domain=.theugmusic.com";
+  document.cookie = "auth-token=; path=/; max-age=0; domain=theugmusic.com";
+  document.cookie = "auth-token=; path=/; max-age=0; domain=www.theugmusic.com";
+
+  try {
+    await fetch("/api/auth/logout", { method: "POST" });
+  } catch {}
+
   window.location.href = "/login";
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Clock, ShieldCheck, Mail, LogOut } from "lucide-react";
+import { signOut } from "@/lib/client-auth";
 
 export default function ArtistPendingPage() {
   const [artist, setArtist] = useState<any>(null);
@@ -56,9 +57,9 @@ export default function ArtistPendingPage() {
           <Link href="/artist/apply" className="px-5 py-2.5 rounded-full border border-zinc-700 text-zinc-300 text-sm hover:bg-zinc-800 transition">
             Edit Application
           </Link>
-          <Link href="/login" className="px-5 py-2.5 rounded-full bg-zinc-800 text-white text-sm hover:bg-zinc-700 transition flex items-center gap-2">
+          <button onClick={() => signOut()} className="px-5 py-2.5 rounded-full bg-zinc-800 text-white text-sm hover:bg-zinc-700 transition flex items-center gap-2">
             <LogOut className="w-3.5 h-3.5" /> Sign Out
-          </Link>
+          </button>
         </div>
       </div>
     </div>
