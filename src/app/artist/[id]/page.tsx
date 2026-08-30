@@ -5,10 +5,13 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { BadgeCheck, Music2, Play, Users, MapPin, Heart } from "lucide-react";
 import { formatNumber, getArtistName } from "@/lib/utils";
+import { usePlayerStore } from "@/store/player";
+import { WebPlayer } from "@/components/layout/player";
 
 export default function ArtistPage() {
   const params = useParams<{ id: string }>();
   const { data: artist, isLoading } = trpc.music.getArtistById.useQuery(params.id);
+  const { setCurrentSong, setQueue } = usePlayerStore();
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" /></div>;
   if (!artist) return <div className="text-center py-20 text-zinc-500">Artist not found</div>;
@@ -16,8 +19,23 @@ export default function ArtistPage() {
   const songs = artist.songs || [];
   const name = getArtistName(artist);
 
+  const handlePlay = () => {
+    if (!songs.length) return;
+    const queue = songs.map((s: any) => ({
+      id: s.id,
+      title: s.title,
+      artist: name,
+      coverUrl: s.coverUrl || undefined,
+      hlsUrl: s.hlsUrl || undefined,
+      fileUrl: s.fileUrl || undefined,
+      duration: s.duration,
+    }));
+    setQueue(queue);
+    setCurrentSong(queue[0]);
+  };
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 pt-6 pb-24 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6">
         <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-yellow-500/10 flex items-center justify-center text-6xl font-bold text-yellow-500 flex-shrink-0 mx-auto sm:mx-0">
           {name.charAt(0)}
@@ -36,7 +54,7 @@ export default function ArtistPage() {
             <span><strong>{songs.length}</strong> songs</span>
           </div>
           <div className="flex justify-center sm:justify-start gap-2 mt-4">
-            <button className="px-5 py-2 rounded-full bg-yellow-500 text-black font-semibold text-sm hover:bg-yellow-400"><Play className="w-4 h-4 inline mr-1" />Play</button>
+            <button onClick={handlePlay} className="px-5 py-2 rounded-full bg-yellow-500 text-black font-semibold text-sm hover:bg-yellow-400"><Play className="w-4 h-4 inline mr-1" />Play</button>
             <button className="px-5 py-2 rounded-full bg-zinc-800 text-white font-semibold text-sm hover:bg-zinc-700"><Heart className="w-4 h-4 inline mr-1" />Follow</button>
           </div>
         </div>
@@ -66,6 +84,7 @@ export default function ArtistPage() {
           {songs.length === 0 && <p className="text-zinc-600 text-sm py-8 text-center">No songs yet</p>}
         </div>
       </section>
+      <WebPlayer />
     </div>
   );
 }
