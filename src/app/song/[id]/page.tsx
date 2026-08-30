@@ -4,8 +4,9 @@ import { trpc } from "@/trpc/client";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Play, Download, Send, Loader2 } from "lucide-react";
+import { Download, Send, Loader2 } from "lucide-react";
 import { formatDuration, getArtistName } from "@/lib/utils";
+import { usePlayerStore } from "@/store/player";
 
 export default function SongPage() {
   const params = useParams<{ id: string }>();
@@ -15,6 +16,27 @@ export default function SongPage() {
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
   const [dlState, setDlState] = useState<"idle" | "downloading" | "downloaded" | "error">("idle");
+  const { setCurrentSong, setQueue, currentSong, isPlaying, togglePlay } = usePlayerStore();
+
+  const handlePlay = () => {
+    if (!song) return;
+    const isActive = currentSong?.id === song.id;
+    if (isActive) {
+      togglePlay();
+      return;
+    }
+    const track = {
+      id: song.id,
+      title: song.title,
+      artist: getArtistName(song.artist),
+      coverUrl: song.coverUrl || song.album?.coverUrl || undefined,
+      hlsUrl: song.hlsUrl || undefined,
+      fileUrl: song.fileUrl || undefined,
+      duration: song.duration,
+    };
+    setCurrentSong(track);
+    setQueue([track]);
+  };
 
   const handleDownload = async () => {
     if (!songId || dlState === "downloading") return;
@@ -89,7 +111,7 @@ export default function SongPage() {
           <span>{(song as any).playCount || 0} plays</span>
         </div>
         <div className="flex justify-center gap-3">
-          <button className="px-6 py-2.5 rounded-full bg-yellow-500 text-black font-semibold text-sm hover:bg-yellow-400"><Play className="w-4 h-4 inline mr-1"/>Play</button>
+          <button onClick={handlePlay} className="px-6 py-2.5 rounded-full bg-yellow-500 text-black font-semibold text-sm hover:bg-yellow-400">{currentSong?.id === song.id && isPlaying ? "Pause" : "Play"}</button>
           <button
             onClick={handleDownload}
             disabled={dlState === "downloading"}
