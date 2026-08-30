@@ -4,3 +4,6 @@ node_modules/
 .env.local
 .env.development
 tmp/
+*.apk
+*.aab
+*.tsbuildinfo
