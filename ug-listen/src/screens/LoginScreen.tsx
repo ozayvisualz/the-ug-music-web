@@ -189,6 +189,9 @@ export default function LoginScreen() {
     if (tab === "register" && (!name.trim() || !email.trim() || !password)) { setError("Please fill all fields"); return; }
     if (tab === "register" && password !== confirmPassword) { setError("Passwords do not match"); return; }
     if (tab === "register" && role === "ARTIST" && !artistName.trim()) { setError("Please enter your artist name"); return; }
+    if (tab === "register" && role === "ARTIST" && !photoUrl) { setError("Artist photo is required"); return; }
+    if (tab === "register" && role === "ARTIST" && !idUrl) { setError("ID document is required"); return; }
+    if (tab === "register" && role === "ARTIST" && !selfieUrl) { setError("Selfie (holding ID) is required"); return; }
     if (tab === "register" && role === "ARTIST" && !accepted) { setError("You must accept the artist terms"); return; }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     setLoading(true);

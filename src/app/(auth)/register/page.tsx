@@ -80,6 +80,9 @@ export default function RegisterPage() {
       if (!form.artistName.trim()) { setError("Artist / Stage name is required"); return; }
       if (!form.country.trim()) { setError("Country is required"); return; }
       if (!form.genre.trim()) { setError("Genre is required"); return; }
+      if (!photoUrl) { setError("Artist photo is required"); return; }
+      if (!idUrl) { setError("ID document is required"); return; }
+      if (!selfieUrl) { setError("Selfie (holding ID) is required"); return; }
       if (!form.accepted) { setError("You must accept the artist terms"); return; }
     }
     registerMut.mutate({
