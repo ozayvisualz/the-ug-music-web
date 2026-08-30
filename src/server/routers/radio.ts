@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { publicProcedure, protectedProcedure, router } from "../trpc";
+import { publicProcedure, protectedProcedure, adminProcedure, router } from "../trpc";
 import { RadioService } from "@/lib/services/radio";
 
 export const radioRouter = router({
@@ -90,4 +90,55 @@ export const radioRouter = router({
       const userId = (ctx.session?.user as any)?.id;
       return RadioService.generateHiddenGemsQueue(userId, input.queueSize);
     }),
+
+  // === ADMIN ===
+  adminList: adminProcedure.query(async () => {
+    return RadioService.adminList();
+  }),
+
+  adminUpsert: adminProcedure
+    .input(
+      z.object({
+        key: z.string().min(1).max(64),
+        type: z.enum(["genre", "mood", "activity"]),
+        name: z.string().min(1).max(80),
+        description: z.string().max(200).optional(),
+        icon: z.string().max(8).optional(),
+        genre: z.string().max(40).optional(),
+        genres: z.array(z.string().max(40)).optional(),
+        moods: z.array(z.string().max(40)).optional(),
+        active: z.boolean().optional(),
+        featured: z.boolean().optional(),
+        weightPopular: z.number().int().min(0).max(100).optional(),
+        weightFresh: z.number().int().min(0).max(100).optional(),
+        weightEngagement: z.number().int().min(0).max(100).optional(),
+        weightDiscovery: z.number().int().min(0).max(100).optional(),
+        maxConsecutiveArtist: z.number().int().min(1).max(10).optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return RadioService.adminUpsert(input);
+    }),
+
+  adminToggleActive: adminProcedure
+    .input(z.string())
+    .mutation(async ({ input }) => {
+      return RadioService.adminToggleActive(input);
+    }),
+
+  adminToggleFeatured: adminProcedure
+    .input(z.string())
+    .mutation(async ({ input }) => {
+      return RadioService.adminToggleFeatured(input);
+    }),
+
+  adminDelete: adminProcedure
+    .input(z.string())
+    .mutation(async ({ input }) => {
+      return RadioService.adminDelete(input);
+    }),
+
+  adminSeed: adminProcedure.mutation(async () => {
+    return RadioService.adminSeed();
+  }),
 });

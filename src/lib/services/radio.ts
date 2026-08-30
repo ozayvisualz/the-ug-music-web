@@ -3,100 +3,71 @@ import { ProfileEngine } from "./intelligence/profile";
 
 type StationType = "genre" | "mood" | "activity";
 
-interface RadioStation {
-  id: string;
-  type: StationType;
-  name: string;
-  genre: string;
-  description: string;
-  icon: string;
-  gradient: string[];
-  songCount: number;
-}
-
-interface MoodStation {
-  id: string;
-  type: StationType;
-  name: string;
-  description: string;
-  icon: string;
-  gradient: string[];
-  genres: string[];
-  moods?: string[];
-  timeOfDay?: string;
-  seasonal?: { start: string; end: string };
-  active: boolean;
-}
-
-interface ActivityStation {
-  id: string;
-  type: StationType;
-  name: string;
-  description: string;
-  icon: string;
-  gradient: string[];
-  genres: string[];
-  moods?: string[];
-  active: boolean;
-}
-
 /**
- * Tunable weighting for balanced discovery. Percentages describe the intended
- * mix of a generated station queue:
- *   popular    — most-played songs
- *   fresh      — recently released songs
- *   engagement — songs with strong listener affinity (likes / profile match)
- *   discovery  — under-played songs for exploration
- * These are configurable rather than hard-coded deep in the algorithm.
+ * Default balanced-discovery weighting (percentages). These seed the database
+ * and are overridable per-station from the Admin dashboard.
  */
 export const RADIO_WEIGHTS = {
-  popular: 0.4,
-  fresh: 0.25,
-  engagement: 0.2,
-  discovery: 0.15,
+  popular: 40,
+  fresh: 25,
+  engagement: 20,
+  discovery: 15,
 };
 
-const ARTIST_MAX_CONSECUTIVE = 2;
+const ARTIST_MAX_CONSECUTIVE_DEFAULT = 2;
 const HOT_WINDOW_DAYS = 7;
 const POPULAR_PLAYCOUNT_THRESHOLD = 1000;
 const DISCOVERY_PLAYCOUNT_MAX = 200;
 const FRESH_AGE_DAYS = 30;
 
-const MOOD_STATIONS: MoodStation[] = [
-  { id: "chill", type: "mood", name: "Chill & Relax", description: "Relaxing music for unwinding", icon: "😌", gradient: ["#8B5CF6", "#6D28D9"], genres: ["R&B", "Acoustic", "Soul", "Kadongo Kamu"], moods: ["chill", "relaxing", "smooth", "acoustic"], active: true },
-  { id: "love", type: "mood", name: "Love Songs", description: "Romantic Ugandan classics and modern hits", icon: "💘", gradient: ["#F43F5E", "#E11D48"], genres: ["R&B", "Acoustic", "Soul", "Afrobeat"], moods: ["romantic", "love"], active: true },
-  { id: "party", type: "mood", name: "Party Time", description: "The hottest party anthems", icon: "🎉", gradient: ["#EC4899", "#BE185D"], genres: ["Dancehall", "Afrobeat", "Pop", "Kidandali"], moods: ["party", "energetic", "dance"], active: true },
-  { id: "happy", type: "mood", name: "Happy", description: "Feel-good and uplifting music", icon: "😄", gradient: ["#F59E0B", "#D97706"], genres: ["Afrobeat", "Pop", "Gospel", "R&B"], moods: ["happy", "upbeat"], active: true },
-  { id: "sad", type: "mood", name: "Sad", description: "Emotional and heartfelt songs", icon: "💔", gradient: ["#64748B", "#475569"], genres: ["R&B", "Soul", "Acoustic", "Kadongo Kamu"], moods: ["sad", "emotional"], active: true },
-  { id: "energetic", type: "mood", name: "Energetic", description: "High-energy, powerful tracks", icon: "⚡", gradient: ["#EF4444", "#DC2626"], genres: ["Dancehall", "Afrobeat", "Amapiano", "Lugaflow"], moods: ["energetic", "party", "upbeat"], active: true },
-  { id: "focus", type: "mood", name: "Focus", description: "Calm, instrumental, acoustic and soft vocals", icon: "🎯", gradient: ["#10B981", "#059669"], genres: ["Acoustic", "R&B", "Gospel", "Traditional", "Instrumental"], moods: ["focus", "study", "instrumental"], active: true },
-  { id: "relaxing", type: "mood", name: "Relaxing", description: "Calm and soothing music", icon: "🌿", gradient: ["#14B8A6", "#0D9488"], genres: ["Acoustic", "R&B", "Soul", "Kadongo Kamu"], moods: ["relaxing", "chill"], active: true },
-  { id: "rainy-day", type: "mood", name: "Rainy Day", description: "Relaxing songs for rainy weather", icon: "☔", gradient: ["#64748B", "#475569"], genres: ["Acoustic", "R&B", "Soul", "Kadongo Kamu"], moods: ["chill", "relaxing", "sad"], active: true },
-  { id: "around-uganda", type: "mood", name: "Around Uganda", description: "Discover music from different regions", icon: "🌍", gradient: ["#14B8A6", "#0D9488"], genres: ["Kadongo Kamu", "Kidandali", "Lugaflow", "Traditional"], active: true },
-  { id: "discover-new", type: "mood", name: "Discover New Music", description: "Play songs from rising artists", icon: "🔥", gradient: ["#F4C430", "#D4A820"], genres: ["Afrobeat", "Dancehall", "Lugaflow", "R&B", "Pop"], active: true },
-  { id: "editors-picks", type: "mood", name: "Editor's Picks", description: "Hand-curated playlists updated weekly", icon: "⭐", gradient: ["#F4C430", "#EAB308"], genres: ["Afrobeat", "Dancehall", "R&B", "Gospel", "Lugaflow"], active: true },
+interface DefaultStation {
+  key: string;
+  type: StationType;
+  name: string;
+  description?: string;
+  icon?: string;
+  genre?: string;
+  genres?: string[];
+  moods?: string[];
+  active?: boolean;
+  featured?: boolean;
+}
+
+const DEFAULT_STATIONS: DefaultStation[] = [
+  { key: "afrobeats", type: "genre", name: "Afrobeats Radio", genre: "Afrobeat", description: "The best Ugandan Afrobeats, non-stop", icon: "🎵" },
+  { key: "dancehall", type: "genre", name: "Dancehall Radio", genre: "Dancehall", description: "Fresh Ugandan Dancehall hits", icon: "🎶" },
+  { key: "lugaflow", type: "genre", name: "Lugaflow Radio", genre: "Lugaflow", description: "Heavy bars and Lugaflow vibes", icon: "🎤" },
+  { key: "gospel", type: "genre", name: "Gospel Radio", genre: "Gospel", description: "Uplifting Ugandan Gospel music", icon: "🙏" },
+  { key: "rb", type: "genre", name: "R&B Radio", genre: "R&B", description: "Smooth R&B from Uganda", icon: "💜" },
+  { key: "trending", type: "genre", name: "Trending Uganda", genre: "", description: "What's hot across Uganda right now", icon: "🔥" },
+  { key: "new-releases", type: "genre", name: "New Releases", genre: "", description: "The latest drops from Ugandan artists", icon: "✨" },
+  { key: "editors-choice", type: "genre", name: "Editor's Choice", genre: "", description: "Hand-picked by TheUgMusic editors", icon: "⭐" },
 ];
 
-const ACTIVITY_STATIONS: ActivityStation[] = [
-  { id: "morning-vibes", type: "activity", name: "Morning Vibes", description: "Start your day with uplifting music", icon: "🌅", gradient: ["#F59E0B", "#D97706"], genres: ["Afrobeat", "Gospel", "R&B", "Acoustic"], moods: ["upbeat", "happy"], active: true },
-  { id: "road-trip", type: "activity", name: "Road Trip", description: "Perfect songs for long drives", icon: "🚗", gradient: ["#3B82F6", "#1D4ED8"], genres: ["Afrobeat", "Dancehall", "Pop", "R&B"], moods: ["upbeat", "happy"], active: true },
-  { id: "workout", type: "activity", name: "Workout Mix", description: "High-energy tracks to keep you moving", icon: "🏋️", gradient: ["#EF4444", "#DC2626"], genres: ["Dancehall", "Afrobeat", "Amapiano", "Lugaflow"], moods: ["energetic", "party", "upbeat"], active: true },
-  { id: "running", type: "activity", name: "Running", description: "Energetic, high-tempo songs", icon: "🏃", gradient: ["#F97316", "#EA580C"], genres: ["Dancehall", "Afrobeat", "Amapiano"], moods: ["energetic", "upbeat", "party"], active: true },
-  { id: "study", type: "activity", name: "Study & Focus", description: "Calmer, less distracting songs", icon: "📚", gradient: ["#10B981", "#059669"], genres: ["Acoustic", "R&B", "Gospel", "Traditional", "Instrumental"], moods: ["focus", "study", "instrumental"], active: true },
-  { id: "late-night", type: "activity", name: "Night Drive", description: "Smooth night-time songs", icon: "🌙", gradient: ["#6366F1", "#4F46E5"], genres: ["R&B", "Soul", "Afrobeat", "Lugaflow"], moods: ["smooth", "chill", "relaxing"], active: true },
-  { id: "work", type: "activity", name: "Work", description: "Background music to stay productive", icon: "💼", gradient: ["#0EA5E9", "#0284C7"], genres: ["Acoustic", "R&B", "Instrumental", "Soul"], moods: ["focus", "study"], active: true },
-  { id: "relaxation", type: "activity", name: "Relaxation", description: "Unwind and de-stress", icon: "🧘", gradient: ["#22C55E", "#16A34A"], genres: ["Acoustic", "R&B", "Soul", "Kadongo Kamu"], moods: ["relaxing", "chill"], active: true },
+const DEFAULT_MOODS: DefaultStation[] = [
+  { key: "chill", type: "mood", name: "Chill & Relax", description: "Relaxing music for unwinding", icon: "😌", genres: ["R&B", "Acoustic", "Soul", "Kadongo Kamu"], moods: ["chill", "relaxing", "smooth", "acoustic"], active: true },
+  { key: "love", type: "mood", name: "Love Songs", description: "Romantic Ugandan classics and modern hits", icon: "💘", genres: ["R&B", "Acoustic", "Soul", "Afrobeat"], moods: ["romantic", "love"], active: true },
+  { key: "party", type: "mood", name: "Party Time", description: "The hottest party anthems", icon: "🎉", genres: ["Dancehall", "Afrobeat", "Pop", "Kidandali"], moods: ["party", "energetic", "dance"], active: true },
+  { key: "happy", type: "mood", name: "Happy", description: "Feel-good and uplifting music", icon: "😄", genres: ["Afrobeat", "Pop", "Gospel", "R&B"], moods: ["happy", "upbeat"], active: true },
+  { key: "sad", type: "mood", name: "Sad", description: "Emotional and heartfelt songs", icon: "💔", genres: ["R&B", "Soul", "Acoustic", "Kadongo Kamu"], moods: ["sad", "emotional"], active: true },
+  { key: "energetic", type: "mood", name: "Energetic", description: "High-energy, powerful tracks", icon: "⚡", genres: ["Dancehall", "Afrobeat", "Amapiano", "Lugaflow"], moods: ["energetic", "party", "upbeat"], active: true },
+  { key: "focus", type: "mood", name: "Focus", description: "Calm, instrumental, acoustic and soft vocals", icon: "🎯", genres: ["Acoustic", "R&B", "Gospel", "Traditional", "Instrumental"], moods: ["focus", "study", "instrumental"], active: true },
+  { key: "relaxing", type: "mood", name: "Relaxing", description: "Calm and soothing music", icon: "🌿", genres: ["Acoustic", "R&B", "Soul", "Kadongo Kamu"], moods: ["relaxing", "chill"], active: true },
+  { key: "rainy-day", type: "mood", name: "Rainy Day", description: "Relaxing songs for rainy weather", icon: "☔", genres: ["Acoustic", "R&B", "Soul", "Kadongo Kamu"], moods: ["chill", "relaxing", "sad"], active: true },
+  { key: "around-uganda", type: "mood", name: "Around Uganda", description: "Discover music from different regions", icon: "🌍", genres: ["Kadongo Kamu", "Kidandali", "Lugaflow", "Traditional"], active: true },
+  { key: "discover-new", type: "mood", name: "Discover New Music", description: "Play songs from rising artists", icon: "🔥", genres: ["Afrobeat", "Dancehall", "Lugaflow", "R&B", "Pop"], active: true },
+  { key: "editors-picks", type: "mood", name: "Editor's Picks", description: "Hand-curated playlists updated weekly", icon: "⭐", genres: ["Afrobeat", "Dancehall", "R&B", "Gospel", "Lugaflow"], active: true },
 ];
 
-const STATIONS: RadioStation[] = [
-  { id: "afrobeats", type: "genre", name: "Afrobeats Radio", genre: "Afrobeat", description: "The best Ugandan Afrobeats, non-stop", icon: "🎵", gradient: ["#F4C430", "#D4A820"], songCount: 0 },
-  { id: "dancehall", type: "genre", name: "Dancehall Radio", genre: "Dancehall", description: "Fresh Ugandan Dancehall hits", icon: "🎶", gradient: ["#F97316", "#EA580C"], songCount: 0 },
-  { id: "lugaflow", type: "genre", name: "Lugaflow Radio", genre: "Lugaflow", description: "Heavy bars and Lugaflow vibes", icon: "🎤", gradient: ["#8B5CF6", "#7C3AED"], songCount: 0 },
-  { id: "gospel", type: "genre", name: "Gospel Radio", genre: "Gospel", description: "Uplifting Ugandan Gospel music", icon: "🙏", gradient: ["#3B82F6", "#2563EB"], songCount: 0 },
-  { id: "rb", type: "genre", name: "R&B Radio", genre: "R&B", description: "Smooth R&B from Uganda", icon: "💜", gradient: ["#EC4899", "#DB2777"], songCount: 0 },
-  { id: "trending", type: "genre", name: "Trending Uganda", genre: "", description: "What's hot across Uganda right now", icon: "🔥", gradient: ["#EF4444", "#DC2626"], songCount: 0 },
-  { id: "new-releases", type: "genre", name: "New Releases", genre: "", description: "The latest drops from Ugandan artists", icon: "✨", gradient: ["#22C55E", "#16A34A"], songCount: 0 },
-  { id: "editors-choice", type: "genre", name: "Editor's Choice", genre: "", description: "Hand-picked by TheUgMusic editors", icon: "⭐", gradient: ["#F4C430", "#EAB308"], songCount: 0 },
+const DEFAULT_ACTIVITIES: DefaultStation[] = [
+  { key: "morning-vibes", type: "activity", name: "Morning Vibes", description: "Start your day with uplifting music", icon: "🌅", genres: ["Afrobeat", "Gospel", "R&B", "Acoustic"], moods: ["upbeat", "happy"], active: true },
+  { key: "road-trip", type: "activity", name: "Road Trip", description: "Perfect songs for long drives", icon: "🚗", genres: ["Afrobeat", "Dancehall", "Pop", "R&B"], moods: ["upbeat", "happy"], active: true },
+  { key: "workout", type: "activity", name: "Workout Mix", description: "High-energy tracks to keep you moving", icon: "🏋️", genres: ["Dancehall", "Afrobeat", "Amapiano", "Lugaflow"], moods: ["energetic", "party", "upbeat"], active: true },
+  { key: "running", type: "activity", name: "Running", description: "Energetic, high-tempo songs", icon: "🏃", genres: ["Dancehall", "Afrobeat", "Amapiano"], moods: ["energetic", "upbeat", "party"], active: true },
+  { key: "study", type: "activity", name: "Study & Focus", description: "Calmer, less distracting songs", icon: "📚", genres: ["Acoustic", "R&B", "Gospel", "Traditional", "Instrumental"], moods: ["focus", "study", "instrumental"], active: true },
+  { key: "late-night", type: "activity", name: "Night Drive", description: "Smooth night-time songs", icon: "🌙", genres: ["R&B", "Soul", "Afrobeat", "Lugaflow"], moods: ["smooth", "chill", "relaxing"], active: true },
+  { key: "work", type: "activity", name: "Work", description: "Background music to stay productive", icon: "💼", genres: ["Acoustic", "R&B", "Instrumental", "Soul"], moods: ["focus", "study"], active: true },
+  { key: "relaxation", type: "activity", name: "Relaxation", description: "Unwind and de-stress", icon: "🧘", genres: ["Acoustic", "R&B", "Soul", "Kadongo Kamu"], moods: ["relaxing", "chill"], active: true },
 ];
 
 interface ScoredSong {
@@ -105,14 +76,25 @@ interface ScoredSong {
   ageDays: number;
 }
 
-function parseMoods(moods: string | null): string[] {
-  if (!moods) return [];
+interface Weights {
+  popular: number;
+  fresh: number;
+  engagement: number;
+  discovery: number;
+}
+
+function parseList(s: string | null): string[] {
+  if (!s) return [];
   try {
-    const arr = JSON.parse(moods);
+    const arr = JSON.parse(s);
     return Array.isArray(arr) ? arr.filter((m) => typeof m === "string") : [];
   } catch {
     return [];
   }
+}
+
+function parseMoods(moods: string | null): string[] {
+  return parseList(moods);
 }
 
 function seededNoise(seedId: string, itemId: string): number {
@@ -133,108 +115,160 @@ function shuffleArray(arr: any[]) {
   return arr;
 }
 
-function getActiveMoodStations(): MoodStation[] {
-  const now = new Date();
-  return MOOD_STATIONS.filter((s) => {
-    if (!s.active) return false;
-    if (s.seasonal) {
-      const start = new Date(s.seasonal.start);
-      const end = new Date(s.seasonal.end);
-      return now >= start && now <= end;
-    }
-    return true;
-  });
+/** Seed the DB with the default stations if the table is empty. Idempotent. */
+async function ensureSeeded() {
+  const count = await db.radioStation.count();
+  if (count > 0) return;
+  const all = [...DEFAULT_STATIONS, ...DEFAULT_MOODS, ...DEFAULT_ACTIVITIES];
+  try {
+    await db.radioStation.createMany({
+      data: all.map((s) => ({
+        key: s.key,
+        type: s.type,
+        name: s.name,
+        description: s.description || "",
+        icon: s.icon || "🎵",
+        genre: s.genre || null,
+        genres: JSON.stringify(s.genres || []),
+        moods: JSON.stringify(s.moods || []),
+        active: s.active ?? true,
+        featured: s.featured ?? false,
+      })),
+    });
+  } catch {
+    // Ignore unique-constraint races during the very first concurrent seed.
+  }
 }
 
-function getActiveActivityStations(): ActivityStation[] {
-  return ACTIVITY_STATIONS.filter((s) => s.active);
-}
-
-function getTimeRecommendedMood(): string | null {
-  const h = new Date().getHours();
-  if (h >= 5 && h < 11) return "morning-vibes";
-  if (h >= 11 && h < 16) return "workout";
-  if (h >= 16 && h < 20) return "party";
-  if (h >= 20 || h < 5) return "late-night";
-  return null;
+function gradientFor(type: StationType): string[] {
+  if (type === "genre") return ["#F4C430", "#D4A820"];
+  if (type === "activity") return ["#F97316", "#EA580C"];
+  return ["#8B5CF6", "#6D28D9"];
 }
 
 export const RadioService = {
-  async getStations(): Promise<RadioStation[]> {
+  async _all() {
+    await ensureSeeded();
+    return db.radioStation.findMany({ orderBy: { createdAt: "asc" } });
+  },
+
+  async getStations() {
+    const rows = (await this._all()).filter((r) => r.type === "genre" && r.active);
+
     const genreSongs = await db.song.groupBy({
       by: ["genre"],
       where: { approved: true, published: true },
       _count: true,
     });
-
     const genreCounts: Record<string, number> = {};
     genreSongs.forEach((g) => {
       if (g.genre) genreCounts[g.genre] = g._count;
     });
-
     const allApproved = await db.song.count({ where: { approved: true, published: true } });
 
-    return STATIONS.map((s) => {
-      let count = s.songCount;
-      if (s.genre) {
-        count = genreCounts[s.genre] || 0;
-      } else if (["trending", "new-releases", "editors-choice"].includes(s.id)) {
-        count = allApproved;
-      }
-      return { ...s, songCount: count };
+    return rows.map((r) => {
+      let count = 0;
+      if (r.genre) count = genreCounts[r.genre] || 0;
+      else count = allApproved;
+      return {
+        id: r.key,
+        type: r.type,
+        name: r.name,
+        genre: r.genre || "",
+        description: r.description || "",
+        icon: r.icon,
+        gradient: gradientFor("genre"),
+        songCount: count,
+        active: r.active,
+        featured: r.featured,
+      };
     });
   },
 
-  async getMoodStations(): Promise<MoodStation[]> {
-    const timeRecommended = getTimeRecommendedMood();
-    return getActiveMoodStations().map((s) => ({
-      ...s,
-      recommended: s.id === timeRecommended,
-    })) as any;
+  async getMoodStations() {
+    const rows = (await this._all()).filter((r) => r.type === "mood" && r.active);
+    return rows.map((r) => ({
+      id: r.key,
+      type: r.type,
+      name: r.name,
+      description: r.description || "",
+      icon: r.icon,
+      gradient: gradientFor("mood"),
+      genres: parseList(r.genres),
+      moods: parseList(r.moods),
+      active: r.active,
+      featured: r.featured,
+    }));
   },
 
-  async getActivityStations(): Promise<ActivityStation[]> {
-    const timeRecommended = getTimeRecommendedMood();
-    return getActiveActivityStations().map((s) => ({
-      ...s,
-      recommended: s.id === timeRecommended,
-    })) as any;
+  async getActivityStations() {
+    const rows = (await this._all()).filter((r) => r.type === "activity" && r.active);
+    return rows.map((r) => ({
+      id: r.key,
+      type: r.type,
+      name: r.name,
+      description: r.description || "",
+      icon: r.icon,
+      gradient: gradientFor("activity"),
+      genres: parseList(r.genres),
+      moods: parseList(r.moods),
+      active: r.active,
+      featured: r.featured,
+    }));
+  },
+
+  async _record(key: string) {
+    const rows = await this._all();
+    return rows.find((r) => r.key === key) || null;
   },
 
   async generateQueue(stationId: string, userId?: string, queueSize = 15) {
-    const station = STATIONS.find((s) => s.id === stationId);
-    if (!station) throw new Error("Station not found");
+    const rec = await this._record(stationId);
+    if (!rec) throw new Error("Station not found");
 
     const where: any = { approved: true, published: true };
-    if (station.genre) where.genre = station.genre;
+    if (rec.genre) where.genre = rec.genre;
 
-    return this._buildQueue(where, stationId, userId, queueSize);
+    return this._buildQueue(where, stationId, userId, queueSize, {
+      relevance: rec.genre ? { genres: [rec.genre] } : undefined,
+      weights: {
+        popular: rec.weightPopular,
+        fresh: rec.weightFresh,
+        engagement: rec.weightEngagement,
+        discovery: rec.weightDiscovery,
+      },
+      maxConsecutive: rec.maxConsecutiveArtist,
+    });
   },
 
   async generateMoodQueue(moodId: string, userId?: string, queueSize = 15) {
-    const mood = MOOD_STATIONS.find((s) => s.id === moodId);
-    if (!mood) throw new Error("Mood station not found");
+    const rec = await this._record(moodId);
+    if (!rec) throw new Error("Mood station not found");
 
-    const where: any = {
-      approved: true,
-      published: true,
-      genre: { in: mood.genres },
-    };
+    const genres = parseList(rec.genres);
+    const moods = parseList(rec.moods);
+    const where: any = { approved: true, published: true, genre: { in: genres } };
 
-    return this._buildQueue(where, moodId, userId, queueSize, { genres: mood.genres, moods: mood.moods });
+    return this._buildQueue(where, moodId, userId, queueSize, {
+      relevance: { genres, moods },
+      weights: { popular: rec.weightPopular, fresh: rec.weightFresh, engagement: rec.weightEngagement, discovery: rec.weightDiscovery },
+      maxConsecutive: rec.maxConsecutiveArtist,
+    });
   },
 
   async generateActivityQueue(activityId: string, userId?: string, queueSize = 15) {
-    const activity = ACTIVITY_STATIONS.find((s) => s.id === activityId);
-    if (!activity) throw new Error("Activity station not found");
+    const rec = await this._record(activityId);
+    if (!rec) throw new Error("Activity station not found");
 
-    const where: any = {
-      approved: true,
-      published: true,
-      genre: { in: activity.genres },
-    };
+    const genres = parseList(rec.genres);
+    const moods = parseList(rec.moods);
+    const where: any = { approved: true, published: true, genre: { in: genres } };
 
-    return this._buildQueue(where, activityId, userId, queueSize, { genres: activity.genres, moods: activity.moods });
+    return this._buildQueue(where, activityId, userId, queueSize, {
+      relevance: { genres, moods },
+      weights: { popular: rec.weightPopular, fresh: rec.weightFresh, engagement: rec.weightEngagement, discovery: rec.weightDiscovery },
+      maxConsecutive: rec.maxConsecutiveArtist,
+    });
   },
 
   /** Artist Radio — songs by a specific artist plus similar artists. */
@@ -329,8 +363,10 @@ export const RadioService = {
     sourceId: string,
     userId?: string,
     queueSize = 15,
-    relevance?: { genres?: string[]; moods?: string[] }
+    opts?: { relevance?: { genres?: string[]; moods?: string[] }; weights?: Weights; maxConsecutive?: number }
   ) {
+    const weights: Weights = opts?.weights || RADIO_WEIGHTS;
+    const maxConsecutive = opts?.maxConsecutive ?? ARTIST_MAX_CONSECUTIVE_DEFAULT;
     const candidateLimit = Math.max(queueSize * 6, 30);
 
     const songs = await db.song.findMany({
@@ -342,7 +378,6 @@ export const RadioService = {
 
     if (songs.length === 0) return [];
 
-    // --- User signals (personalization, likes, recent plays) ---
     let profileGenres: Record<string, number> = {};
     let profileArtists: Record<string, number> = {};
     let likedSongIds = new Set<string>();
@@ -363,7 +398,6 @@ export const RadioService = {
       recentSongIds = new Set(recent.map((r) => r.songId));
     }
 
-    // --- Trending signal: recent stream volume per song ---
     const hotSince = new Date(Date.now() - HOT_WINDOW_DAYS * 24 * 60 * 60 * 1000);
     const hotRows = await db.stream.groupBy({
       by: ["songId"],
@@ -381,47 +415,40 @@ export const RadioService = {
       const liked = likedSongIds.has(s.id) ? 2 : 0;
 
       let relevanceBoost = 0;
-      if (relevance?.genres?.length && s.genre && relevance.genres.includes(s.genre)) relevanceBoost += 1.5;
-      if (relevance?.moods?.length) {
+      if (opts?.relevance?.genres?.length && s.genre && opts.relevance.genres.includes(s.genre)) relevanceBoost += 1.5;
+      if (opts?.relevance?.moods?.length) {
         const moods = parseMoods(s.moods);
-        if (moods.some((m) => relevance.moods!.includes(m))) relevanceBoost += 1.5;
+        if (moods.some((m) => opts.relevance!.moods!.includes(m))) relevanceBoost += 1.5;
       }
 
       const score =
-        popularity +
-        recency * 0.6 +
-        hotness +
-        affinity +
-        liked +
-        relevanceBoost +
-        seededNoise(sourceId, s.id) * 0.4;
+        popularity + recency * 0.6 + hotness + affinity + liked + relevanceBoost + seededNoise(sourceId, s.id) * 0.4;
 
       return { song: s, score, ageDays };
     });
 
-    // Repetition avoidance: drop recently-played songs unless the catalog is small.
     let pool = scored.filter((x) => !recentSongIds.has(x.song.id));
     if (pool.length < queueSize) pool = scored;
 
     pool.sort((a, b) => b.score - a.score);
 
-    const balanced = this._balanceBuckets(pool, queueSize);
-    const diversified = this._diversify(balanced, queueSize);
+    const balanced = this._balanceBuckets(pool, queueSize, weights);
+    const diversified = this._diversify(balanced, queueSize, maxConsecutive);
 
     return diversified.slice(0, queueSize).map((x) => this._shape(x.song));
   },
 
-  /** Select a balanced mix of popular / fresh / discovery / engagement songs. */
-  _balanceBuckets(pool: ScoredSong[], queueSize: number): ScoredSong[] {
+  _balanceBuckets(pool: ScoredSong[], queueSize: number, weights: Weights): ScoredSong[] {
     const scored = pool.slice();
+    const total = Math.max(1, weights.popular + weights.fresh + weights.engagement + weights.discovery);
 
     const popular = scored.filter((x) => (x.song.playCount || 0) >= POPULAR_PLAYCOUNT_THRESHOLD);
     const fresh = scored.filter((x) => x.ageDays <= FRESH_AGE_DAYS);
     const discovery = scored.filter((x) => (x.song.playCount || 0) <= DISCOVERY_PLAYCOUNT_MAX);
 
-    const nPopular = Math.round(queueSize * RADIO_WEIGHTS.popular);
-    const nFresh = Math.round(queueSize * RADIO_WEIGHTS.fresh);
-    const nDiscovery = Math.round(queueSize * RADIO_WEIGHTS.discovery);
+    const nPopular = Math.round((queueSize * weights.popular) / total);
+    const nFresh = Math.round((queueSize * weights.fresh) / total);
+    const nDiscovery = Math.round((queueSize * weights.discovery) / total);
 
     const picked: ScoredSong[] = [];
     const seen = new Set<string>();
@@ -437,7 +464,6 @@ export const RadioService = {
       }
     };
 
-    // Lead with the single highest-scored song.
     if (scored.length && !seen.has(scored[0].song.id)) {
       seen.add(scored[0].song.id);
       picked.push(scored[0]);
@@ -447,7 +473,6 @@ export const RadioService = {
     addFrom(fresh, nFresh);
     addFrom(discovery, nDiscovery);
 
-    // Fill the remainder with the best remaining (engagement blend).
     for (const x of scored) {
       if (picked.length >= queueSize) break;
       if (!seen.has(x.song.id)) {
@@ -459,8 +484,7 @@ export const RadioService = {
     return picked;
   },
 
-  /** Reorder to reduce consecutive same-artist songs (keeps the lead song). */
-  _diversify(items: ScoredSong[], queueSize: number): ScoredSong[] {
+  _diversify(items: ScoredSong[], queueSize: number, maxConsecutive: number): ScoredSong[] {
     if (items.length <= 2) return items;
 
     const first = items[0];
@@ -472,6 +496,7 @@ export const RadioService = {
 
     const reordered: ScoredSong[] = [];
     let lastArtist = first.song.artistId;
+    let streak = 1;
     let progressed = true;
 
     while (progressed && reordered.length < rest.length) {
@@ -480,14 +505,14 @@ export const RadioService = {
         if (reordered.length >= rest.length) break;
         const bucket = buckets[aid];
         if (!bucket.length) continue;
-        if (aid === lastArtist && artistIds.length > 1) continue;
+        if (aid === lastArtist && streak >= maxConsecutive && artistIds.length > 1) continue;
         reordered.push(bucket.shift()!);
-        lastArtist = aid;
+        if (aid === lastArtist) streak++;
+        else { lastArtist = aid; streak = 1; }
         progressed = true;
       }
     }
 
-    // Append any leftovers (single-artist catalog, etc.).
     for (const aid of artistIds) {
       while (buckets[aid].length && reordered.length < rest.length) reordered.push(buckets[aid].shift()!);
     }
@@ -496,26 +521,13 @@ export const RadioService = {
   },
 
   async getNextSongs(stationId: string, excludeIds: string[], count = 10) {
-    const station = STATIONS.find((s) => s.id === stationId);
-    if (!station) {
-      const mood = MOOD_STATIONS.find((s) => s.id === stationId);
-      const activity = ACTIVITY_STATIONS.find((s) => s.id === stationId);
-      if (!mood && !activity) throw new Error("Station not found");
+    const rec = await this._record(stationId);
+    if (!rec) throw new Error("Station not found");
 
-      const genres = mood ? mood.genres : activity!.genres;
-      const where: any = { approved: true, published: true, id: { notIn: excludeIds }, genre: { in: genres } };
-      const songs = await db.song.findMany({
-        where,
-        include: { artist: { include: { user: { select: { name: true } } } } },
-        orderBy: [{ playCount: "desc" }, { createdAt: "desc" }],
-        take: count,
-      });
-      shuffleArray(songs);
-      return songs.map((s) => this._shape(s));
-    }
-
+    const genres = parseList(rec.genres);
     const where: any = { approved: true, published: true, id: { notIn: excludeIds } };
-    if (station.genre) where.genre = station.genre;
+    if (rec.type === "genre" && rec.genre) where.genre = rec.genre;
+    else if (genres.length > 0) where.genre = { in: genres };
 
     const songs = await db.song.findMany({
       where,
@@ -523,8 +535,110 @@ export const RadioService = {
       orderBy: [{ playCount: "desc" }, { createdAt: "desc" }],
       take: count,
     });
-
     shuffleArray(songs);
     return songs.map((s) => this._shape(s));
+  },
+
+  // === ADMIN ===
+  async adminList() {
+    const rows = await this._all();
+    return rows.map((r) => ({
+      id: r.id,
+      key: r.key,
+      type: r.type,
+      name: r.name,
+      description: r.description,
+      icon: r.icon,
+      genre: r.genre,
+      genres: parseList(r.genres),
+      moods: parseList(r.moods),
+      active: r.active,
+      featured: r.featured,
+      weightPopular: r.weightPopular,
+      weightFresh: r.weightFresh,
+      weightEngagement: r.weightEngagement,
+      weightDiscovery: r.weightDiscovery,
+      maxConsecutiveArtist: r.maxConsecutiveArtist,
+      updatedAt: r.updatedAt,
+    }));
+  },
+
+  async adminUpsert(input: {
+    key: string;
+    type: StationType;
+    name: string;
+    description?: string;
+    icon?: string;
+    genre?: string;
+    genres?: string[];
+    moods?: string[];
+    active?: boolean;
+    featured?: boolean;
+    weightPopular?: number;
+    weightFresh?: number;
+    weightEngagement?: number;
+    weightDiscovery?: number;
+    maxConsecutiveArtist?: number;
+  }) {
+    const data = {
+      type: input.type,
+      name: input.name,
+      description: input.description || "",
+      icon: input.icon || "🎵",
+      genre: input.type === "genre" ? input.genre || "" : null,
+      genres: JSON.stringify(input.genres || []),
+      moods: JSON.stringify(input.moods || []),
+      active: input.active ?? true,
+      featured: input.featured ?? false,
+      weightPopular: input.weightPopular ?? RADIO_WEIGHTS.popular,
+      weightFresh: input.weightFresh ?? RADIO_WEIGHTS.fresh,
+      weightEngagement: input.weightEngagement ?? RADIO_WEIGHTS.engagement,
+      weightDiscovery: input.weightDiscovery ?? RADIO_WEIGHTS.discovery,
+      maxConsecutiveArtist: input.maxConsecutiveArtist ?? ARTIST_MAX_CONSECUTIVE_DEFAULT,
+    };
+    return db.radioStation.upsert({
+      where: { key: input.key },
+      update: data,
+      create: { key: input.key, ...data },
+    });
+  },
+
+  async adminToggleActive(key: string) {
+    const rec = await db.radioStation.findUnique({ where: { key } });
+    if (!rec) throw new Error("Station not found");
+    return db.radioStation.update({ where: { key }, data: { active: !rec.active } });
+  },
+
+  async adminToggleFeatured(key: string) {
+    const rec = await db.radioStation.findUnique({ where: { key } });
+    if (!rec) throw new Error("Station not found");
+    return db.radioStation.update({ where: { key }, data: { featured: !rec.featured } });
+  },
+
+  async adminDelete(key: string) {
+    return db.radioStation.delete({ where: { key } });
+  },
+
+  async adminSeed() {
+    const all = [...DEFAULT_STATIONS, ...DEFAULT_MOODS, ...DEFAULT_ACTIVITIES];
+    for (const s of all) {
+      await db.radioStation.upsert({
+        where: { key: s.key },
+        update: {},
+        create: {
+          key: s.key,
+          type: s.type,
+          name: s.name,
+          description: s.description || "",
+          icon: s.icon || "🎵",
+          genre: s.genre || null,
+          genres: JSON.stringify(s.genres || []),
+          moods: JSON.stringify(s.moods || []),
+          active: s.active ?? true,
+          featured: s.featured ?? false,
+        },
+      });
+    }
+    return { seeded: all.length };
   },
 };

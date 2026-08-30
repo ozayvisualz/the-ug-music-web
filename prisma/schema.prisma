@@ -857,3 +857,26 @@ model AiPlaylist {
 
   @@index([key])
 }
+
+model RadioStation {
+  id          String   @id @default(cuid())
+  key         String   @unique // stable id: "afrobeats", "workout", ...
+  type        String   @default("genre") // genre | mood | activity
+  name        String
+  description String   @default("")
+  icon        String   @default("🎵")
+  genre       String? // single genre for genre-type stations
+  genres      String   @default("[]") // JSON array for mood/activity stations
+  moods       String   @default("[]") // JSON array of mood tags
+  active      Boolean  @default(true)
+  featured    Boolean  @default(false)
+  weightPopular     Int @default(40)
+  weightFresh       Int @default(25)
+  weightEngagement  Int @default(20)
+  weightDiscovery   Int @default(15)
+  maxConsecutiveArtist Int @default(2)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type])
+}
