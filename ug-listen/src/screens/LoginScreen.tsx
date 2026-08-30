@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -14,7 +15,7 @@ import {
   type TextInputProps,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Music2, Eye, EyeOff } from "lucide-react-native";
+import { Music2, Eye, EyeOff, Upload } from "lucide-react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -30,10 +31,13 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { COLORS, SPRING } from "../constants/theme";
-import { login, register } from "../api/auth";
+import { login, register, getStoredToken } from "../api/auth";
 import { useAuthStore } from "../store/authStore";
 import { useTheme } from "../theme/ThemeContext";
 import FloatingNotes from "../components/FloatingNotes";
+import * as ImagePicker from "expo-image-picker";
+import * as DocumentPicker from "expo-document-picker";
+import { uploadFile } from "../lib/upload";
 
 const { width: SW, height: SH } = Dimensions.get("window");
 const CARD_MAX = 384;
@@ -116,6 +120,20 @@ export default function LoginScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState<"LISTENER" | "ARTIST">("LISTENER");
   const [artistName, setArtistName] = useState("");
+  const [legalName, setLegalName] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [genre, setGenre] = useState("");
+  const [bio, setBio] = useState("");
+  const [socialLinks, setSocialLinks] = useState("");
+  const [musicLinks, setMusicLinks] = useState("");
+  const [recordLabel, setRecordLabel] = useState("");
+  const [managementContact, setManagementContact] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [idUrl, setIdUrl] = useState("");
+  const [selfieUrl, setSelfieUrl] = useState("");
+  const [uploadingDoc, setUploadingDoc] = useState<"photo" | "id" | "selfie" | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -175,6 +193,34 @@ export default function LoginScreen() {
       const user = tab === "signin"
         ? await login(email.trim(), password)
         : await register(name.trim(), email.trim(), password, role, artistName.trim() || undefined);
+
+      // Submit artist verification info to the admin review queue.
+      if (tab === "register" && role === "ARTIST") {
+        try {
+          const token = await getStoredToken();
+          await fetch("https://www.theugmusic.com/api/artist/apply", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+            body: JSON.stringify({
+              artistName: artistName.trim(),
+              legalName: legalName.trim() || name.trim(),
+              country: country.trim(),
+              city: city.trim(),
+              dateOfBirth: dateOfBirth.trim(),
+              genre: genre.trim(),
+              bio: bio.trim(),
+              socialLinks: socialLinks.split(",").map((s) => s.trim()).filter(Boolean),
+              musicLinks: musicLinks.trim(),
+              recordLabel: recordLabel.trim(),
+              managementContact: managementContact.trim(),
+              photoUrl: photoUrl || undefined,
+              idDocument: idUrl || undefined,
+              selfieDocument: selfieUrl || undefined,
+            }),
+          });
+        } catch {}
+      }
+
       setUser(user);
     } catch (e: any) {
       setError(e.message ?? "Login failed");
@@ -185,6 +231,51 @@ export default function LoginScreen() {
   const handleGuest = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft).catch(() => {});
     setUser({ id: "guest", email: "", name: "Guest", role: "LISTENER" });
+  };
+
+  const uploadDoc = async (kind: "photo" | "id" | "selfie", uri: string, fileName: string, mimeType: string) => {
+    setUploadingDoc(kind);
+    try {
+      const url = await uploadFile(uri, fileName, mimeType);
+      if (kind === "photo") setPhotoUrl(url);
+      else if (kind === "id") setIdUrl(url);
+      else setSelfieUrl(url);
+    } catch {
+      Alert.alert("Upload Failed", "Could not upload the file. Please try again.");
+    } finally {
+      setUploadingDoc(null);
+    }
+  };
+
+  const pickPhoto = async () => {
+    try {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) { Alert.alert("Permission", "Photo library permission is required to upload a photo."); return; }
+      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8 });
+      if (result.canceled || !result.assets?.length) return;
+      const a = result.assets[0];
+      await uploadDoc("photo", a.uri, a.fileName || "photo.jpg", a.mimeType || "image/jpeg");
+    } catch {}
+  };
+
+  const pickSelfie = async () => {
+    try {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) { Alert.alert("Permission", "Photo library permission is required to upload a selfie."); return; }
+      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8 });
+      if (result.canceled || !result.assets?.length) return;
+      const a = result.assets[0];
+      await uploadDoc("selfie", a.uri, a.fileName || "selfie.jpg", a.mimeType || "image/jpeg");
+    } catch {}
+  };
+
+  const pickId = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ type: ["image/*", "application/pdf"], copyToCacheDirectory: true });
+      if (result.canceled || !result.assets?.length) return;
+      const a = result.assets[0];
+      await uploadDoc("id", a.uri, a.name || "id-document", a.mimeType || "application/pdf");
+    } catch {}
   };
 
   const onPressIn = useCallback(() => { btnScale.value = withSpring(0.97, SPRING.snappy); }, []);
@@ -326,7 +417,34 @@ export default function LoginScreen() {
                       </View>
                     )}
                     {isRegister && role === "ARTIST" && (
-                      <GlassInput label="Artist / Stage Name" value={artistName} onChangeText={setArtistName} autoCapitalize="words" />
+                      <>
+                        <GlassInput label="Artist / Stage Name" value={artistName} onChangeText={setArtistName} autoCapitalize="words" />
+                        <GlassInput label="Legal Full Name" value={legalName} onChangeText={setLegalName} autoCapitalize="words" />
+                        <View style={styles.artistGrid}>
+                          <View style={styles.artistGridItem}><GlassInput label="Country" value={country} onChangeText={setCountry} autoCapitalize="words" /></View>
+                          <View style={styles.artistGridItem}><GlassInput label="City" value={city} onChangeText={setCity} autoCapitalize="words" /></View>
+                        </View>
+                        <GlassInput label="Date of Birth" value={dateOfBirth} onChangeText={setDateOfBirth} placeholder="YYYY-MM-DD" />
+                        <GlassInput label="Genre" value={genre} onChangeText={setGenre} autoCapitalize="words" />
+                        <GlassInput label="Short Bio" value={bio} onChangeText={setBio} />
+                        <GlassInput label="Social Links (comma separated)" value={socialLinks} onChangeText={setSocialLinks} />
+                        <GlassInput label="Music Links" value={musicLinks} onChangeText={setMusicLinks} />
+                        <GlassInput label="Record Label (optional)" value={recordLabel} onChangeText={setRecordLabel} />
+                        <GlassInput label="Management Contact (optional)" value={managementContact} onChangeText={setManagementContact} />
+
+                        <TouchableOpacity style={styles.uploadBtn} onPress={pickPhoto} activeOpacity={0.7}>
+                          {uploadingDoc === "photo" ? <ActivityIndicator size="small" color={COLORS.gold} /> : <Upload size={16} color={COLORS.gold} />}
+                          <Text style={[styles.uploadBtnText, { color: photoUrl ? COLORS.green : COLORS.text }]}>{photoUrl ? "Artist Photo Uploaded ✓" : "Upload Artist Photo"}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.uploadBtn} onPress={pickId} activeOpacity={0.7}>
+                          {uploadingDoc === "id" ? <ActivityIndicator size="small" color={COLORS.gold} /> : <Upload size={16} color={COLORS.gold} />}
+                          <Text style={[styles.uploadBtnText, { color: idUrl ? COLORS.green : COLORS.text }]}>{idUrl ? "ID Document Uploaded ✓" : "Upload ID Document"}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.uploadBtn} onPress={pickSelfie} activeOpacity={0.7}>
+                          {uploadingDoc === "selfie" ? <ActivityIndicator size="small" color={COLORS.gold} /> : <Upload size={16} color={COLORS.gold} />}
+                          <Text style={[styles.uploadBtnText, { color: selfieUrl ? COLORS.green : COLORS.text }]}>{selfieUrl ? "Selfie Uploaded ✓" : "Upload Selfie (holding ID)"}</Text>
+                        </TouchableOpacity>
+                      </>
                     )}
                   </Animated.View>
 
@@ -496,6 +614,10 @@ const styles = StyleSheet.create({
   },
   rolePillText: { color: "rgba(255,255,255,0.55)", fontWeight: "600", fontSize: 13 },
   rolePillTextActive: { color: COLORS.gold },
+  artistGrid: { flexDirection: "row", gap: 10 },
+  artistGridItem: { flex: 1 },
+  uploadBtn: { flexDirection: "row", alignItems: "center", gap: 8, borderWidth: 1, borderColor: "rgba(255,255,255,0.14)", borderRadius: 12, paddingVertical: 12, paddingHorizontal: 14, marginBottom: 12 },
+  uploadBtnText: { fontSize: 13, fontWeight: "600", color: COLORS.text, flex: 1 },
 
   btnWrap: { width: "100%", marginTop: 2 },
   submitBtn: {
