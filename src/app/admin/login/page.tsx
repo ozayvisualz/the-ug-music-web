@@ -1,12 +1,13 @@
 "use client";
 
-import { Shield } from "lucide-react";
+import { Shield, Eye, EyeOff } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 function AdminLoginForm() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0B0B0D] px-4">
@@ -38,7 +39,14 @@ function AdminLoginForm() {
           </div>
           <div>
             <label className="block text-xs text-zinc-500 mb-1.5 font-medium uppercase tracking-wider">Password</label>
-            <input name="password" type="password" className="w-full bg-zinc-900 border border-zinc-700 rounded-lg py-2.5 px-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-yellow-500/50 transition" placeholder="••••••••" required />
+            <div className="relative">
+              <input name="password" type={showPassword ? "text" : "password"} className="w-full bg-zinc-900 border border-zinc-700 rounded-lg py-2.5 px-3 pr-10 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-yellow-500/50 transition" placeholder="••••••••" required />
+              <button type="button" onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-yellow-500"
+                aria-label={showPassword ? "Hide password" : "Show password"}>
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
           <button type="submit" className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-semibold rounded-lg py-2.5 transition text-sm">Sign In to Admin</button>
         </form>

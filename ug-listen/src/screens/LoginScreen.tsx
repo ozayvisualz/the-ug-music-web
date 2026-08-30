@@ -14,7 +14,7 @@ import {
   type TextInputProps,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Music2 } from "lucide-react-native";
+import { Music2, Eye, EyeOff } from "lucide-react-native";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -44,9 +44,10 @@ const CARD_MAX = 384;
 
 type GlassInputProps = TextInputProps & { label: string };
 
-function GlassInput({ label, value, onChangeText, ...rest }: GlassInputProps) {
+function GlassInput({ label, value, onChangeText, secureTextEntry, ...rest }: GlassInputProps) {
   const { isDark } = useTheme();
   const [focused, setFocused] = useState(false);
+  const [secure, setSecure] = useState(!!secureTextEntry);
   const float = useSharedValue(0);
   const active = focused || (value ? value.length > 0 : false);
 
@@ -75,14 +76,30 @@ function GlassInput({ label, value, onChangeText, ...rest }: GlassInputProps) {
         {label}
       </Animated.Text>
       <TextInput
-        style={[styles.input, { color: isDark ? "#FFFFFF" : "#101013" }]}
+        style={[styles.input, { color: isDark ? "#FFFFFF" : "#101013" }, secureTextEntry && styles.inputWithToggle]}
         value={value}
         onChangeText={onChangeText}
+        secureTextEntry={secure}
         placeholderTextColor="transparent"
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         {...rest}
       />
+      {secureTextEntry ? (
+        <TouchableOpacity
+          style={styles.eyeBtn}
+          onPress={() => setSecure((v) => !v)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={secure ? "Show password" : "Hide password"}
+        >
+          {secure ? (
+            <EyeOff size={18} color={isDark ? COLORS.textMuted : "rgba(0,0,0,0.5)"} />
+          ) : (
+            <Eye size={18} color={COLORS.gold} />
+          )}
+        </TouchableOpacity>
+      ) : null}
     </View>
   );
 }
@@ -96,6 +113,7 @@ export default function LoginScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState<"LISTENER" | "ARTIST">("LISTENER");
   const [artistName, setArtistName] = useState("");
   const [error, setError] = useState("");
@@ -149,6 +167,7 @@ export default function LoginScreen() {
     setError("");
     if (tab === "signin" && (!email.trim() || !password)) { setError("Please enter email and password"); return; }
     if (tab === "register" && (!name.trim() || !email.trim() || !password)) { setError("Please fill all fields"); return; }
+    if (tab === "register" && password !== confirmPassword) { setError("Passwords do not match"); return; }
     if (tab === "register" && role === "ARTIST" && !artistName.trim()) { setError("Please enter your artist name"); return; }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     setLoading(true);
@@ -289,6 +308,9 @@ export default function LoginScreen() {
                     )}
                     <GlassInput label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
                     <GlassInput label="Password" value={password} onChangeText={setPassword} secureTextEntry />
+                    {isRegister && (
+                      <GlassInput label="Confirm Password" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
+                    )}
                     {isRegister && (
                       <View style={styles.roleRow}>
                         {(["LISTENER", "ARTIST"] as const).map((r) => (
@@ -448,6 +470,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
   },
   input: { flex: 1, fontSize: 15, color: "#FFFFFF", paddingVertical: 0 },
+  inputWithToggle: { paddingRight: 40 },
+  eyeBtn: { position: "absolute", right: 10, top: 0, bottom: 0, justifyContent: "center", paddingHorizontal: 4 },
   inputLabel: {
     position: "absolute",
     left: 16,
