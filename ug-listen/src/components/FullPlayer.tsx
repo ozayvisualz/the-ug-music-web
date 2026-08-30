@@ -64,7 +64,11 @@ function QueueRow({
       <Animated.View style={[styles.queueItem, { borderBottomColor: colors.border }, animatedStyle]}>
         <Text style={[styles.queueIdx, { color: colors.textMuted }]}>{displayIndex}</Text>
         <View style={[styles.queueArt, { backgroundColor: colors.goldMuted }]}>
-          <Music2 size={14} color={colors.gold} />
+          {item.coverUrl ? (
+            <Image source={{ uri: item.coverUrl }} style={styles.queueArtImg} />
+          ) : (
+            <Music2 size={14} color={colors.gold} />
+          )}
         </View>
         <TouchableOpacity style={{ flex: 1, minWidth: 0 }} onPress={onJump}>
           <Text style={[styles.queueTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>
@@ -470,7 +474,8 @@ const styles = StyleSheet.create({
   commentInput: { flex: 1, borderWidth: 1, borderRadius: 99, paddingHorizontal: 14, paddingVertical: 8, fontSize: 13 },
   queueItem: { flexDirection: "row", alignItems: "center", paddingVertical: 10, borderBottomWidth: 0.5, gap: 10 },
   queueIdx: { fontSize: 12, width: 20, textAlign: "center" },
-  queueArt: { width: 32, height: 32, borderRadius: 6, alignItems: "center", justifyContent: "center" },
+  queueArt: { width: 32, height: 32, borderRadius: 6, alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  queueArtImg: { width: "100%", height: "100%", borderRadius: 6 },
   queueTitle: { fontSize: 13, fontWeight: "500" },
   queueArtist: { fontSize: 11 },
   modalOverlay: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 200, justifyContent: "flex-end" },
