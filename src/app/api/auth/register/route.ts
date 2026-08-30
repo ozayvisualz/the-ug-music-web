@@ -34,13 +34,19 @@ export async function POST(req: NextRequest) {
     const existing = await db.user.findUnique({ where: { email } });
     if (existing) return respond({ error: "User already exists" }, 409);
 
+    const phoneValue = phone?.trim() ? phone.trim() : null;
+    if (phoneValue) {
+      const phoneTaken = await db.user.findUnique({ where: { phone: phoneValue } });
+      if (phoneTaken) return respond({ error: "An account with this phone number already exists" }, 409);
+    }
+
     const hashed = await bcrypt.hash(password, 10);
     const user = await db.user.create({
       data: {
         name,
         email,
         password: hashed,
-        phone: phone?.trim() ? phone.trim() : null,
+        phone: phoneValue,
         role: role === "ARTIST" ? "ARTIST" : "LISTENER",
         userId: generateUserId(role === "ARTIST" ? "ARTIST" : "LISTENER"),
         accountType: role === "ARTIST" ? "artist" : "listener",
@@ -59,6 +65,9 @@ export async function POST(req: NextRequest) {
       user: { id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role, artist: null },
     });
   } catch (error: any) {
+    if (error?.code === "P2002") {
+      return respond({ error: "An account with this email or phone number already exists" }, 409);
+    }
     return respond({ error: error?.message || "Registration failed" }, 500);
   }
 }
