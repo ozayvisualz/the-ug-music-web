@@ -12,6 +12,7 @@ export type AuthUser = {
   role: "LISTENER" | "ARTIST" | "ADMIN";
   image?: string | null;
   phone?: string | null;
+  artist?: { artistName?: string | null } | null;
 };
 
 async function apiPost(url: string, body: Record<string, unknown>) {

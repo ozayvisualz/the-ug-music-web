@@ -381,7 +381,8 @@ export default function HomeScreen() {
   const onHeroTouchStart = () => (heroAutoAdvance.current = false);
   const onHeroTouchEnd = () => (heroAutoAdvance.current = true);
 
-  const avatarLetter = user?.name?.charAt(0)?.toUpperCase() ?? "L";
+  const displayName = user?.role === "ARTIST" && user.artist?.artistName ? user.artist.artistName : user?.name;
+  const avatarLetter = displayName?.charAt(0)?.toUpperCase() ?? "L";
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
@@ -405,7 +406,7 @@ export default function HomeScreen() {
               <Text style={styles.greetingWave}>{/* wave */}</Text>
             </Text>
             <Text style={[styles.username, { color: colors.white }]}>
-              {user?.name?.split(" ")[0] ?? "Listener"}
+              {displayName?.split(" ")[0] ?? "Listener"}
             </Text>
           </View>
         </View>

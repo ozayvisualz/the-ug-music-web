@@ -47,6 +47,7 @@ export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const { colors } = useTheme();
+  const displayName = user?.role === "ARTIST" && user.artist?.artistName ? user.artist.artistName : user?.name ?? "";
 
   const likedCount = useLikedStore((s) => s.likedIds.size);
   const downloadCount = useDownloadStore((s) => Object.keys(s.downloaded).length);
@@ -183,11 +184,11 @@ export default function ProfileScreen() {
               <Image source={{ uri: user.image }} style={styles.avatarImage} />
             ) : (
               <Text style={styles.avatarText}>
-                {user.name?.charAt(0).toUpperCase()}
+                {displayName.charAt(0).toUpperCase()}
               </Text>
             )}
           </View>
-          <Text style={[styles.name, { color: colors.white }]}>{user.name}</Text>
+          <Text style={[styles.name, { color: colors.white }]}>{displayName}</Text>
           <Text style={styles.email}>{user.email}</Text>
           <View
             style={[
