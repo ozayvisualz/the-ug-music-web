@@ -22,7 +22,11 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const router = useRouter();
   const registerMut = trpc.auth.register.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (data: any) => {
+      if (data?.token) {
+        document.cookie = `auth-token=${data.token}; path=/; max-age=2592000; domain=.theugmusic.com`;
+        localStorage.setItem("auth-user", JSON.stringify(data.user));
+      }
       if (form.role === "ARTIST") {
         try {
           await fetch("/api/artist/apply", {

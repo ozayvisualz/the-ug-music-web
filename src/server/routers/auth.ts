@@ -59,7 +59,7 @@ export const authRouter = router({
           name: input.name,
           email: input.email,
           password: hashedPassword,
-          phone: input.phone,
+          phone: input.phone?.trim() ? input.phone.trim() : null,
           role: input.role as any,
           userId: generateUserId(input.role),
           accountType: input.role === "ARTIST" ? "artist" : "listener",
@@ -76,7 +76,18 @@ export const authRouter = router({
         include: { artist: true },
       });
 
-      return { id: user.id, userId: user.userId, email: user.email, artistName: user.artist?.artistName ?? null };
+      const token = jwt.sign(
+        { id: user.id, email: user.email, name: user.name, role: user.role },
+        process.env.AUTH_SECRET || "default-secret",
+        { expiresIn: "30d" }
+      );
+
+      return {
+        token,
+        user: { id: user.id, email: user.email, name: user.name, role: user.role },
+        userId: user.userId,
+        artistName: user.artist?.artistName ?? null,
+      };
     }),
 
   me: protectedProcedure.query(async ({ ctx }) => {
