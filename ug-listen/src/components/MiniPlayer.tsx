@@ -3,6 +3,7 @@ import { Music2, Play, Pause, SkipForward, X } from "lucide-react-native";
 import { COLORS, RADIUS, HIT_SLOP } from "../constants/theme";
 import { usePlayer } from "./PlayerContext";
 import { useTheme } from "../theme/ThemeContext";
+import FloatingNotes from "./FloatingNotes";
 
 const SW = Dimensions.get("window").width;
 
@@ -18,6 +19,7 @@ export default function MiniPlayer({ onExpand }: Props) {
 
   return (
     <View style={[styles.wrap, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+      <FloatingNotes count={10} height={miniHeight} />
       <View style={[styles.bar, { backgroundColor: colors.gold, width: `${progress * 100}%` }]} />
       <View style={styles.row}>
         <TouchableOpacity style={styles.infoWrap} activeOpacity={0.9} onPress={onExpand}>

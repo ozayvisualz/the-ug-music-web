@@ -12,12 +12,22 @@ export type Track = {
   startPosition?: number;
 };
 
+export type RadioContext = {
+  stationId: string;
+  title: string;
+};
+
+const HISTORY_LIMIT = 10;
+
 type QueueState = {
   queue: Track[];
   currentIndex: number;
   shuffle: boolean;
   repeat: number; // 0 = off, 1 = all, 2 = one
+  history: string[]; // recently played song IDs (most recent first)
+  radioContext: RadioContext | null;
   setQueue: (tracks: Track[], index?: number) => void;
+  setRadioContext: (ctx: RadioContext | null) => void;
   addToQueue: (tracks: Track[]) => void;
   playNext: (track: Track) => void;
   next: () => Track | null;
@@ -37,8 +47,18 @@ export const useQueueStore = create<QueueState>((set, get) => ({
   currentIndex: -1,
   shuffle: false,
   repeat: 0,
+  history: [],
+  radioContext: null,
 
-  setQueue: (tracks, index = 0) => set({ queue: tracks, currentIndex: Math.max(-1, Math.min(index, tracks.length - 1)) }),
+  setQueue: (tracks, index = 0) => {
+    const i = Math.max(-1, Math.min(index, tracks.length - 1));
+    set({
+      queue: tracks,
+      currentIndex: i,
+      history: i >= 0 && tracks[i] ? [tracks[i].id] : [],
+      radioContext: null,
+    });
+  },
 
   addToQueue: (tracks) =>
     set((state) => ({ queue: [...state.queue, ...tracks] })),
@@ -50,42 +70,55 @@ export const useQueueStore = create<QueueState>((set, get) => ({
       return {
         queue: [...before, track, ...after],
         currentIndex: state.currentIndex + 1,
+        history: [track.id, ...state.history].slice(0, HISTORY_LIMIT),
       };
     }),
 
   next: () => {
-    const { queue, currentIndex, shuffle, repeat } = get();
+    const { queue, currentIndex, shuffle, repeat, history } = get();
     if (queue.length === 0) return null;
+
     if (shuffle && repeat !== 2) {
-      const remaining = queue.map((_, i) => i).filter((i) => i !== currentIndex);
+      // Avoid immediately replaying the most recent songs.
+      const recent = history.slice(0, 3);
+      let remaining = queue
+        .map((_, i) => i)
+        .filter((i) => i !== currentIndex && !recent.includes(queue[i].id));
+      if (remaining.length === 0) {
+        remaining = queue.map((_, i) => i).filter((i) => i !== currentIndex);
+      }
       if (remaining.length === 0) return null;
       const randomIdx = remaining[Math.floor(Math.random() * remaining.length)];
-      set({ currentIndex: randomIdx });
+      set({ currentIndex: randomIdx, history: [queue[randomIdx].id, ...history].slice(0, HISTORY_LIMIT) });
       return queue[randomIdx];
     }
-    if (repeat === 2) return queue[currentIndex];
+
     if (currentIndex < queue.length - 1) {
-      set({ currentIndex: currentIndex + 1 });
-      return queue[currentIndex + 1];
+      const nextIdx = currentIndex + 1;
+      set({ currentIndex: nextIdx, history: [queue[nextIdx].id, ...history].slice(0, HISTORY_LIMIT) });
+      return queue[nextIdx];
     }
+
     if (repeat === 1) {
-      set({ currentIndex: 0 });
+      set({ currentIndex: 0, history: [queue[0].id, ...history].slice(0, HISTORY_LIMIT) });
       return queue[0];
     }
+
     return null;
   },
 
   prev: () => {
-    const { queue, currentIndex } = get();
+    const { queue, currentIndex, history } = get();
     if (queue.length === 0) return null;
     if (currentIndex > 0) {
-      set({ currentIndex: currentIndex - 1 });
-      return queue[currentIndex - 1];
+      const prevIdx = currentIndex - 1;
+      set({ currentIndex: prevIdx, history: [queue[prevIdx].id, ...history].slice(0, HISTORY_LIMIT) });
+      return queue[prevIdx];
     }
     return null;
   },
 
-  clear: () => set({ queue: [], currentIndex: -1 }),
+  clear: () => set({ queue: [], currentIndex: -1, history: [] }),
 
   toggleShuffle: () => set((state) => ({ shuffle: !state.shuffle })),
 
@@ -116,5 +149,14 @@ export const useQueueStore = create<QueueState>((set, get) => ({
       return { queue };
     }),
 
-  jumpTo: (index) => set({ currentIndex: index }),
+  jumpTo: (index) =>
+    set((state) => {
+      const id = state.queue[index]?.id;
+      return {
+        currentIndex: index,
+        history: id ? [id, ...state.history].slice(0, HISTORY_LIMIT) : state.history,
+      };
+    }),
+
+  setRadioContext: (ctx) => set({ radioContext: ctx }),
 }));

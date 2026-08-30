@@ -65,6 +65,7 @@ export function useAudioPlayer() {
   const positionInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const currentTrackId = useRef<string | null>(null);
   const lastPersistRef = useRef(0);
+  const extendInFlight = useRef<string | null>(null);
 
   const queue = useQueueStore((s) => s.queue);
   const currentIndex = useQueueStore((s) => s.currentIndex);
@@ -170,16 +171,34 @@ export function useAudioPlayer() {
     };
   }, [stopPositionTimer, clearCrossfade, persistPosition]);
 
+  const advanceToNext = useCallback(() => {
+    const t = next();
+    if (!t) {
+      setIsPlaying(false);
+      stopPositionTimer();
+    }
+  }, [next, setIsPlaying, stopPositionTimer]);
+
   useEffect(() => {
     if (!currentTrack || currentTrack.id === currentTrackId.current) return;
-    currentTrackId.current = currentTrack.id;
+    const trackId = currentTrack.id;
+    currentTrackId.current = trackId;
     setError("");
+
+    let statusSub: { remove: () => void } | null = null;
 
     (async () => {
       // Prefer the local downloaded file (offline playback) when available.
       const localUri = await getLocalUri(currentTrack.id);
+      // Race guard: a newer track was selected while resolving the URL.
+      if (currentTrackId.current !== trackId) return;
+
       const audioUrl = localUri || currentTrack.url;
-      if (!audioUrl) { setError("No audio URL"); return; }
+      if (!audioUrl) {
+        setError("No audio URL");
+        advanceToNext();
+        return;
+      }
 
       // Cancel any in-progress crossfade (rapid track switching).
       if (crossfadeTimer.current) { clearInterval(crossfadeTimer.current); crossfadeTimer.current = null; }
@@ -188,58 +207,52 @@ export function useAudioPlayer() {
         fadingPlayerRef.current = null;
       }
 
-    const oldPlayer = playerRef.current;
-    const shouldCrossfade = !!oldPlayer && crossfadeDurationMs > 0;
+      const oldPlayer = playerRef.current;
+      const shouldCrossfade = !!oldPlayer && crossfadeDurationMs > 0;
 
-    setPosition(currentTrack.startPosition || 0);
-    setDuration(currentTrack.duration || 0);
-    // Keep isLoaded true during crossfade so the player UI doesn't flash "Loading…"
-    // while the current track is still audibly playing.
-    if (!shouldCrossfade) setIsLoaded(false);
-    setIsBuffering(true);
+      setPosition(currentTrack.startPosition || 0);
+      setDuration(currentTrack.duration || 0);
+      // Keep isLoaded true during crossfade so the player UI doesn't flash "Loading…"
+      // while the current track is still audibly playing.
+      if (!shouldCrossfade) setIsLoaded(false);
+      setIsBuffering(true);
 
-    try {
-      const newPlayer = createAudioPlayer({ uri: audioUrl }, { downloadFirst: false, updateInterval: 200 });
-
-      if (shouldCrossfade) {
-        // Crossfade: buffer the next track silently, then fade old->new once ready.
-        newPlayer.volume = 0;
+      try {
+        const newPlayer = createAudioPlayer({ uri: audioUrl }, { downloadFirst: false, updateInterval: 200 });
+        newPlayer.volume = shouldCrossfade ? 0 : 1;
 
         let crossfadeStarted = false;
-        newPlayer.addListener("playbackStatusUpdate", (status: any) => {
-          if (status.isLoaded && !crossfadeStarted) {
-            crossfadeStarted = true;
-            setIsLoaded(true);
-            setIsBuffering(false);
-            setDuration(status.duration || currentTrack.duration);
-            if (currentTrack.startPosition && currentTrack.startPosition > 0) {
-              try { newPlayer.seekTo(currentTrack.startPosition); setPosition(currentTrack.startPosition); } catch {}
-            }
-            try { newPlayer.play(); } catch {}
-            crossfade(oldPlayer, newPlayer, crossfadeDurationMs);
-          }
-        });
+        let finished = false;
+        statusSub = newPlayer.addListener("playbackStatusUpdate", (status: any) => {
+          if (currentTrackId.current !== trackId) return;
 
-        playerRef.current = newPlayer;
-        try { newPlayer.play(); } catch {} // begin buffering silently
-        setIsPlaying(true);
-        startPositionTimer();
-      } else {
-        // First track, or crossfade disabled.
-        newPlayer.volume = 1;
-
-        let started = false;
-        newPlayer.addListener("playbackStatusUpdate", (status: any) => {
           if (status.isLoaded) {
             setIsLoaded(true);
             setIsBuffering(false);
             setDuration(status.duration || currentTrack.duration);
-            if (!started && !status.playing) {
-              started = true;
-              try { newPlayer.play(); } catch {}
-            }
             if (currentTrack.startPosition && currentTrack.startPosition > 0) {
               try { newPlayer.seekTo(currentTrack.startPosition); setPosition(currentTrack.startPosition); } catch {}
+            }
+            if (!status.playing) {
+              try { newPlayer.play(); } catch {}
+            }
+            if (shouldCrossfade && !crossfadeStarted) {
+              crossfadeStarted = true;
+              crossfade(oldPlayer, newPlayer, crossfadeDurationMs);
+            }
+          }
+
+          // Automatic next song when the track finishes.
+          if (status.didJustFinish && !finished) {
+            finished = true;
+            if (useQueueStore.getState().repeat === 2) {
+              // Repeat one: replay the current song from the start.
+              try { newPlayer.seekTo(0); newPlayer.play(); } catch {}
+              setPosition(0);
+              setIsPlaying(true);
+              finished = false;
+            } else {
+              advanceToNext();
             }
           }
         });
@@ -248,15 +261,51 @@ export function useAudioPlayer() {
         try { newPlayer.play(); } catch {}
         setIsPlaying(true);
         startPositionTimer();
-        if (oldPlayer) { try { oldPlayer.remove(); } catch {} }
+
+        if (!shouldCrossfade && oldPlayer) { try { oldPlayer.remove(); } catch {} }
+      } catch (e: any) {
+        if (currentTrackId.current !== trackId) return;
+        setError(e?.message || "Audio load error");
+        setIsBuffering(false);
+        setIsLoaded(false);
+        advanceToNext();
       }
-    } catch (e: any) {
-      setError(e?.message || "Audio load error");
-      setIsBuffering(false);
-      setIsLoaded(false);
-    }
     })();
-  }, [currentTrack?.id]);
+
+    return () => {
+      if (statusSub) { try { statusSub.remove(); } catch {} }
+    };
+  }, [currentTrack?.id, advanceToNext, crossfade, startPositionTimer]);
+
+  // Radio: keep the queue topped up so the station never stops unexpectedly.
+  useEffect(() => {
+    const ctx = useQueueStore.getState().radioContext;
+    if (!ctx) return;
+    const remaining = queue.length - currentIndex;
+    if (remaining > 3) return;
+    if (extendInFlight.current === ctx.stationId) return;
+    extendInFlight.current = ctx.stationId;
+    (async () => {
+      try {
+        const excludeIds = useQueueStore.getState().queue.map((t) => t.id);
+        const more = await trpc.radio.getNextSongs.query({ stationId: ctx.stationId, excludeIds, count: 20 });
+        if (Array.isArray(more) && more.length > 0) {
+          const tracks = more.map((s: any) => ({
+            id: s.id,
+            title: s.title,
+            artist: s.artist,
+            url: s.fileUrl || s.hlsUrl || s.url || "",
+            duration: s.duration || 0,
+            coverUrl: s.coverUrl,
+            artistId: s.artistId,
+          }));
+          useQueueStore.getState().addToQueue(tracks);
+        }
+      } catch {} finally {
+        extendInFlight.current = null;
+      }
+    })();
+  }, [currentIndex, queue.length]);
 
   const togglePlay = useCallback(() => {
     const p = playerRef.current;
@@ -326,6 +375,7 @@ export function useAudioPlayer() {
       try { p.remove(); } catch {}
     }
     playerRef.current = null;
+    currentTrackId.current = null;
     stopPositionTimer();
     setIsPlaying(false);
     setIsLoaded(false);

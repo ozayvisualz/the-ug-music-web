@@ -1,20 +1,82 @@
 ﻿import { useState, useEffect, useCallback, useRef } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, Dimensions, Share, TextInput, ActivityIndicator, Image } from "react-native";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { Music2, Play, Pause, SkipBack, SkipForward, Heart, Download, ListPlus, Share2, Shuffle, Repeat, ChevronDown, Send, Repeat1, X } from "lucide-react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming, runOnJS } from "react-native-reanimated";
 import { COLORS, RADIUS, HIT_SLOP, SPRING } from "../constants/theme";
 import { usePlayer } from "./PlayerContext";
 import { useQueueStore } from "../store/playerStore";
+import { useLikedStore } from "../store/likedStore";
 import { useTheme } from "../theme/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { navigate } from "../navigation/navigationRef";
 import { trpc } from "../api/client";
 import { getStoredToken } from "../api/auth";
 import GlassDownloadModal from "./GlassDownloadModal";
+import FloatingNotes from "./FloatingNotes";
 
 const SW = Dimensions.get("window").width;
 const ART_SIZE = Math.min(SW * 0.55, 260);
 const isSmall = SW < 360;
+
+const QUEUE_ROW_HEIGHT = 52;
+
+function QueueRow({
+  item,
+  displayIndex,
+  absoluteIndex,
+  colors,
+  onJump,
+  onRemove,
+  onReorder,
+}: {
+  item: any;
+  displayIndex: number;
+  absoluteIndex: number;
+  colors: any;
+  onJump: () => void;
+  onRemove: () => void;
+  onReorder: (from: number, delta: number) => void;
+}) {
+  const translateY = useSharedValue(0);
+  const z = useSharedValue(0);
+
+  const pan = Gesture.Pan()
+    .activateAfterLongPress(250)
+    .onStart(() => { z.value = 10; })
+    .onChange((e) => { translateY.value = e.translationY; })
+    .onEnd((e) => {
+      const delta = Math.round(e.translationY / QUEUE_ROW_HEIGHT);
+      if (delta !== 0) {
+        runOnJS(onReorder)(absoluteIndex, delta);
+      }
+      translateY.value = withSpring(0);
+      z.value = 0;
+    });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+    zIndex: z.value,
+  }));
+
+  return (
+    <GestureDetector gesture={pan}>
+      <Animated.View style={[styles.queueItem, { borderBottomColor: colors.border }, animatedStyle]}>
+        <Text style={[styles.queueIdx, { color: colors.textMuted }]}>{displayIndex}</Text>
+        <View style={[styles.queueArt, { backgroundColor: colors.goldMuted }]}>
+          <Music2 size={14} color={colors.gold} />
+        </View>
+        <TouchableOpacity style={{ flex: 1, minWidth: 0 }} onPress={onJump}>
+          <Text style={[styles.queueTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>
+          <Text style={[styles.queueArtist, { color: colors.textMuted }]} numberOfLines={1}>{item.artist}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onRemove} hitSlop={HIT_SLOP}>
+          <X size={16} color={colors.textMuted} />
+        </TouchableOpacity>
+      </Animated.View>
+    </GestureDetector>
+  );
+}
 
 type Props = { onCollapse?: () => void };
 
@@ -28,11 +90,12 @@ export default function FullPlayer({ onCollapse }: Props) {
   const cycleRepeat = useQueueStore((s) => s.cycleRepeat);
   const removeFromQueue = useQueueStore((s) => s.removeFromQueue);
   const jumpTo = useQueueStore((s) => s.jumpTo);
+  const reorderQueue = useQueueStore((s) => s.reorderQueue);
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   const [tab, setTab] = useState<"lyrics" | "queue" | "comments">("lyrics");
-  const [liked, setLiked] = useState(false);
+  const liked = useLikedStore((s) => (currentTrack?.id ? s.likedIds.has(currentTrack.id) : false));
   const [lyrics, setLyrics] = useState<string>("");
   const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState("");
@@ -88,12 +151,20 @@ export default function FullPlayer({ onCollapse }: Props) {
   };
 
   const handleLike = async () => {
-    const next = !liked;
-    setLiked(next);
+    if (!currentTrack?.id) return;
+    const songId = currentTrack.id;
+    useLikedStore.getState().toggleLiked(songId);
     try {
-      const token = await getStoredToken();
-      await fetch(`https://www.theugmusic.com/api/trpc/social.likeSong?batch=1`, { method: "POST", headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) }, body: JSON.stringify({ "0": { json: currentTrack.id } }) });
-    } catch {}
+      const result = await trpc.social.likeSong.mutate(songId);
+      if (result && typeof result.liked === "boolean") {
+        const next = new Set(useLikedStore.getState().likedIds);
+        if (result.liked) next.add(songId);
+        else next.delete(songId);
+        useLikedStore.setState({ likedIds: next });
+      }
+    } catch {
+      useLikedStore.getState().toggleLiked(songId);
+    }
   };
 
   const openDownloadModal = () => {
@@ -159,10 +230,20 @@ export default function FullPlayer({ onCollapse }: Props) {
   const upcoming = queue.slice(currentIndex + 1);
   const displayPosition = dragPos ?? position;
 
+  const handleQueueReorder = useCallback(
+    (from: number, delta: number) => {
+      let to = from + delta;
+      to = Math.max(currentIndex + 1, Math.min(queue.length - 1, to));
+      if (to !== from) reorderQueue(from, to);
+    },
+    [currentIndex, queue.length, reorderQueue],
+  );
+
   return (
     <View style={styles.overlay}>
       <View style={[styles.backdrop, { backgroundColor: isDark ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.5)" }]} />
       <Animated.View style={[styles.card, { backgroundColor: colors.bg, paddingTop: insets.top }, cardStyle]}>
+        <FloatingNotes count={22} />
         <TouchableOpacity onPress={handleCollapse} style={styles.dragBar}>
           <View style={[styles.dragPill, { backgroundColor: colors.textDisabled }]} />
         </TouchableOpacity>
@@ -299,19 +380,15 @@ export default function FullPlayer({ onCollapse }: Props) {
               data={upcoming}
               keyExtractor={(item, i) => `${item.id}-${i}`}
               renderItem={({ item, index }) => (
-                <View style={[styles.queueItem, { borderBottomColor: colors.border }]}>
-                  <Text style={[styles.queueIdx, { color: colors.textMuted }]}>{index + 1}</Text>
-                  <View style={[styles.queueArt, { backgroundColor: colors.goldMuted }]}>
-                    <Music2 size={14} color={colors.gold} />
-                  </View>
-                  <TouchableOpacity style={{ flex: 1, minWidth: 0 }} onPress={() => jumpTo(currentIndex + 1 + index)}>
-                    <Text style={[styles.queueTitle, { color: colors.text }]} numberOfLines={1}>{item.title}</Text>
-                    <Text style={[styles.queueArtist, { color: colors.textMuted }]} numberOfLines={1}>{item.artist}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => removeFromQueue(currentIndex + 1 + index)} hitSlop={HIT_SLOP}>
-                    <X size={16} color={colors.textMuted} />
-                  </TouchableOpacity>
-                </View>
+                <QueueRow
+                  item={item}
+                  displayIndex={index + 1}
+                  absoluteIndex={currentIndex + 1 + index}
+                  colors={colors}
+                  onJump={() => jumpTo(currentIndex + 1 + index)}
+                  onRemove={() => removeFromQueue(currentIndex + 1 + index)}
+                  onReorder={handleQueueReorder}
+                />
               )}
               style={{ flex: 1 }}
             />

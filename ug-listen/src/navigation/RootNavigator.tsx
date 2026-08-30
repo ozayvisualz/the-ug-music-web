@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { navigationRef } from "./navigationRef";
 import { View, StyleSheet } from "react-native";
-import { Home, Compass, Library, User } from "lucide-react-native";
+import { Home, Compass, Library, User, Radio } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { useTheme } from "../theme/ThemeContext";
 import HomeScreen from "../screens/HomeScreen";
@@ -37,7 +37,6 @@ function HomeStack() {
       <Stack.Screen name="Playlist" component={PlaylistScreen} />
       <Stack.Screen name="Search" component={SearchScreen} />
       <Stack.Screen name="MadeInUganda" component={MadeInUgandaScreen} />
-      <Stack.Screen name="Radio" component={RadioScreen} />
       <Stack.Screen name="Notifications" component={NotificationsScreen} />
       <Stack.Screen name="CategoryPlaylist" component={CategoryPlaylistScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
@@ -98,6 +97,7 @@ export default function RootNavigator() {
                 case "Home": return <Home {...props} />;
                 case "Discover": return <Compass {...props} />;
                 case "Library": return <Library {...props} />;
+                case "Radio": return <Radio {...props} />;
                 case "Profile": return <User {...props} />;
                 default: return null;
               }
@@ -110,6 +110,7 @@ export default function RootNavigator() {
         >
           <Tab.Screen name="Home" component={HomeStack} />
           <Tab.Screen name="Discover" component={DiscoverStack} />
+          <Tab.Screen name="Radio" component={RadioScreen} />
           <Tab.Screen name="Library" component={LibraryStack} />
           <Tab.Screen name="Profile" component={ProfileStack} />
         </Tab.Navigator>

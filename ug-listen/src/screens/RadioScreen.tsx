@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,40 +9,18 @@ import {
   Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
-import { Play } from "lucide-react-native";
+import { Play, Radio } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { trpc } from "../api/client";
 import { useQueueStore, type Track } from "../store/playerStore";
 import { useTheme } from "../theme/ThemeContext";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const SW = SCREEN_WIDTH;
+const { width: SW } = Dimensions.get("window");
 const H_PAD = 16;
 const GAP = 10;
 const CARD_W = (SW - H_PAD * 2 - GAP * 3) / 4;
 
-const GENRE_STATIONS = [
-  { id: "afrobeats", name: "Afrobeats", emoji: "\uD83C\uDFB5" },
-  { id: "dancehall", name: "Dancehall", emoji: "\uD83D\uDC83" },
-  { id: "gospel", name: "Gospel", emoji: "\uD83D\uDE4F" },
-  { id: "hiphop", name: "Hip Hop", emoji: "\uD83C\uDFA4" },
-  { id: "reggae", name: "Reggae", emoji: "\uD83C\uDF3F" },
-  { id: "amapiano", name: "Amapiano", emoji: "\uD83C\uDFA7" },
-  { id: "lugaflow", name: "Lugaflow", emoji: "\uD83C\uDFA7" },
-  { id: "kadongo-kamu", name: "Kadongo Kamu", emoji: "\uD83C\uDFB8" },
-];
-
-const MOOD_STATIONS = [
-  { id: "morning-vibes", name: "Morning Vibes", emoji: "\uD83C\uDF05" },
-  { id: "road-trip", name: "Road Trip", emoji: "\uD83D\uDE97" },
-  { id: "workout", name: "Workout", emoji: "\uD83D\uDCAA" },
-  { id: "chill", name: "Chill", emoji: "\uD83D\uDE0C" },
-  { id: "party", name: "Party", emoji: "\uD83C\uDF89" },
-  { id: "love-songs", name: "Love Songs", emoji: "\uD83D\uDC95" },
-  { id: "study", name: "Study", emoji: "\uD83D\uDCDA" },
-  { id: "late-night", name: "Late Night", emoji: "\uD83C\uDF19" },
-];
+type Station = { id: string; name: string; icon?: string };
 
 type QueueSong = {
   id: string;
@@ -62,45 +40,56 @@ function formatDuration(d: number): string {
 }
 
 export default function RadioScreen() {
-  const navigation = useNavigation<any>();
-  const setQueue = useQueueStore((s) => s.setQueue);
   const { colors } = useTheme();
+  const setQueue = useQueueStore((s) => s.setQueue);
+  const setRadioContext = useQueueStore((s) => s.setRadioContext);
+
+  const [genres, setGenres] = useState<Station[]>([]);
+  const [moods, setMoods] = useState<Station[]>([]);
+  const [activities, setActivities] = useState<Station[]>([]);
+  const [loadingStations, setLoadingStations] = useState(true);
 
   const [generatedQueue, setGeneratedQueue] = useState<QueueSong[]>([]);
   const [queueTitle, setQueueTitle] = useState("");
   const [loading, setLoading] = useState(false);
+  const [radioCtx, setRadioCtx] = useState<{ type: "genre" | "mood" | "activity"; stationId: string; title: string } | null>(null);
 
-  const handleGenrePress = useCallback(async (stationId: string, name: string) => {
-    setLoading(true);
-    setQueueTitle(name);
-    try {
-      const data = await trpc.radio.generateQueue.mutate({
-        stationId,
-        queueSize: 15,
-      });
-      setGeneratedQueue(data as QueueSong[]);
-    } catch {
-      setGeneratedQueue([]);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    (async () => {
+      try {
+        const [g, m, a] = await Promise.all([
+          trpc.radio.getStations.query(),
+          trpc.radio.getMoodStations.query(),
+          trpc.radio.getActivityStations.query(),
+        ]);
+        setGenres(Array.isArray(g) ? g : []);
+        setMoods(Array.isArray(m) ? m : []);
+        setActivities(Array.isArray(a) ? a : []);
+      } catch {} finally {
+        setLoadingStations(false);
+      }
+    })();
   }, []);
 
-  const handleMoodPress = useCallback(async (moodId: string, name: string) => {
-    setLoading(true);
-    setQueueTitle(name);
-    try {
-      const data = await trpc.radio.generateMoodQueue.mutate({
-        moodId,
-        queueSize: 15,
-      });
-      setGeneratedQueue(data as QueueSong[]);
-    } catch {
-      setGeneratedQueue([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const handleStationPress = useCallback(
+    async (type: "genre" | "mood" | "activity", id: string, name: string) => {
+      setLoading(true);
+      setQueueTitle(name);
+      setRadioCtx({ type, stationId: id, title: name });
+      try {
+        let data: any = [];
+        if (type === "genre") data = await trpc.radio.getQueue.query({ stationId: id, queueSize: 30 });
+        else if (type === "mood") data = await trpc.radio.getMoodQueue.query({ moodId: id, queueSize: 30 });
+        else data = await trpc.radio.getActivityQueue.query({ activityId: id, queueSize: 30 });
+        setGeneratedQueue(Array.isArray(data) ? data : []);
+      } catch {
+        setGeneratedQueue([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   const handlePlayAll = useCallback(() => {
     if (generatedQueue.length === 0) return;
@@ -113,264 +102,153 @@ export default function RadioScreen() {
       coverUrl: s.coverUrl,
     }));
     setQueue(tracks);
-  }, [generatedQueue, setQueue]);
+    if (radioCtx) {
+      setRadioContext({ stationId: radioCtx.stationId, title: radioCtx.title });
+    }
+  }, [generatedQueue, setQueue, setRadioContext, radioCtx]);
 
-  const renderGenreStation = useCallback(
-    ({ item }: { item: (typeof GENRE_STATIONS)[0] }) => (
-      <TouchableOpacity
-        style={[styles.stationCard, { backgroundColor: colors.surface }]}
-        activeOpacity={0.7}
-        onPress={() => handleGenrePress(item.id, item.name)}
-      >
-        <Text style={styles.stationEmoji}>{item.emoji}</Text>
-        <Text style={[styles.stationName, { color: colors.white }]}>{item.name}</Text>
-      </TouchableOpacity>
-    ),
-    [handleGenrePress],
-  );
-
-  const renderMoodStation = (item: (typeof MOOD_STATIONS)[0]) => (
+  const renderStationCard = (station: Station, onPress: () => void) => (
     <TouchableOpacity
-      key={item.id}
-      style={[styles.moodCard, { backgroundColor: colors.surface }]}
+      key={station.id}
+      style={[styles.stationCard, { backgroundColor: colors.surface }]}
       activeOpacity={0.7}
-      onPress={() => handleMoodPress(item.id, item.name)}
+      onPress={onPress}
     >
-      <Text style={styles.moodEmoji}>{item.emoji}</Text>
-      <Text style={[styles.moodName, { color: colors.white }]}>{item.name}</Text>
+      <Text style={styles.stationEmoji}>{station.icon || "🎵"}</Text>
+      <Text style={[styles.stationName, { color: colors.white }]}>{station.name}</Text>
     </TouchableOpacity>
   );
 
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
-      <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: colors.white }]}>Radio</Text>
-        <Text style={styles.headerSub}>
-          Endless music based on your taste
-        </Text>
-      </View>
-
-      <FlatList
-        data={generatedQueue}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.songRow}>
-            <View style={styles.songIdx}>
-              <View style={styles.songBullet} />
-            </View>
-            <View style={styles.songInfo}>
-              <Text style={[styles.songTitle, { color: colors.white }]} numberOfLines={1}>
-                {item.title}
-              </Text>
-              <Text style={styles.songSub} numberOfLines={1}>
-                {item.artist}
-              </Text>
-            </View>
-            <Text style={styles.songDur}>{formatDuration(item.duration)}</Text>
+        <View style={styles.header}>
+          <View style={styles.headerIcon}>
+            <Radio size={20} color={COLORS.bg} />
           </View>
-        )}
-        ListHeaderComponent={
-          <View style={styles.listHeader}>
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.white }]}>Genre Stations</Text>
-              <FlatList
-                data={GENRE_STATIONS}
-                keyExtractor={(item) => item.id}
-                renderItem={renderGenreStation}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                snapToInterval={CARD_W + GAP}
-                decelerationRate="fast"
-                contentContainerStyle={styles.stationsList}
-              />
-            </View>
-
-            <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.white }]}>Mood Stations</Text>
-              <View style={styles.moodGrid}>
-                {MOOD_STATIONS.map(renderMoodStation)}
-              </View>
-            </View>
-
-            {loading && (
-              <ActivityIndicator
-                color={COLORS.gold}
-                style={styles.loader}
-              />
-            )}
-
-            {generatedQueue.length > 0 && !loading && (
-              <View style={styles.queueHeader}>
-                <Text style={[styles.queueTitle, { color: colors.white }]}>{queueTitle} Queue</Text>
-                <TouchableOpacity
-                  style={styles.playAllBtn}
-                  activeOpacity={0.8}
-                  onPress={handlePlayAll}
-                >
-                  <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
-                  <Text style={styles.playAllText}>Play All</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+          <View style={styles.headerText}>
+            <Text style={[styles.headerTitle, { color: colors.white }]}>Radio</Text>
+            <Text style={styles.headerSub}>Genre, mood & activity stations</Text>
           </View>
-        }
-        showsVerticalScrollIndicator={false}
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-      />
+        </View>
+
+        <FlatList
+          data={generatedQueue}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.songRow}>
+              <View style={styles.songIdx}>
+                <View style={styles.songBullet} />
+              </View>
+              <View style={styles.songInfo}>
+                <Text style={[styles.songTitle, { color: colors.white }]} numberOfLines={1}>
+                  {item.title}
+                </Text>
+                <Text style={styles.songSub} numberOfLines={1}>
+                  {item.artist}
+                </Text>
+              </View>
+              <Text style={styles.songDur}>{formatDuration(item.duration)}</Text>
+            </View>
+          )}
+          ListHeaderComponent={
+            <View style={styles.listHeader}>
+              {loadingStations ? (
+                <ActivityIndicator color={COLORS.gold} style={styles.loader} />
+              ) : (
+                <>
+                  <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: colors.white }]}>Genre Stations</Text>
+                    <FlatList
+                      data={genres}
+                      keyExtractor={(s) => s.id}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      snapToInterval={CARD_W + GAP}
+                      decelerationRate="fast"
+                      contentContainerStyle={styles.stationsList}
+                      renderItem={({ item }) => renderStationCard(item, () => handleStationPress("genre", item.id, item.name))}
+                    />
+                  </View>
+
+                  <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: colors.white }]}>Mood Stations</Text>
+                    <FlatList
+                      data={moods}
+                      keyExtractor={(s) => s.id}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      snapToInterval={CARD_W + GAP}
+                      decelerationRate="fast"
+                      contentContainerStyle={styles.stationsList}
+                      renderItem={({ item }) => renderStationCard(item, () => handleStationPress("mood", item.id, item.name))}
+                    />
+                  </View>
+
+                  <View style={styles.section}>
+                    <Text style={[styles.sectionTitle, { color: colors.white }]}>Activity Stations</Text>
+                    <FlatList
+                      data={activities}
+                      keyExtractor={(s) => s.id}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      snapToInterval={CARD_W + GAP}
+                      decelerationRate="fast"
+                      contentContainerStyle={styles.stationsList}
+                      renderItem={({ item }) => renderStationCard(item, () => handleStationPress("activity", item.id, item.name))}
+                    />
+                  </View>
+
+                  {loading && <ActivityIndicator color={COLORS.gold} style={styles.loader} />}
+
+                  {generatedQueue.length > 0 && !loading && (
+                    <View style={styles.queueHeader}>
+                      <Text style={[styles.queueTitle, { color: colors.white }]}>{queueTitle} Queue</Text>
+                      <TouchableOpacity style={styles.playAllBtn} activeOpacity={0.8} onPress={handlePlayAll}>
+                        <Play size={14} color={COLORS.bg} fill={COLORS.bg} />
+                        <Text style={styles.playAllText}>Play All</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </>
+              )}
+            </View>
+          }
+          showsVerticalScrollIndicator={false}
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+        />
       </SafeAreaView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
-  header: {
-    paddingHorizontal: Math.min(SW * 0.04, 16),
-    paddingTop: 10,
-    paddingBottom: 6,
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: COLORS.white,
-    marginBottom: 3,
-  },
-  headerSub: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingBottom: 70,
-  },
-  listHeader: {
-    paddingHorizontal: Math.min(SW * 0.04, 16),
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: COLORS.white,
-    marginBottom: 10,
-  },
-  stationsList: {
-    paddingHorizontal: H_PAD,
-    gap: GAP,
-  },
-  stationCard: {
-    width: CARD_W,
-    height: CARD_W,
-    backgroundColor: COLORS.surface,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 5,
-  },
-  stationEmoji: {
-    fontSize: 22,
-  },
-  stationName: {
-    color: COLORS.white,
-    fontSize: 10,
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  moodGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: GAP,
-  },
-  moodCard: {
-    width: CARD_W,
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  moodEmoji: {
-    fontSize: 18,
-  },
-  moodName: {
-    color: COLORS.white,
-    fontSize: 12,
-    fontWeight: "600",
-    flexShrink: 1,
-  },
-  loader: {
-    marginVertical: 16,
-  },
-  queueHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-    marginTop: 6,
-  },
-  queueTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: COLORS.white,
-  },
-  playAllBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.gold,
-    borderRadius: 999,
-    paddingVertical: 7,
-    paddingHorizontal: 14,
-    gap: 5,
-  },
-  playAllText: {
-    color: COLORS.bg,
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  songRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  songIdx: {
-    width: 18,
-    alignItems: "center",
-  },
-  songBullet: {
-    width: 5,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: COLORS.gold,
-  },
-  songInfo: {
-    flex: 1,
-    minWidth: 0,
-  },
-  songTitle: {
-    color: COLORS.white,
-    fontSize: 13,
-    fontWeight: "600",
-    flexShrink: 1,
-  },
-  songSub: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-    marginTop: 1,
-    flexShrink: 1,
-  },
-  songDur: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-  },
+  root: { flex: 1, backgroundColor: COLORS.bg },
+  header: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: Math.min(SW * 0.04, 16), paddingTop: 10, paddingBottom: 10 },
+  headerIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: COLORS.gold, alignItems: "center", justifyContent: "center" },
+  headerText: { flex: 1 },
+  headerTitle: { fontSize: 22, fontWeight: "700", color: COLORS.white, marginBottom: 1 },
+  headerSub: { fontSize: 12, color: COLORS.textMuted },
+  scroll: { flex: 1 },
+  scrollContent: { paddingBottom: 70 },
+  listHeader: { paddingHorizontal: Math.min(SW * 0.04, 16) },
+  section: { marginBottom: 20 },
+  sectionTitle: { fontSize: 15, fontWeight: "700", color: COLORS.white, marginBottom: 10 },
+  stationsList: { paddingHorizontal: H_PAD, gap: GAP },
+  stationCard: { width: CARD_W, height: CARD_W, backgroundColor: COLORS.surface, borderRadius: 14, alignItems: "center", justifyContent: "center", gap: 5 },
+  stationEmoji: { fontSize: 22 },
+  stationName: { color: COLORS.white, fontSize: 10, fontWeight: "600", textAlign: "center" },
+  loader: { marginVertical: 16 },
+  queueHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10, marginTop: 6 },
+  queueTitle: { fontSize: 15, fontWeight: "700", color: COLORS.white },
+  playAllBtn: { flexDirection: "row", alignItems: "center", backgroundColor: COLORS.gold, borderRadius: 999, paddingVertical: 7, paddingHorizontal: 14, gap: 5 },
+  playAllText: { color: COLORS.bg, fontSize: 12, fontWeight: "700" },
+  songRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8, paddingHorizontal: 16, gap: 8 },
+  songIdx: { width: 18, alignItems: "center" },
+  songBullet: { width: 5, height: 5, borderRadius: 3, backgroundColor: COLORS.gold },
+  songInfo: { flex: 1, minWidth: 0 },
+  songTitle: { color: COLORS.white, fontSize: 13, fontWeight: "600", flexShrink: 1 },
+  songSub: { color: COLORS.textMuted, fontSize: 11, marginTop: 1, flexShrink: 1 },
+  songDur: { color: COLORS.textMuted, fontSize: 11 },
 });

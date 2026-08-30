@@ -11,6 +11,8 @@ import { getStoredToken, getStoredUser } from "./src/api/auth";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import { PlayerProvider } from "./src/components/PlayerContext";
 import { registerPushToken, setupNotificationListeners } from "./src/lib/notifications";
+import { trpc } from "./src/api/client";
+import { useLikedStore } from "./src/store/likedStore";
 
 function AppContent() {
   const { user, loading, setUser, setLoading } = useAuthStore();
@@ -31,6 +33,18 @@ function AppContent() {
       registerPushToken();
     })();
   }, []);
+
+  useEffect(() => {
+    if (!user || user.id === "guest") {
+      useLikedStore.getState().clearLiked();
+      return;
+    }
+    trpc.social.getLikedIds.query()
+      .then((ids: any) => {
+        if (Array.isArray(ids)) useLikedStore.getState().setLikedIds(ids);
+      })
+      .catch(() => {});
+  }, [user]);
 
   if (loading) {
     return (
