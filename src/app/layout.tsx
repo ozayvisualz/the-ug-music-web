@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import Script from "next/script";
+import MonetagAds from "@/components/MonetagAds";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MobileNav />
           {children}
         </Providers>
-        <Script id="monetag-vignette" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='11686391',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
+        <MonetagAds />
       </body>
     </html>
   );
