@@ -8,6 +8,7 @@ import {
   Alert,
   Dimensions,
   Share,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
@@ -178,9 +179,13 @@ export default function ProfileScreen() {
       >
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {user.name?.charAt(0).toUpperCase()}
-            </Text>
+            {user.image ? (
+              <Image source={{ uri: user.image }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>
+                {user.name?.charAt(0).toUpperCase()}
+              </Text>
+            )}
           </View>
           <Text style={[styles.name, { color: colors.white }]}>{user.name}</Text>
           <Text style={styles.email}>{user.email}</Text>
@@ -327,6 +332,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
+    overflow: "hidden",
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 25,
   },
   avatarText: {
     color: COLORS.bg,

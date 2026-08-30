@@ -6,9 +6,12 @@ const USER_KEY = "auth_user";
 
 export type AuthUser = {
   id: string;
+  userId?: string;
   email: string;
   name: string;
   role: "LISTENER" | "ARTIST" | "ADMIN";
+  image?: string | null;
+  phone?: string | null;
 };
 
 async function apiPost(url: string, body: Record<string, unknown>) {
