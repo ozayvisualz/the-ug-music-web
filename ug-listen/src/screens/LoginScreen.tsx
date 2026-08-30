@@ -230,7 +230,9 @@ export default function LoginScreen() {
               selfieDocument: uploadedSelfie || undefined,
             }),
           });
-        } catch {}
+        } catch (e: any) {
+          Alert.alert("Verification", e?.message || "Documents could not be uploaded. Your account was created, but verification was not submitted.");
+        }
       }
 
       setUser(user);
