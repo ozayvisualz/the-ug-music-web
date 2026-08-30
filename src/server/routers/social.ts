@@ -36,6 +36,15 @@ export const socialRouter = router({
     });
   }),
 
+  getLikedIds: protectedProcedure.query(async ({ ctx }) => {
+    const userId = (ctx.session!.user as any).id;
+    const likes = await ctx.db.like.findMany({
+      where: { userId },
+      select: { songId: true },
+    });
+    return likes.map((l) => l.songId);
+  }),
+
   followArtist: protectedProcedure
     .input(z.string())
     .mutation(async ({ input, ctx }) => {
