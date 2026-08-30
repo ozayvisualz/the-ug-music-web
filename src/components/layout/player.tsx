@@ -3,11 +3,13 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Play, Pause, SkipBack, SkipForward, X, Music2 } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
+import { trpc } from "@/trpc/client";
 
 let globalAudio: HTMLAudioElement | null = null;
 
 export function WebPlayer() {
-  const { currentSong, isPlaying, queue, togglePlay, playNext, playPrevious, setCurrentTime, setDuration, setIsPlaying, setCurrentSong } = usePlayerStore();
+  const { currentSong, isPlaying, queue, togglePlay, playNext, playPrevious, setCurrentTime, setDuration, setIsPlaying, setCurrentSong, radioContext, setRadioContext } = usePlayerStore();
+  const utils = trpc.useUtils();
   const [pos, setPos] = useState(0);
 
   const playTrack = useCallback((song: any) => {
@@ -33,12 +35,29 @@ export function WebPlayer() {
       const idx = state.queue.findIndex((s) => s.id === song.id);
       if (idx >= 0 && idx < state.queue.length - 1) {
         setCurrentSong(state.queue[idx + 1]);
+      } else if (state.radioContext) {
+        // Continuous radio: extend the queue using the same station rules.
+        const ctx = state.radioContext;
+        void (async () => {
+          try {
+            const playedIds = state.queue.map((s) => s.id);
+            const more = await utils.radio.getNextSongs.fetch({ stationId: ctx.stationId, excludeIds: playedIds, count: 15 });
+            if (more && more.length) {
+              usePlayerStore.setState((s) => ({ queue: [...s.queue, ...more] }));
+              setCurrentSong(more[0]);
+            } else {
+              setIsPlaying(false);
+            }
+          } catch {
+            setIsPlaying(false);
+          }
+        })();
       } else {
         setIsPlaying(false);
       }
     };
     audio.onerror = () => { setIsPlaying(false); };
-  }, [setCurrentTime, setDuration, setIsPlaying]);
+  }, [setCurrentTime, setDuration, setIsPlaying, utils]);
 
   useEffect(() => {
     if (!currentSong) return;
@@ -78,7 +97,7 @@ export function WebPlayer() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold truncate">{currentSong.title}</p>
-          <p className="text-xs text-zinc-500 truncate">{currentSong.artist}</p>
+          <p className="text-xs text-zinc-500 truncate">{radioContext ? `${radioContext.title} · ${currentSong.artist}` : currentSong.artist}</p>
           <p className="text-[10px] text-zinc-600">{fmt(currentPos)} / {fmt(dur)}</p>
         </div>
         <div className="flex items-center gap-1">
@@ -87,7 +106,7 @@ export function WebPlayer() {
             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </button>
           <button onClick={playNext} className="p-2 hover:bg-zinc-800 rounded-lg" title="Next"><SkipForward className="w-4 h-4" /></button>
-          <button onClick={() => { globalAudio?.pause(); globalAudio = null; setCurrentSong(null as any); setIsPlaying(false); }} className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-500" title="Close"><X className="w-4 h-4" /></button>
+          <button onClick={() => { globalAudio?.pause(); globalAudio = null; setCurrentSong(null as any); setIsPlaying(false); setRadioContext(null); }} className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-500" title="Close"><X className="w-4 h-4" /></button>
         </div>
       </div>
     </div>

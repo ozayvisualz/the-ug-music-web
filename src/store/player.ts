@@ -10,6 +10,11 @@ interface Song {
   duration: number;
 }
 
+export interface RadioContext {
+  stationId: string;
+  title: string;
+}
+
 interface PlayerState {
   currentSong: Song | null;
   queue: Song[];
@@ -19,6 +24,7 @@ interface PlayerState {
   volume: number;
   isMuted: boolean;
   isPremium: boolean;
+  radioContext: RadioContext | null;
 
   setCurrentSong: (song: Song) => void;
   setQueue: (songs: Song[]) => void;
@@ -32,6 +38,7 @@ interface PlayerState {
   setVolume: (volume: number) => void;
   toggleMute: () => void;
   setIsPremium: (premium: boolean) => void;
+  setRadioContext: (ctx: RadioContext | null) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
@@ -43,6 +50,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   volume: 0.8,
   isMuted: false,
   isPremium: false,
+  radioContext: null,
 
   setCurrentSong: (song) => set({ currentSong: song, isPlaying: true, currentTime: 0 }),
   setQueue: (songs) => set({ queue: songs }),
@@ -70,4 +78,5 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   setVolume: (volume) => set({ volume, isMuted: false }),
   toggleMute: () => set((s) => ({ isMuted: !s.isMuted })),
   setIsPremium: (premium) => set({ isPremium: premium }),
+  setRadioContext: (ctx) => set({ radioContext: ctx }),
 }));

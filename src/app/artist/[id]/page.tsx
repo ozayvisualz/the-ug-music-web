@@ -11,7 +11,7 @@ import { WebPlayer } from "@/components/layout/player";
 export default function ArtistPage() {
   const params = useParams<{ id: string }>();
   const { data: artist, isLoading } = trpc.music.getArtistById.useQuery(params.id);
-  const { setCurrentSong, setQueue } = usePlayerStore();
+  const { setCurrentSong, setQueue, setRadioContext } = usePlayerStore();
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" /></div>;
   if (!artist) return <div className="text-center py-20 text-zinc-500">Artist not found</div>;
@@ -31,6 +31,7 @@ export default function ArtistPage() {
       duration: s.duration,
     }));
     setQueue(queue);
+    setRadioContext(null);
     setCurrentSong(queue[0]);
   };
 

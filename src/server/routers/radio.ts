@@ -11,6 +11,10 @@ export const radioRouter = router({
     return RadioService.getMoodStations();
   }),
 
+  getActivityStations: publicProcedure.query(async () => {
+    return RadioService.getActivityStations();
+  }),
+
   generateQueue: protectedProcedure
     .input(z.object({ stationId: z.string(), queueSize: z.number().min(5).max(50).default(15) }))
     .mutation(async ({ input, ctx }) => {
@@ -25,16 +29,32 @@ export const radioRouter = router({
       return RadioService.generateMoodQueue(input.moodId, userId, input.queueSize);
     }),
 
+  generateActivityQueue: protectedProcedure
+    .input(z.object({ activityId: z.string(), queueSize: z.number().min(5).max(50).default(15) }))
+    .mutation(async ({ input, ctx }) => {
+      const userId = (ctx.session?.user as any)?.id;
+      return RadioService.generateActivityQueue(input.activityId, userId, input.queueSize);
+    }),
+
   getQueue: publicProcedure
     .input(z.object({ stationId: z.string(), queueSize: z.number().default(15) }))
-    .query(async ({ input }) => {
-      return RadioService.generateQueue(input.stationId, undefined, input.queueSize);
+    .query(async ({ input, ctx }) => {
+      const userId = (ctx.session?.user as any)?.id;
+      return RadioService.generateQueue(input.stationId, userId, input.queueSize);
     }),
 
   getMoodQueue: publicProcedure
     .input(z.object({ moodId: z.string(), queueSize: z.number().default(15) }))
-    .query(async ({ input }) => {
-      return RadioService.generateMoodQueue(input.moodId, undefined, input.queueSize);
+    .query(async ({ input, ctx }) => {
+      const userId = (ctx.session?.user as any)?.id;
+      return RadioService.generateMoodQueue(input.moodId, userId, input.queueSize);
+    }),
+
+  getActivityQueue: publicProcedure
+    .input(z.object({ activityId: z.string(), queueSize: z.number().default(15) }))
+    .query(async ({ input, ctx }) => {
+      const userId = (ctx.session?.user as any)?.id;
+      return RadioService.generateActivityQueue(input.activityId, userId, input.queueSize);
     }),
 
   getNextSongs: publicProcedure

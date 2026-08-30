@@ -17,7 +17,7 @@ export default function SongPage() {
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
   const [dlState, setDlState] = useState<"idle" | "downloading" | "downloaded" | "error">("idle");
-  const { setCurrentSong, setQueue, currentSong, isPlaying, togglePlay } = usePlayerStore();
+  const { setCurrentSong, setQueue, setRadioContext, currentSong, isPlaying, togglePlay } = usePlayerStore();
 
   const handlePlay = () => {
     if (!song) return;
@@ -26,6 +26,7 @@ export default function SongPage() {
       togglePlay();
       return;
     }
+    setRadioContext(null);
     const track = {
       id: song.id,
       title: song.title,

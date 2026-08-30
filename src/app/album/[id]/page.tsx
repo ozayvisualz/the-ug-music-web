@@ -11,7 +11,7 @@ import { WebPlayer } from "@/components/layout/player";
 export default function AlbumPage() {
   const params = useParams<{ id: string }>();
   const { data: album, isLoading } = trpc.music.getAlbumById.useQuery(params.id);
-  const { setCurrentSong, setQueue } = usePlayerStore();
+  const { setCurrentSong, setQueue, setRadioContext } = usePlayerStore();
 
   if (isLoading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" /></div>;
   if (!album) return <div className="text-center py-20 text-zinc-500">Album not found</div>;
@@ -30,6 +30,7 @@ export default function AlbumPage() {
       duration: s.duration,
     }));
     setQueue(queue);
+    setRadioContext(null);
     setCurrentSong(queue[0]);
   };
 

@@ -39,7 +39,7 @@ interface SongCardProps {
 }
 
 export function SongCard({ song }: SongCardProps) {
-  const { setCurrentSong, currentSong, isPlaying, togglePlay } = usePlayerStore();
+  const { setCurrentSong, setRadioContext, currentSong, isPlaying, togglePlay } = usePlayerStore();
   const isActive = currentSong?.id === song.id;
 
   const handlePlay = () => {
@@ -47,6 +47,7 @@ export function SongCard({ song }: SongCardProps) {
       togglePlay();
       return;
     }
+    setRadioContext(null);
     setCurrentSong({
       id: song.id,
       title: song.title,
