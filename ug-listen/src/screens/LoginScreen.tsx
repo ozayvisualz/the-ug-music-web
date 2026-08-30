@@ -279,12 +279,13 @@ export default function LoginScreen() {
     }
   };
 
-  const pickIdFile = async () => {
+  const pickFile = async (kind: "photo" | "id" | "selfie") => {
     try {
-      const result = await DocumentPicker.getDocumentAsync({ type: ["image/*", "application/pdf"], copyToCacheDirectory: true });
+      const types = kind === "id" ? ["image/*", "application/pdf"] : ["image/*"];
+      const result = await DocumentPicker.getDocumentAsync({ type: types, copyToCacheDirectory: true });
       if (result.canceled || !result.assets?.length) return;
       const a = result.assets[0];
-      await uploadDoc("id", a.uri, a.name || "id-document", a.mimeType || "application/pdf");
+      await uploadDoc(kind, a.uri, a.name || `${kind}-file`, a.mimeType || (kind === "id" ? "application/pdf" : "image/jpeg"));
     } catch (e: any) {
       Alert.alert("Error", e?.message || "Could not open the file picker.");
     }
@@ -294,6 +295,7 @@ export default function LoginScreen() {
     Alert.alert("Artist Photo", "Choose a source", [
       { text: "Take Photo", onPress: () => takePhoto("photo") },
       { text: "Choose from Library", onPress: () => pickFromLibrary("photo") },
+      { text: "Choose from Files", onPress: () => pickFile("photo") },
       { text: "Cancel", style: "cancel" },
     ]);
   };
@@ -302,6 +304,7 @@ export default function LoginScreen() {
     Alert.alert("Selfie", "Choose a source", [
       { text: "Take Photo", onPress: () => takePhoto("selfie") },
       { text: "Choose from Library", onPress: () => pickFromLibrary("selfie") },
+      { text: "Choose from Files", onPress: () => pickFile("selfie") },
       { text: "Cancel", style: "cancel" },
     ]);
   };
@@ -309,7 +312,7 @@ export default function LoginScreen() {
   const pickId = () => {
     Alert.alert("ID Document", "Choose a source", [
       { text: "Take Photo", onPress: () => takePhoto("id") },
-      { text: "Choose File", onPress: () => pickIdFile() },
+      { text: "Choose from Files", onPress: () => pickFile("id") },
       { text: "Cancel", style: "cancel" },
     ]);
   };
