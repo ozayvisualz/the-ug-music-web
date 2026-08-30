@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import MonetagAds from "@/components/MonetagAds";
+import Script from "next/script";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -28,11 +28,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body className="bg-zinc-950 text-white antialiased font-sans min-h-screen overflow-x-hidden">
+        <Script id="monetag-vignette" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `(function(s){s.dataset.zone='11686391',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))` }} />
         <Providers>
           <MobileNav />
           {children}
         </Providers>
-        <MonetagAds />
       </body>
     </html>
   );
