@@ -8,6 +8,7 @@ import {
   Alert,
   StyleSheet,
   Dimensions,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -109,11 +110,11 @@ export default function PremiumScreen() {
       const res = await fetch(url);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed");
-      Alert.alert(
-        "Payment",
-        `Redirecting to Flutterwave to complete your ${plan.name} subscription (UGX ${plan.price}).`,
-        [{ text: "OK" }],
-      );
+      if (data.checkoutUrl) {
+        await Linking.openURL(data.checkoutUrl);
+      } else {
+        Alert.alert("Payment", `Your ${plan.name} subscription is being processed.`);
+      }
     } catch (e: any) {
       Alert.alert("Error", e.message || "Failed to initiate subscription. Please try again.");
     } finally {
