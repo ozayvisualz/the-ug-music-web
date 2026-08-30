@@ -27,7 +27,7 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, password, role, artistName } = await req.json();
+    const { name, email, password, role, artistName, phone } = await req.json();
     if (!name || !email || !password) return respond({ error: "Name, email and password required" }, 400);
     if (role === "ARTIST" && (!artistName || artistName.trim().length < 2)) return respond({ error: "Artist name is required" }, 400);
 
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
         name,
         email,
         password: hashed,
+        phone: phone?.trim() ? phone.trim() : null,
         role: role === "ARTIST" ? "ARTIST" : "LISTENER",
         userId: generateUserId(role === "ARTIST" ? "ARTIST" : "LISTENER"),
         accountType: role === "ARTIST" ? "artist" : "listener",

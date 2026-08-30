@@ -35,9 +35,10 @@ export async function login(email: string, password: string): Promise<AuthUser> 
   return data.user;
 }
 
-export async function register(name: string, email: string, password: string, role: "LISTENER" | "ARTIST" = "LISTENER", artistName?: string): Promise<AuthUser> {
+export async function register(name: string, email: string, password: string, role: "LISTENER" | "ARTIST" = "LISTENER", artistName?: string, phone?: string): Promise<AuthUser> {
   const body: any = { name, email, password, role };
   if (artistName) body.artistName = artistName;
+  if (phone) body.phone = phone;
   await apiPost("https://www.theugmusic.com/api/auth/register", body);
   return login(email, password);
 }

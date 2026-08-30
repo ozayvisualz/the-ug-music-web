@@ -116,8 +116,10 @@ export default function LoginScreen() {
   const [tab, setTab] = useState<"signin" | "register">("signin");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [accepted, setAccepted] = useState(false);
   const [role, setRole] = useState<"LISTENER" | "ARTIST">("LISTENER");
   const [artistName, setArtistName] = useState("");
   const [legalName, setLegalName] = useState("");
@@ -187,12 +189,13 @@ export default function LoginScreen() {
     if (tab === "register" && (!name.trim() || !email.trim() || !password)) { setError("Please fill all fields"); return; }
     if (tab === "register" && password !== confirmPassword) { setError("Passwords do not match"); return; }
     if (tab === "register" && role === "ARTIST" && !artistName.trim()) { setError("Please enter your artist name"); return; }
+    if (tab === "register" && role === "ARTIST" && !accepted) { setError("You must accept the artist terms"); return; }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     setLoading(true);
     try {
       const user = tab === "signin"
         ? await login(email.trim(), password)
-        : await register(name.trim(), email.trim(), password, role, artistName.trim() || undefined);
+        : await register(name.trim(), email.trim(), password, role, artistName.trim() || undefined, phone.trim() || undefined);
 
       // Submit artist verification info to the admin review queue.
       if (tab === "register" && role === "ARTIST") {
@@ -398,6 +401,9 @@ export default function LoginScreen() {
                       <GlassInput label="Name" value={name} onChangeText={setName} autoCapitalize="words" />
                     )}
                     <GlassInput label="Email" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+                    {isRegister && (
+                      <GlassInput label="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+                    )}
                     <GlassInput label="Password" value={password} onChangeText={setPassword} secureTextEntry />
                     {isRegister && (
                       <GlassInput label="Confirm Password" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
@@ -443,6 +449,13 @@ export default function LoginScreen() {
                         <TouchableOpacity style={styles.uploadBtn} onPress={pickSelfie} activeOpacity={0.7}>
                           {uploadingDoc === "selfie" ? <ActivityIndicator size="small" color={COLORS.gold} /> : <Upload size={16} color={COLORS.gold} />}
                           <Text style={[styles.uploadBtnText, { color: selfieUrl ? COLORS.green : COLORS.text }]}>{selfieUrl ? "Selfie Uploaded ✓" : "Upload Selfie (holding ID)"}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.termsRow} onPress={() => setAccepted((v) => !v)} activeOpacity={0.7}>
+                          <View style={[styles.termsCheckbox, accepted && styles.termsCheckboxActive]}>
+                            {accepted && <Text style={styles.termsCheckboxTick}>✓</Text>}
+                          </View>
+                          <Text style={styles.termsText}>I confirm that all information provided is accurate and I accept the Artist Terms of Service.</Text>
                         </TouchableOpacity>
                       </>
                     )}
@@ -618,6 +631,11 @@ const styles = StyleSheet.create({
   artistGridItem: { flex: 1 },
   uploadBtn: { flexDirection: "row", alignItems: "center", gap: 8, borderWidth: 1, borderColor: "rgba(255,255,255,0.14)", borderRadius: 12, paddingVertical: 12, paddingHorizontal: 14, marginBottom: 12 },
   uploadBtnText: { fontSize: 13, fontWeight: "600", color: COLORS.text, flex: 1 },
+  termsRow: { flexDirection: "row", alignItems: "flex-start", gap: 8, marginBottom: 12 },
+  termsCheckbox: { width: 20, height: 20, borderRadius: 6, borderWidth: 1, borderColor: "rgba(255,255,255,0.3)", alignItems: "center", justifyContent: "center" },
+  termsCheckboxActive: { backgroundColor: COLORS.gold, borderColor: COLORS.gold },
+  termsCheckboxTick: { color: COLORS.bg, fontSize: 12, fontWeight: "700" },
+  termsText: { flex: 1, fontSize: 12, color: COLORS.textMuted, lineHeight: 16 },
 
   btnWrap: { width: "100%", marginTop: 2 },
   submitBtn: {
