@@ -30,6 +30,7 @@ import { useTheme } from "../theme/ThemeContext";
 import { getStoredToken } from "../api/auth";
 import { trpc } from "../api/client";
 import { useQueueStore } from "../store/playerStore";
+import { useLikedStore } from "../store/likedStore";
 import { useNotificationStore } from "../store/notificationStore";
 import { markNotificationOpened } from "../lib/notifications";
 import { navigate } from "../navigation/navigationRef";
@@ -200,7 +201,20 @@ export default function NotificationsScreen() {
 
   const handleLike = (n: NotificationItem) => {
     if (!n.targetId) return;
-    trpc.social.likeSong.mutate(n.targetId).catch(() => {});
+    const songId = n.targetId;
+    useLikedStore.getState().toggleLiked(songId);
+    trpc.social.likeSong.mutate(songId)
+      .then((result: any) => {
+        if (result && typeof result.liked === "boolean") {
+          const next = new Set(useLikedStore.getState().likedIds);
+          if (result.liked) next.add(songId);
+          else next.delete(songId);
+          useLikedStore.setState({ likedIds: next });
+        }
+      })
+      .catch(() => {
+        useLikedStore.getState().toggleLiked(songId);
+      });
   };
 
   const handleShare = (n: NotificationItem) => {

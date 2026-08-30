@@ -40,6 +40,7 @@ import { COLORS, SPACING, RADIUS, SPRING, TIMING, SHADOWS, HIT_SLOP } from "../c
 import { trpc } from "../api/client";
 import { useAuthStore } from "../store/authStore";
 import { useQueueStore } from "../store/playerStore";
+import { useLikedStore } from "../store/likedStore";
 import { useNotificationStore } from "../store/notificationStore";
 import { useTheme } from "../theme/ThemeContext";
 import { getStoredToken } from "../api/auth";
@@ -169,6 +170,7 @@ function SectionHeader({
 function HeroCard({ song, onPlay, onSave }: { song: any; onPlay: (s: any) => void; onSave: (s: any) => void }) {
   const { colors } = useTheme();
   const coverUrl = getCoverUrl(song);
+  const liked = useLikedStore((s) => s.likedIds.has(song.id));
   return (
     <View style={[styles.heroCard, { backgroundColor: colors.surface }]}>
       <View style={styles.heroArtPlaceholder}>
@@ -194,7 +196,7 @@ function HeroCard({ song, onPlay, onSave }: { song: any; onPlay: (s: any) => voi
             <Play size={18} color={COLORS.bg} fill={COLORS.bg} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.heroSaveBtn} onPress={() => onSave(song)} hitSlop={HIT_SLOP}>
-            <Heart size={18} color={COLORS.white} />
+            <Heart size={18} color={liked ? COLORS.red : COLORS.white} fill={liked ? COLORS.red : "none"} />
           </TouchableOpacity>
         </View>
       </View>
@@ -309,6 +311,23 @@ export default function HomeScreen() {
     (song: any) => setQueue([mapTrack(song)]),
     [setQueue],
   );
+
+  const handleLikeSong = useCallback(async (song: any) => {
+    const songId = song?.id;
+    if (!songId) return;
+    useLikedStore.getState().toggleLiked(songId);
+    try {
+      const result = await trpc.social.likeSong.mutate(songId);
+      if (result && typeof result.liked === "boolean") {
+        const next = new Set(useLikedStore.getState().likedIds);
+        if (result.liked) next.add(songId);
+        else next.delete(songId);
+        useLikedStore.setState({ likedIds: next });
+      }
+    } catch {
+      useLikedStore.getState().toggleLiked(songId);
+    }
+  }, []);
 
   const handleContinueResume = useCallback((item: any) => {
     const resumePos = typeof item.position === "number" && item.position > 0 ? item.position : undefined;
@@ -443,7 +462,7 @@ export default function HomeScreen() {
                   <HeroCard
                     song={item}
                     onPlay={handlePlaySong}
-                    onSave={() => {}}
+                    onSave={handleLikeSong}
                   />
                 )}
               />

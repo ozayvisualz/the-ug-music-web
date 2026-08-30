@@ -16,6 +16,8 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { Music2, Play, Send, Heart, MessageCircle } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { useQueueStore } from "../store/playerStore";
+import { useLikedStore } from "../store/likedStore";
+import { trpc } from "../api/client";
 import { useAuthStore } from "../store/authStore";
 import { useTheme } from "../theme/ThemeContext";
 import { getStoredToken } from "../api/auth";
@@ -78,6 +80,7 @@ export default function SongScreen() {
   const setQueue = useQueueStore((s) => s.setQueue);
   const user = useAuthStore((s) => s.user);
   const { colors } = useTheme();
+  const liked = useLikedStore((s) => s.likedIds.has(songId));
 
   const [song, setSong] = useState<Song | null>(null);
   const [songLoading, setSongLoading] = useState(true);
@@ -115,6 +118,22 @@ export default function SongScreen() {
       },
     ]);
   }, [song, setQueue]);
+
+  const handleLike = useCallback(async () => {
+    if (!songId) return;
+    useLikedStore.getState().toggleLiked(songId);
+    try {
+      const result = await trpc.social.likeSong.mutate(songId);
+      if (result && typeof result.liked === "boolean") {
+        const next = new Set(useLikedStore.getState().likedIds);
+        if (result.liked) next.add(songId);
+        else next.delete(songId);
+        useLikedStore.setState({ likedIds: next });
+      }
+    } catch {
+      useLikedStore.getState().toggleLiked(songId);
+    }
+  }, [songId]);
 
   const handleSendComment = useCallback(async () => {
     const content = commentText.trim();
@@ -200,14 +219,24 @@ export default function SongScreen() {
             ) : null}
           </View>
 
-          <TouchableOpacity
-            style={styles.playBtnLarge}
-            activeOpacity={0.8}
-            onPress={handlePlay}
-          >
-            <Play size={16} color={COLORS.bg} fill={COLORS.bg} />
-            <Text style={styles.playBtnText}>Play</Text>
-          </TouchableOpacity>
+          <View style={styles.actionRow}>
+            <TouchableOpacity
+              style={styles.playBtnLarge}
+              activeOpacity={0.8}
+              onPress={handlePlay}
+            >
+              <Play size={16} color={COLORS.bg} fill={COLORS.bg} />
+              <Text style={styles.playBtnText}>Play</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.likeBtn}
+              activeOpacity={0.8}
+              onPress={handleLike}
+            >
+              <Heart size={16} color={liked ? COLORS.red : COLORS.text} fill={liked ? COLORS.red : "none"} />
+              <Text style={[styles.likeBtnText, liked && { color: COLORS.red }]}>{liked ? "Liked" : "Like"}</Text>
+            </TouchableOpacity>
+          </View>
 
           {song.story ? (
             <View style={styles.section}>
@@ -363,17 +392,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 3,
   },
+  actionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    marginBottom: 20,
+  },
   playBtnLarge: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    alignSelf: "center",
     backgroundColor: COLORS.gold,
     borderRadius: 999,
     paddingVertical: 10,
     paddingHorizontal: 28,
-    marginBottom: 20,
     gap: 7,
+  },
+  likeBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999,
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    gap: 6,
+  },
+  likeBtnText: {
+    color: COLORS.text,
+    fontWeight: "700",
+    fontSize: 14,
   },
   playBtnText: {
     color: COLORS.bg,
