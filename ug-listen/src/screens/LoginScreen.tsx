@@ -246,42 +246,72 @@ export default function LoginScreen() {
       if (kind === "photo") setPhotoUrl(url);
       else if (kind === "id") setIdUrl(url);
       else setSelfieUrl(url);
-    } catch {
-      Alert.alert("Upload Failed", "Could not upload the file. Please try again.");
+    } catch (e: any) {
+      Alert.alert("Upload Failed", e?.message || "Could not upload the file. Please try again.");
     } finally {
       setUploadingDoc(null);
     }
   };
 
-  const pickPhoto = async () => {
+  const pickFromLibrary = async (kind: "photo" | "selfie") => {
     try {
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!perm.granted) { Alert.alert("Permission", "Photo library permission is required to upload a photo."); return; }
+      if (!perm.granted) { Alert.alert("Permission", "Photo library access is required."); return; }
       const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8 });
       if (result.canceled || !result.assets?.length) return;
       const a = result.assets[0];
-      await uploadDoc("photo", a.uri, a.fileName || "photo.jpg", a.mimeType || "image/jpeg");
-    } catch {}
+      await uploadDoc(kind, a.uri, a.fileName || `${kind}.jpg`, a.mimeType || "image/jpeg");
+    } catch (e: any) {
+      Alert.alert("Error", e?.message || "Could not open the photo library.");
+    }
   };
 
-  const pickSelfie = async () => {
+  const takePhoto = async (kind: "photo" | "id" | "selfie") => {
     try {
-      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!perm.granted) { Alert.alert("Permission", "Photo library permission is required to upload a selfie."); return; }
-      const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8 });
+      const perm = await ImagePicker.requestCameraPermissionsAsync();
+      if (!perm.granted) { Alert.alert("Permission", "Camera access is required."); return; }
+      const result = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], quality: 0.8 });
       if (result.canceled || !result.assets?.length) return;
       const a = result.assets[0];
-      await uploadDoc("selfie", a.uri, a.fileName || "selfie.jpg", a.mimeType || "image/jpeg");
-    } catch {}
+      await uploadDoc(kind, a.uri, a.fileName || `${kind}.jpg`, a.mimeType || "image/jpeg");
+    } catch (e: any) {
+      Alert.alert("Error", e?.message || "Could not open the camera.");
+    }
   };
 
-  const pickId = async () => {
+  const pickIdFile = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({ type: ["image/*", "application/pdf"], copyToCacheDirectory: true });
       if (result.canceled || !result.assets?.length) return;
       const a = result.assets[0];
       await uploadDoc("id", a.uri, a.name || "id-document", a.mimeType || "application/pdf");
-    } catch {}
+    } catch (e: any) {
+      Alert.alert("Error", e?.message || "Could not open the file picker.");
+    }
+  };
+
+  const pickPhoto = () => {
+    Alert.alert("Artist Photo", "Choose a source", [
+      { text: "Take Photo", onPress: () => takePhoto("photo") },
+      { text: "Choose from Library", onPress: () => pickFromLibrary("photo") },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
+  const pickSelfie = () => {
+    Alert.alert("Selfie", "Choose a source", [
+      { text: "Take Photo", onPress: () => takePhoto("selfie") },
+      { text: "Choose from Library", onPress: () => pickFromLibrary("selfie") },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  };
+
+  const pickId = () => {
+    Alert.alert("ID Document", "Choose a source", [
+      { text: "Take Photo", onPress: () => takePhoto("id") },
+      { text: "Choose File", onPress: () => pickIdFile() },
+      { text: "Cancel", style: "cancel" },
+    ]);
   };
 
   const onPressIn = useCallback(() => { btnScale.value = withSpring(0.97, SPRING.snappy); }, []);
