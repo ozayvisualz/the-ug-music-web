@@ -13,7 +13,7 @@ export function WebPlayer() {
   const playTrack = useCallback((song: any) => {
     if (!song) return;
     if (globalAudio) { globalAudio.pause(); globalAudio = null; }
-    const url = song.hlsUrl || song.fileUrl || "";
+    const url = song.fileUrl || song.hlsUrl || "";
     if (!url) return;
     const audio = new Audio(url);
     audio.volume = usePlayerStore.getState().volume;

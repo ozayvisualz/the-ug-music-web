@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { Download, Send, Loader2 } from "lucide-react";
 import { formatDuration, getArtistName } from "@/lib/utils";
 import { usePlayerStore } from "@/store/player";
+import { WebPlayer } from "@/components/layout/player";
 
 export default function SongPage() {
   const params = useParams<{ id: string }>();
@@ -98,7 +99,7 @@ export default function SongPage() {
   if (!song) return <div className="text-center py-20 text-zinc-500">Song not found</div>;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+    <div className="max-w-3xl mx-auto px-4 pt-8 pb-24 space-y-6">
       <div className="text-center space-y-4">
         <div className="w-48 h-48 mx-auto rounded-2xl bg-yellow-500/10 flex items-center justify-center text-6xl overflow-hidden">
           {(song as any).coverUrl ? <img src={(song as any).coverUrl} alt={song.title} className="w-full h-full object-cover" /> : <span>🎵</span>}
@@ -164,6 +165,7 @@ export default function SongPage() {
           </button>
         </div>
       </section>
+      <WebPlayer />
     </div>
   );
 }
