@@ -96,6 +96,7 @@ function ProfileStack() {
       <Stack.Screen name="ArtistComments" component={ArtistCommentsScreen} />
       <Stack.Screen name="ArtistAlbums" component={ArtistAlbumsScreen} />
       <Stack.Screen name="ArtistWithdrawals" component={ArtistWithdrawalsScreen} />
+      <Stack.Screen name="ArtistNotifications" component={NotificationsScreen} />
       <Stack.Screen name="Support" component={SupportScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>

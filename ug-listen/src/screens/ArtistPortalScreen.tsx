@@ -27,6 +27,7 @@ import {
   MessageCircle,
   Disc3,
   Banknote,
+  Bell,
 } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { useAuthStore } from "../store/authStore";
@@ -228,6 +229,11 @@ export default function ArtistPortalScreen() {
                 <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistComments")}>
                   <View style={styles.menuIcon}><MessageCircle size={18} color={COLORS.gold} /></View>
                   <Text style={[styles.menuLabel, { color: colors.white }]}>Comments</Text>
+                  <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistNotifications")}>
+                  <View style={styles.menuIcon}><Bell size={18} color={COLORS.gold} /></View>
+                  <Text style={[styles.menuLabel, { color: colors.white }]}>Notifications</Text>
                   <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.menuItem, styles.menuItemLast]} onPress={() => navigation.navigate("ArtistProfileEdit")}>
