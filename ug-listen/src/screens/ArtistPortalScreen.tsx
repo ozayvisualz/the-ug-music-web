@@ -23,6 +23,10 @@ import {
   TrendingUp,
   Wallet,
   User,
+  Users,
+  MessageCircle,
+  Disc3,
+  Banknote,
 } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { useAuthStore } from "../store/authStore";
@@ -201,9 +205,29 @@ export default function ArtistPortalScreen() {
                   <Text style={[styles.menuLabel, { color: colors.white }]}>Analytics</Text>
                   <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistAlbums")}>
+                  <View style={styles.menuIcon}><Disc3 size={18} color={COLORS.gold} /></View>
+                  <Text style={[styles.menuLabel, { color: colors.white }]}>Albums</Text>
+                  <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistEarnings")}>
                   <View style={styles.menuIcon}><Wallet size={18} color={COLORS.gold} /></View>
                   <Text style={[styles.menuLabel, { color: colors.white }]}>Earnings</Text>
+                  <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistWithdrawals")}>
+                  <View style={styles.menuIcon}><Banknote size={18} color={COLORS.gold} /></View>
+                  <Text style={[styles.menuLabel, { color: colors.white }]}>Withdrawals</Text>
+                  <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistFollowers")}>
+                  <View style={styles.menuIcon}><Users size={18} color={COLORS.gold} /></View>
+                  <Text style={[styles.menuLabel, { color: colors.white }]}>Followers</Text>
+                  <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistComments")}>
+                  <View style={styles.menuIcon}><MessageCircle size={18} color={COLORS.gold} /></View>
+                  <Text style={[styles.menuLabel, { color: colors.white }]}>Comments</Text>
                   <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.menuItem, styles.menuItemLast]} onPress={() => navigation.navigate("ArtistProfileEdit")}>

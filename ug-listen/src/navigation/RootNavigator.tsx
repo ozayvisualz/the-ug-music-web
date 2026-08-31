@@ -27,6 +27,10 @@ import ArtistUploadScreen from "../screens/ArtistUploadScreen";
 import ArtistAnalyticsScreen from "../screens/ArtistAnalyticsScreen";
 import ArtistEarningsScreen from "../screens/ArtistEarningsScreen";
 import ArtistProfileEditScreen from "../screens/ArtistProfileEditScreen";
+import ArtistFollowersScreen from "../screens/ArtistFollowersScreen";
+import ArtistCommentsScreen from "../screens/ArtistCommentsScreen";
+import ArtistAlbumsScreen from "../screens/ArtistAlbumsScreen";
+import ArtistWithdrawalsScreen from "../screens/ArtistWithdrawalsScreen";
 import MiniPlayer from "../components/MiniPlayer";
 import FullPlayer from "../components/FullPlayer";
 import { useState } from "react";
@@ -88,6 +92,10 @@ function ProfileStack() {
       <Stack.Screen name="ArtistAnalytics" component={ArtistAnalyticsScreen} />
       <Stack.Screen name="ArtistEarnings" component={ArtistEarningsScreen} />
       <Stack.Screen name="ArtistProfileEdit" component={ArtistProfileEditScreen} />
+      <Stack.Screen name="ArtistFollowers" component={ArtistFollowersScreen} />
+      <Stack.Screen name="ArtistComments" component={ArtistCommentsScreen} />
+      <Stack.Screen name="ArtistAlbums" component={ArtistAlbumsScreen} />
+      <Stack.Screen name="ArtistWithdrawals" component={ArtistWithdrawalsScreen} />
       <Stack.Screen name="Support" component={SupportScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
