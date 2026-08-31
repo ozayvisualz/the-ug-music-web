@@ -40,3 +40,35 @@ html {
 .animate-eq {
   animation: eq 0.8s ease-in-out infinite;
 }
+
+@keyframes note-rise {
+  0%   { opacity: 0; transform: translateY(var(--note-rise, 100vh)); }
+  12%  { opacity: var(--note-opacity, 0.15); }
+  80%  { opacity: var(--note-opacity, 0.15); }
+  100% { opacity: 0; transform: translateY(-40px); }
+}
+
+@keyframes note-sway {
+  from { transform: translateX(calc(-1 * var(--note-drift, 16px))) rotate(0deg); }
+  to   { transform: translateX(var(--note-drift, 16px)) rotate(var(--note-rot, 180deg)); }
+}
+
+.note-float {
+  position: absolute;
+  top: 0;
+  color: #EAB308;
+  font-weight: 700;
+  text-shadow: 0 0 8px rgba(234, 179, 8, 0.8);
+  animation: note-rise linear infinite;
+  will-change: transform, opacity;
+}
+
+.note-sway {
+  display: inline-block;
+  animation: note-sway ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note-float { animation: none; opacity: var(--note-opacity, 0.15); transform: translateY(50%); }
+  .note-sway { animation: none; }
+}

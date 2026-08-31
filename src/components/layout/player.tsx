@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Play, Pause, SkipBack, SkipForward, X, Music2 } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
 import { DownloadButton } from "@/components/ui/download-button";
+import FloatingNotes from "@/components/ui/floating-notes";
 import { trpc } from "@/trpc/client";
 
 let globalAudio: HTMLAudioElement | null = null;
@@ -96,7 +97,13 @@ export function WebPlayer() {
   const fmt = (s: number) => { const m = Math.floor(s / 60); const sec = Math.floor(s % 60); return `${m}:${sec.toString().padStart(2, "0")}`; };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0B0B0D] border-t border-zinc-800">
+    <>
+      {isPlaying && (
+        <div aria-hidden className="pointer-events-none fixed bottom-14 left-0 right-0 h-44 z-40 overflow-hidden">
+          <FloatingNotes count={12} rise="180px" />
+        </div>
+      )}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0B0B0D] border-t border-zinc-800">
       <div className="h-1 bg-zinc-800 cursor-pointer group" onClick={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const t = ((e.clientX - rect.left) / rect.width) * dur;
@@ -128,6 +135,7 @@ export function WebPlayer() {
           <button onClick={() => { globalAudio?.pause(); globalAudio = null; setCurrentSong(null as any); setIsPlaying(false); setRadioContext(null); }} className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-500" title="Close"><X className="w-4 h-4" /></button>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

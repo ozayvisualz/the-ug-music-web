@@ -7,6 +7,7 @@ import { trpc } from "@/trpc/client";
 import { Mail, Lock, User, Phone, Loader2, Upload, Eye, EyeOff } from "lucide-react";
 import { uploadToFirebase } from "@/lib/firebase-storage";
 import { LogoMark } from "@/components/ui/logo";
+import FloatingNotes from "@/components/ui/floating-notes";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -86,8 +87,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4 py-8">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen flex items-center justify-center bg-zinc-950 px-4 py-8 overflow-hidden">
+      <FloatingNotes count={34} />
+      <div className="relative w-full max-w-md">
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center mb-4">
             <LogoMark size={64} />
