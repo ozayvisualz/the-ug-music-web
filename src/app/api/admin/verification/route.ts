@@ -1,27 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import jwt from "jsonwebtoken";
+import { getServerUser } from "@/lib/server-auth";
 
-function getAdmin(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  let token: string | null = null;
-  if (authHeader?.startsWith("Bearer ")) token = authHeader.slice(7);
-  if (!token) {
-    const cookie = req.headers.get("cookie") || "";
-    const match = cookie.match(/(?:^|;\s*)auth-token=([^;]*)/);
-    if (match) token = match[1];
-  }
-  if (!token) return null;
-  try { return jwt.verify(token, process.env.AUTH_SECRET || "default-secret") as any; } catch { return null; }
+async function getAdmin(req: NextRequest): Promise<{ id: string; role: string } | null> {
+  return getServerUser(req);
 }
 
 export async function GET(req: NextRequest) {
-  const decoded = getAdmin(req);
+  const decoded = await getAdmin(req);
   let admin: any = decoded;
   if (!admin) {
     const session = await auth();
-    if (session?.user && (session.user as any).role === "ADMIN") admin = session.user;
+    if (session?.user && (session.user as any).role === "ADMIN") {
+      const sUser = session.user as any;
+      const dbUser = await db.user.findUnique({ where: { id: sUser.id }, select: { role: true, accountStatus: true } });
+      admin = dbUser && dbUser.accountStatus === "active" ? { id: sUser.id, role: dbUser.role } : null;
+    }
   }
   if (!admin || admin.role !== "ADMIN") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

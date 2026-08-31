@@ -1,30 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import jwt from "jsonwebtoken";
+import { getServerUser } from "@/lib/server-auth";
 
-function getUserId(req: NextRequest): { id: string; role: string } | null {
-  const authHeader = req.headers.get("authorization");
-  let token: string | null = null;
-  if (authHeader?.startsWith("Bearer ")) token = authHeader.slice(7);
-  if (!token) {
-    const cookie = req.headers.get("cookie") || "";
-    const match = cookie.match(/(?:^|;\s*)auth-token=([^;]*)/);
-    if (match) token = match[1];
-  }
-  if (!token) {
-    token = req.nextUrl.searchParams.get("token");
-  }
-  if (token) {
-    try {
-      return jwt.verify(token, process.env.AUTH_SECRET || "default-secret") as any;
-    } catch {}
-  }
-  return null;
+async function getUserId(req: NextRequest): Promise<{ id: string; role: string } | null> {
+  return getServerUser(req);
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const user = getUserId(req);
+    const user = await getUserId(req);
     if (!user || user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -81,7 +65,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const user = getUserId(req);
+    const user = await getUserId(req);
 
     // Mark all as read
     if (req.nextUrl.searchParams.get("markRead") === "1" && user?.id) {
