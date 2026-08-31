@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { ChevronLeft, Music2, Image as ImageIcon, Upload, Check, Mic2 } from "lucide-react-native";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
+import { Audio } from "expo-av";
 import { COLORS } from "../constants/theme";
 import { useTheme } from "../theme/ThemeContext";
 import { trpc } from "../api/client";
@@ -79,6 +80,18 @@ export default function ArtistUploadScreen() {
 
   const [submitting, setSubmitting] = useState(false);
 
+  async function readDuration(uri: string): Promise<number> {
+    try {
+      const { sound } = await Audio.Sound.createAsync({ uri }, { shouldPlay: false });
+      const status = await sound.getStatusAsync();
+      const d = status && "durationMillis" in status && status.durationMillis ? Math.round(status.durationMillis / 1000) : 0;
+      try { await sound.unloadAsync(); } catch {}
+      return d;
+    } catch {
+      return 0;
+    }
+  }
+
   const toggleMood = (id: string) => {
     setMoods((m) => (m.includes(id) ? m.filter((x) => x !== id) : m.length < 5 ? [...m, id] : m));
   };
@@ -115,11 +128,12 @@ export default function ArtistUploadScreen() {
       if (cover) {
         coverUrl = await uploadFile(cover.uri, cover.name, cover.mimeType);
       }
+      const duration = (await readDuration(audio.uri)) || 180;
       await trpc.artist.uploadSong.mutate({
         title: title.trim(),
         genre: genre || undefined,
         description: description || undefined,
-        duration: 180,
+        duration,
         fileUrl,
         coverUrl: coverUrl || undefined,
         featuredArtistId: featuredArtistId || undefined,
