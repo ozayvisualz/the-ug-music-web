@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Download, Send, Loader2 } from "lucide-react";
-import { formatDuration, getArtistName } from "@/lib/utils";
+import { formatDuration, getArtistName, getDisplayArtist } from "@/lib/utils";
 import { slugify } from "@/lib/seo";
 import { usePlayerStore } from "@/store/player";
 import { WebPlayer } from "@/components/layout/player";
@@ -31,7 +31,7 @@ export default function SongPage() {
     const track = {
       id: song.id,
       title: song.title,
-      artist: getArtistName(song.artist),
+      artist: getDisplayArtist(song),
       coverUrl: song.coverUrl || song.album?.coverUrl || undefined,
       hlsUrl: song.hlsUrl || undefined,
       fileUrl: song.fileUrl || undefined,
@@ -116,7 +116,12 @@ export default function SongPage() {
           {(song as any).coverUrl ? <img src={(song as any).coverUrl} alt={`${song.title} by ${getArtistName(song.artist)} cover artwork`} className="w-full h-full object-cover" /> : <span>🎵</span>}
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold break-words px-2">{song.title}</h1>
-        <Link href={`/artist/${(song as any).artistId}`} className="text-zinc-400 hover:text-yellow-500 transition">{getArtistName(song.artist)}</Link>
+        <div className="text-zinc-400">
+          <Link href={`/artist/${(song as any).artistId}`} className="hover:text-yellow-500 transition">{getArtistName(song.artist)}</Link>
+          {song.featuredArtist && (
+            <span className="text-zinc-500"> feat. <Link href={`/artist/${(song as any).featuredArtistId}`} className="hover:text-yellow-500 transition">{getArtistName(song.featuredArtist)}</Link></span>
+          )}
+        </div>
         <div className="flex items-center justify-center gap-4 text-sm text-zinc-500">
           {(song as any).genre ? (
             <Link href={`/genre/${slugify((song as any).genre)}`} className="hover:text-yellow-500 transition">{(song as any).genre}</Link>

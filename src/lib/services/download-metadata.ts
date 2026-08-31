@@ -30,11 +30,14 @@ export type EnrichableSong = {
   fileUrl?: string | null;
   coverUrl?: string | null;
   artist?: { artistName?: string | null; user?: { name?: string | null } } | null;
+  featuredArtist?: { artistName?: string | null; user?: { name?: string | null } } | null;
   album?: { title?: string | null; releaseDate?: Date | null } | null;
 };
 
 function artistName(song: EnrichableSong): string {
-  return song.artist?.artistName || song.artist?.user?.name || "Unknown Artist";
+  const primary = song.artist?.artistName || song.artist?.user?.name || "Unknown Artist";
+  const featured = song.featuredArtist?.artistName || song.featuredArtist?.user?.name;
+  return featured ? `${primary} feat. ${featured}` : primary;
 }
 
 function releaseYear(song: EnrichableSong): string {

@@ -31,6 +31,7 @@ export async function GET(
       where: { id: songId },
       include: {
         artist: { include: { user: { select: { name: true } } } },
+        featuredArtist: { select: { artistName: true, user: { select: { name: true } } } },
         album: { select: { title: true, releaseDate: true } },
       },
     });

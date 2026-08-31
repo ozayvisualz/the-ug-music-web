@@ -185,6 +185,7 @@ model Artist {
   user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   label          Label?        @relation(fields: [labelId], references: [id])
   songs          Song[]
+  featuredSongs  Song[] @relation("SongFeaturedArtist")
   albums         Album[]
   paymentMethods PaymentMethod[]
   wallet         ArtistWallet?
@@ -229,6 +230,7 @@ model Song {
   artistId    String
   uploadedBy  String?
   albumId     String?
+  featuredArtistId String?
   title       String
   slug        String?  @unique
   genre       String?
@@ -260,6 +262,7 @@ model Song {
 
   artist    Artist    @relation(fields: [artistId], references: [id], onDelete: Cascade)
   album     Album?    @relation(fields: [albumId], references: [id])
+  featuredArtist Artist? @relation("SongFeaturedArtist", fields: [featuredArtistId], references: [id])
   streams   Stream[]
   downloads Download[]
   likes     Like[]

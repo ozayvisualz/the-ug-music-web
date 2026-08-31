@@ -48,6 +48,14 @@ export default function UploadMusicPage() {
     },
   });
 
+  const [featuredArtistId, setFeaturedArtistId] = useState("");
+  const [featuredArtistName, setFeaturedArtistName] = useState("");
+  const [featuredSearch, setFeaturedSearch] = useState("");
+  const featuredQuery = trpc.music.getArtists.useQuery(
+    { search: featuredSearch, limit: 6 },
+    { enabled: featuredSearch.trim().length > 0 }
+  );
+
   const onDropAudio = useCallback((accepted: File[]) => {
     const file = accepted[0];
     setAudioFile(file);
@@ -131,6 +139,7 @@ export default function UploadMusicPage() {
 
       await uploadSongMut.mutateAsync({
         title: form.title,
+        featuredArtistId: featuredArtistId || undefined,
         genre: form.genre || undefined,
         description: form.description || undefined,
         duration,
@@ -208,6 +217,32 @@ export default function UploadMusicPage() {
               <input type="text" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
                 className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500 transition"
                 placeholder="Song title" required />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-zinc-400 mb-1.5">Featured Artist (optional)</label>
+              {featuredArtistName ? (
+                <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5">
+                  <span className="text-white">{featuredArtistName}</span>
+                  <button type="button" onClick={() => { setFeaturedArtistId(""); setFeaturedArtistName(""); }}
+                    className="text-xs text-zinc-500 hover:text-white transition">Remove</button>
+                </div>
+              ) : (
+                <>
+                  <input type="text" value={featuredSearch} onChange={(e) => setFeaturedSearch(e.target.value)}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500 transition"
+                    placeholder="Search for an artist to feature..." />
+                  {featuredQuery.data && featuredQuery.data.length > 0 && (
+                    <div className="mt-1 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                      {featuredQuery.data.map((a: any) => (
+                        <button key={a.id} type="button" onClick={() => { setFeaturedArtistId(a.id); setFeaturedArtistName(a.artistName || a.user?.name || "Artist"); setFeaturedSearch(""); }}
+                          className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-zinc-800 transition">
+                          {a.artistName || a.user?.name || "Artist"}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
             <div>
               <label className="block text-sm text-zinc-400 mb-1.5">Genre</label>

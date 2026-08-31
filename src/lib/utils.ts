@@ -47,6 +47,12 @@ export function getArtistName(artist: any): string {
   return artist.artistName || artist.user?.name || "Unknown Artist";
 }
 
+export function getDisplayArtist(song: any): string {
+  const primary = getArtistName(song?.artist);
+  const featured = song?.featuredArtist ? getArtistName(song.featuredArtist) : null;
+  return featured ? `${primary} feat. ${featured}` : primary;
+}
+
 export const GENRES = [
   "Afrobeat",
   "Dancehall",

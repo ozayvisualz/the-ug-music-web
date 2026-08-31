@@ -29,7 +29,7 @@ export const musicRouter = router({
       const [songs, total] = await Promise.all([
         ctx.db.song.findMany({
           where,
-          include: { artist: { select: { artistName: true, user: { select: { name: true, image: true } } } }, album: { select: { id: true, title: true, coverUrl: true } } },
+          include: { artist: { select: { artistName: true, user: { select: { name: true, image: true } } } }, featuredArtist: { select: { artistName: true, user: { select: { name: true, image: true } } } }, album: { select: { id: true, title: true, coverUrl: true } } },
           orderBy: { createdAt: "desc" },
           take: input.limit,
           skip: input.offset,
@@ -47,6 +47,7 @@ export const musicRouter = router({
         where: { id: input },
         include: {
           artist: { select: { artistName: true, user: { select: { name: true, image: true } } } },
+          featuredArtist: { select: { artistName: true, user: { select: { name: true, image: true } } } },
           album: true,
           comments: {
             include: { user: { select: { id: true, name: true, image: true } } },

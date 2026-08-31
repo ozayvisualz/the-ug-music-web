@@ -15,11 +15,19 @@ export default function ArtistMusicPage() {
   const deleteMut = trpc.artist.deleteSong.useMutation({ onSuccess: () => { toast.success("Song deleted"); utils.artist.getMySongs.invalidate(); }, onError: (e) => toast.error(e.message) });
   const updateMut = trpc.artist.updateSong.useMutation({ onSuccess: () => { toast.success("Song updated"); setEditing(null); utils.artist.getMySongs.invalidate(); }, onError: (e) => toast.error(e.message) });
 
+  const [featuredArtistId, setFeaturedArtistId] = useState<string | null>(null);
+  const [featuredArtistName, setFeaturedArtistName] = useState("");
+  const [featuredSearch, setFeaturedSearch] = useState("");
+  const featuredQuery = trpc.music.getArtists.useQuery({ search: featuredSearch, limit: 6 }, { enabled: featuredSearch.trim().length > 0 });
+
   const filtered = songs?.filter((s: any) => !search || s.title.toLowerCase().includes(search.toLowerCase())) || [];
 
   const startEdit = (song: any) => {
     setEditing(song);
     setEditForm({ title: song.title, genre: song.genre || "", description: song.description || "", price: song.price || 1000 });
+    setFeaturedArtistId(song.featuredArtistId || null);
+    setFeaturedArtistName(song.featuredArtist?.artistName || "");
+    setFeaturedSearch("");
   };
 
   return (
@@ -74,10 +82,29 @@ export default function ArtistMusicPage() {
               <div><label className="block text-xs text-zinc-500 mb-1">Genre</label><select value={editForm.genre} onChange={(e) => setEditForm({ ...editForm, genre: e.target.value })} className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-yellow-500/50"><option value="">Select genre</option>{GENRES.map((g) => <option key={g} value={g}>{g}</option>)}</select></div>
               <div><label className="block text-xs text-zinc-500 mb-1">Description</label><textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={2} className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-yellow-500/50 resize-none" /></div>
               <div><label className="block text-xs text-zinc-500 mb-1">Price (UGX)</label><input type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: parseInt(e.target.value) || 0 })} className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-yellow-500/50" /></div>
+              <div><label className="block text-xs text-zinc-500 mb-1">Featured Artist (optional)</label>
+                {featuredArtistName ? (
+                  <div className="flex items-center justify-between bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5">
+                    <span className="text-sm text-white">{featuredArtistName}</span>
+                    <button type="button" onClick={() => { setFeaturedArtistId(null); setFeaturedArtistName(""); }} className="text-xs text-zinc-500 hover:text-white">Remove</button>
+                  </div>
+                ) : (
+                  <>
+                    <input type="text" value={featuredSearch} onChange={(e) => setFeaturedSearch(e.target.value)} placeholder="Search artist to feature..." className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-yellow-500/50" />
+                    {featuredQuery.data && featuredQuery.data.length > 0 && (
+                      <div className="mt-1 bg-zinc-900 border border-zinc-700 rounded-xl overflow-hidden">
+                        {featuredQuery.data.map((a: any) => (
+                          <button key={a.id} type="button" onClick={() => { setFeaturedArtistId(a.id); setFeaturedArtistName(a.artistName || a.user?.name || "Artist"); setFeaturedSearch(""); }} className="w-full text-left px-4 py-2.5 text-sm text-white hover:bg-zinc-800">{a.artistName || a.user?.name || "Artist"}</button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
             <div className="flex gap-3 mt-4">
               <button onClick={() => setEditing(null)} className="flex-1 py-2.5 rounded-xl border border-zinc-700 text-zinc-400 text-sm hover:bg-zinc-800">Cancel</button>
-              <button onClick={() => updateMut.mutate({ songId: editing.id, ...editForm })} disabled={!editForm.title || updateMut.isPending} className="flex-1 py-2.5 rounded-xl bg-yellow-500 text-black font-bold text-sm hover:bg-yellow-400 disabled:opacity-50">{updateMut.isPending ? "Saving..." : "Save Changes"}</button>
+              <button onClick={() => updateMut.mutate({ songId: editing.id, ...editForm, featuredArtistId })} disabled={!editForm.title || updateMut.isPending} className="flex-1 py-2.5 rounded-xl bg-yellow-500 text-black font-bold text-sm hover:bg-yellow-400 disabled:opacity-50">{updateMut.isPending ? "Saving..." : "Save Changes"}</button>
             </div>
           </div>
         </div>

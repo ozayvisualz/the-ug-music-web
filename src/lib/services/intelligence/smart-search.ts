@@ -154,7 +154,7 @@ export const SmartSearchEngine = {
     const [songs, artists, albums] = await Promise.all([
       db.song.findMany({
         where: { approved: true, published: true },
-        include: { artist: { include: { user: { select: { name: true, image: true } } } } },
+        include: { artist: { include: { user: { select: { name: true, image: true } } } }, featuredArtist: { select: { artistName: true, user: { select: { name: true } } } } },
         orderBy: { playCount: "desc" },
         take: 300,
       }),
@@ -172,8 +172,9 @@ export const SmartSearchEngine = {
     const rankedSongs = songs
       .map((song) => {
         const artistName = song.artist?.artistName || song.artist?.user?.name || "";
+        const featuredName = song.featuredArtist?.artistName || song.featuredArtist?.user?.name || "";
         const titleSim = similarity(core, song.title);
-        const artistSim = similarity(core, artistName);
+        const artistSim = Math.max(similarity(core, artistName), similarity(core, featuredName));
         const genreSim = song.genre ? similarity(core, song.genre) : 0;
         const moodSim = intent.mood ? this._moodSimilarity(intent.mood, song.moods) : 0;
         const activityBoost = intent.activity && song.genre ? (ACTIVITY_TO_GENRES[intent.activity]?.includes(song.genre) ? 0.4 : 0) : 0;
@@ -183,15 +184,15 @@ export const SmartSearchEngine = {
         const relevance = Math.max(titleSim * 3, artistSim * 2.2, genreSim * 1.5, moodSim * 2, activityBoost);
         const score = relevance + personalBoost + popularity + similarity(core, song.genre || "") * 0.5;
 
-        return { song, score, relevance };
+        return { song, score, relevance, displayArtist: featuredName ? `${artistName} feat. ${featuredName}` : artistName };
       })
       .filter((r) => r.relevance > 0.15 || r.score > 1)
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
-      .map(({ song }) => ({
+      .map(({ song, displayArtist }) => ({
         id: song.id,
         title: song.title,
-        artist: song.artist?.artistName || song.artist?.user?.name || "Unknown",
+        artist: displayArtist || "Unknown",
         artistId: song.artistId,
         genre: song.genre,
         coverUrl: song.coverUrl,

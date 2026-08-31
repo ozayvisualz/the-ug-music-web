@@ -24,6 +24,7 @@ export const artistRouter = router({
         hlsUrl: z.string().optional(),
         coverUrl: z.string().optional(),
         albumId: z.string().optional(),
+        featuredArtistId: z.string().optional(),
         price: z.number().min(0).default(1000),
         story: z.string().optional(),
         releaseDate: z.string().optional(),
@@ -45,6 +46,14 @@ export const artistRouter = router({
         throw new Error("Verification required before you can upload music.");
       }
 
+      const featuredArtistId = input.featuredArtistId?.trim() || null;
+      if (featuredArtistId) {
+        if (featuredArtistId === artist.id) throw new Error("Featured artist cannot be the same as the primary artist");
+        const featured = await ctx.db.artist.findUnique({ where: { id: featuredArtistId } });
+        if (!featured) throw new Error("Featured artist not found");
+        if (featured.verificationStatus !== "approved") throw new Error("Featured artist must be a verified artist");
+      }
+
       const signature = generateSignature(input.fileUrl, input.duration);
 
       const duplicate = await ctx.db.song.findUnique({ where: { signature } });
@@ -53,6 +62,7 @@ export const artistRouter = router({
       const song = await ctx.db.song.create({
         data: {
           ...input,
+          featuredArtistId,
           artistId: artist.id,
           uploadedBy: (ctx.session!.user as any).id,
           published: true,
@@ -146,7 +156,7 @@ export const artistRouter = router({
 
     return ctx.db.song.findMany({
       where: { artistId: artist.id },
-      include: { album: { select: { id: true, title: true } }, artist: { select: { artistName: true } } },
+      include: { album: { select: { id: true, title: true } }, artist: { select: { artistName: true } }, featuredArtist: { select: { artistName: true } } },
       orderBy: { createdAt: "desc" },
     });
   }),
@@ -422,6 +432,7 @@ export const artistRouter = router({
         genre: z.string().optional(),
         description: z.string().optional(),
         price: z.number().min(0).optional(),
+        featuredArtistId: z.string().nullable().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
@@ -430,14 +441,25 @@ export const artistRouter = router({
       });
       if (!artist) throw new Error("Artist not found");
 
-      const { songId, ...data } = input;
+      const { songId, featuredArtistId, ...data } = input;
 
       const song = await ctx.db.song.findFirst({
         where: { id: songId, artistId: artist.id },
       });
       if (!song) throw new Error("Song not found");
 
-      return ctx.db.song.update({ where: { id: songId }, data });
+      const updateData: any = { ...data };
+      if (featuredArtistId !== undefined) {
+        if (featuredArtistId !== null) {
+          if (featuredArtistId === artist.id) throw new Error("Featured artist cannot be the same as the primary artist");
+          const featured = await ctx.db.artist.findUnique({ where: { id: featuredArtistId } });
+          if (!featured) throw new Error("Featured artist not found");
+          if (featured.verificationStatus !== "approved") throw new Error("Featured artist must be a verified artist");
+        }
+        updateData.featuredArtistId = featuredArtistId;
+      }
+
+      return ctx.db.song.update({ where: { id: songId }, data: updateData });
     }),
 
   deleteAlbum: artistProcedure

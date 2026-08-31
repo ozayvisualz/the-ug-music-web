@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Play, Download, MoreVertical } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
-import { formatDuration, formatUGX, getArtistName } from "@/lib/utils";
+import { formatDuration, formatUGX, getDisplayArtist } from "@/lib/utils";
 
 function Equalizer({ color = "#EAB308" }: { color?: string }) {
   return (
@@ -27,7 +27,8 @@ interface SongCardProps {
   song: {
     id: string;
     title: string;
-    artist: { user: { name: string | null; image: string | null } };
+    artist: { artistName?: string | null; user: { name: string | null; image: string | null } };
+    featuredArtist?: { artistName?: string | null; user?: { name: string | null } } | null;
     album?: { id: string; title: string; coverUrl: string | null } | null;
     coverUrl?: string | null;
     hlsUrl?: string | null;
@@ -51,7 +52,7 @@ export function SongCard({ song }: SongCardProps) {
     setCurrentSong({
       id: song.id,
       title: song.title,
-      artist: getArtistName(song.artist),
+      artist: getDisplayArtist(song),
       coverUrl: song.coverUrl || song.album?.coverUrl || undefined,
       hlsUrl: song.hlsUrl || undefined,
       fileUrl: song.fileUrl || undefined,
@@ -63,7 +64,7 @@ export function SongCard({ song }: SongCardProps) {
     <div className="group flex items-center gap-3 p-2 rounded-lg transition cursor-pointer hover:bg-zinc-800/50 border border-transparent">
       <div className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-zinc-800">
         {song.coverUrl || song.album?.coverUrl ? (
-          <img src={song.coverUrl || song.album?.coverUrl || ""} alt={`${song.title} by ${getArtistName(song.artist)} cover artwork`} loading="lazy" className="w-full h-full object-cover" />
+          <img src={song.coverUrl || song.album?.coverUrl || ""} alt={`${song.title} by ${getDisplayArtist(song)} cover artwork`} loading="lazy" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Play className="w-5 h-5 text-zinc-600" />
@@ -87,7 +88,7 @@ export function SongCard({ song }: SongCardProps) {
         <Link href={`/song/${song.id}`} className="text-sm font-medium hover:text-yellow-500 transition line-clamp-1">
           {song.title}
         </Link>
-        <p className="text-xs text-zinc-500">{getArtistName(song.artist)}</p>
+        <p className="text-xs text-zinc-500">{getDisplayArtist(song)}</p>
         {song.price && song.price > 0 && (
           <span className="inline-flex items-center gap-1 text-xs text-yellow-500 mt-0.5">
             {formatUGX(song.price)}
