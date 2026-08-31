@@ -8,10 +8,15 @@ import { DownloadButton } from "@/components/ui/download-button";
 import { trpc } from "@/trpc/client";
 
 let globalAudio: HTMLAudioElement | null = null;
+let recordedPlayId: string | null = null;
+const PLAY_THRESHOLD_SECONDS = 30;
 
 export function WebPlayer() {
   const { currentSong, isPlaying, queue, togglePlay, playNext, playPrevious, setCurrentTime, setDuration, setIsPlaying, setCurrentSong, radioContext, setRadioContext } = usePlayerStore();
   const utils = trpc.useUtils();
+  const trackStream = trpc.streaming.trackStream.useMutation({ onError: () => {} });
+  const trackStreamRef = useRef(trackStream.mutate);
+  trackStreamRef.current = trackStream.mutate;
   const [pos, setPos] = useState(0);
 
   const playTrack = useCallback((song: any) => {
@@ -23,6 +28,7 @@ export function WebPlayer() {
     audio.volume = usePlayerStore.getState().volume;
     audio.play().catch(() => {});
     globalAudio = audio;
+    recordedPlayId = null;
     setDuration(song.duration || 0);
     setCurrentTime(0);
     setIsPlaying(true);
@@ -30,6 +36,11 @@ export function WebPlayer() {
     audio.ontimeupdate = () => {
       setCurrentTime(audio.currentTime);
       setPos(audio.currentTime);
+      // Record a qualifying play once per song session (never on click alone).
+      if (recordedPlayId !== song.id && audio.currentTime >= PLAY_THRESHOLD_SECONDS) {
+        recordedPlayId = song.id;
+        trackStreamRef.current({ songId: song.id, durationListened: Math.floor(audio.currentTime) });
+      }
     };
     audio.onloadedmetadata = () => { setDuration(audio.duration || song.duration || 0); };
     audio.onended = () => {

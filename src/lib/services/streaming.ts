@@ -90,22 +90,24 @@ export const StreamingEngine = {
       },
     });
 
-    // 6. Update play count on EVERY playback start (play count vs stream count are separate)
-    await db.song.update({
-      where: { id: songId },
-      data: { playCount: { increment: 1 } },
-    });
-
-    // Update album play count if song belongs to an album
-    if (song.albumId) {
-      await db.album.update({
-        where: { id: song.albumId },
-        data: { playCount: { increment: 1 } },
-      }).catch(() => {});
-    }
-
-    // 7. Update artist total streams only for revenue-eligible streams
+    // 6. A play is only counted once the listener has met the minimum listen
+    //    threshold (revenueEligible). This prevents inflating play counts from
+    //    accidental clicks, quick skips, or sub-threshold listens.
     if (revenueEligible) {
+      await db.song.update({
+        where: { id: songId },
+        data: { playCount: { increment: 1 } },
+      });
+
+      // Update album play count if song belongs to an album
+      if (song.albumId) {
+        await db.album.update({
+          where: { id: song.albumId },
+          data: { playCount: { increment: 1 } },
+        }).catch(() => {});
+      }
+
+      // 7. Update artist total streams for eligible streams
       await db.artist.update({
         where: { id: song.artistId },
         data: { totalStreams: { increment: 1 } },

@@ -6,7 +6,7 @@ import { trpc } from "../api/client";
 import { getLocalUri } from "../lib/downloads";
 
 const STREAM_THRESHOLD = 30;
-let recordedStreams = new Set<string>();
+let recordedStreamId: string | null = null;
 
 // ---------------------------------------------------------------------------
 // Hidden crossfade preference (infrastructure only — no UI yet).
@@ -41,8 +41,8 @@ export function getCrossfadeDurationMs() {
 }
 
 async function recordStream(songId: string, durationListened: number) {
-  if (recordedStreams.has(songId)) return;
-  recordedStreams.add(songId);
+  if (recordedStreamId === songId) return;
+  recordedStreamId = songId;
   try {
     const token = await getStoredToken();
     const url = `https://www.theugmusic.com/api/mobile/stream?songId=${encodeURIComponent(songId)}&duration=${durationListened}&token=${encodeURIComponent(token || "")}`;
@@ -183,6 +183,7 @@ export function useAudioPlayer() {
     if (!currentTrack || currentTrack.id === currentTrackId.current) return;
     const trackId = currentTrack.id;
     currentTrackId.current = trackId;
+    recordedStreamId = null;
     setError("");
 
     let statusSub: { remove: () => void } | null = null;
