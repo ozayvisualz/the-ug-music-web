@@ -48,8 +48,12 @@ export default function ArtistPage() {
         </ol>
       </nav>
       <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6">
-        <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-yellow-500/10 flex items-center justify-center text-6xl font-bold text-yellow-500 flex-shrink-0 mx-auto sm:mx-0">
-          {name.charAt(0)}
+        <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-yellow-500/10 flex items-center justify-center text-6xl font-bold text-yellow-500 flex-shrink-0 mx-auto sm:mx-0 overflow-hidden">
+          {artist.photoUrl ? (
+            <img src={artist.photoUrl} alt={`${name} profile photo`} className="w-full h-full object-cover" />
+          ) : (
+            name.charAt(0)
+          )}
         </div>
         <div className="min-w-0 text-center sm:text-left">
           <div className="flex items-center gap-2 justify-center sm:justify-start">

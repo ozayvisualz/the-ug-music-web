@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Dimensions,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -41,6 +42,7 @@ type Artist = {
   id: string;
   name?: string;
   artistName?: string;
+  photoUrl?: string | null;
   verified: boolean;
   genre?: string;
   location?: string;
@@ -138,9 +140,13 @@ export default function ArtistScreen() {
       >
         <View style={[styles.headerArea, { backgroundColor: colors.surface }]}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
-              {artist.name?.charAt(0).toUpperCase()}
-            </Text>
+            {artist.photoUrl ? (
+              <Image source={{ uri: artist.photoUrl }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarText}>
+                {artist.name?.charAt(0).toUpperCase()}
+              </Text>
+            )}
           </View>
 
           <View style={styles.nameRow}>
@@ -292,6 +298,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
+    overflow: "hidden",
+  },
+  avatarImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   avatarText: {
     color: COLORS.bg,
