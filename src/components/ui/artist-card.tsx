@@ -19,7 +19,7 @@ export function ArtistCard({ artist }: ArtistCardProps) {
     >
       <div className="w-24 h-24 rounded-full overflow-hidden bg-zinc-800 mb-3 ring-2 ring-transparent group-hover:ring-yellow-500/50 transition-all">
         {artist.user.image ? (
-          <img src={artist.user.image} alt="" className="w-full h-full object-cover" />
+          <img src={artist.user.image} alt={`${artist.user.name} profile photo`} loading="lazy" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <User className="w-10 h-10 text-zinc-600" />

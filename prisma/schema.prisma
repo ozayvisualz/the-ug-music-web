@@ -153,6 +153,7 @@ model Artist {
   id             String   @id @default(cuid())
   userId         String   @unique
   artistName     String?
+  slug           String?  @unique
   bio            String?
   genre          String?
   location       String?
@@ -229,6 +230,7 @@ model Song {
   uploadedBy  String?
   albumId     String?
   title       String
+  slug        String?  @unique
   genre       String?
   description String?
   duration    Int      @default(0)
@@ -274,6 +276,7 @@ model Album {
   id          String   @id @default(cuid())
   artistId    String
   title       String
+  slug        String?  @unique
   description String?
   coverUrl    String?
   genre       String?

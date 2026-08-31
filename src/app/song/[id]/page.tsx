@@ -103,7 +103,7 @@ export default function SongPage() {
     <div className="max-w-3xl mx-auto px-4 pt-8 pb-24 space-y-6">
       <div className="text-center space-y-4">
         <div className="w-48 h-48 mx-auto rounded-2xl bg-yellow-500/10 flex items-center justify-center text-6xl overflow-hidden">
-          {(song as any).coverUrl ? <img src={(song as any).coverUrl} alt={song.title} className="w-full h-full object-cover" /> : <span>🎵</span>}
+          {(song as any).coverUrl ? <img src={(song as any).coverUrl} alt={`${song.title} by ${getArtistName(song.artist)} cover artwork`} className="w-full h-full object-cover" /> : <span>🎵</span>}
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold break-words px-2">{song.title}</h1>
         <Link href={`/artist/${(song as any).artistId}`} className="text-zinc-400 hover:text-yellow-500 transition">{getArtistName(song.artist)}</Link>

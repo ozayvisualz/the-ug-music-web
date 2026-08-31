@@ -2,6 +2,7 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
+import { ensureSlug } from "@/lib/slugs";
 import {
   albumTitle,
   absoluteUrl,
@@ -16,12 +17,19 @@ type Props = {
   children: React.ReactNode;
 };
 
-const getAlbum = cache(async (id: string) =>
-  db.album.findUnique({
-    where: { id },
-    include: { artist: { include: { user: { select: { name: true } } } } },
-  })
-);
+const getAlbum = cache(async (handle: string) => {
+  const include = { artist: { include: { user: { select: { name: true } } } } };
+  const bySlug = await db.album.findUnique({ where: { slug: handle }, include });
+  if (bySlug) return bySlug;
+  const byId = await db.album.findUnique({ where: { id: handle }, include });
+  if (!byId) return null;
+  if (!byId.slug) {
+    const slug = await ensureSlug("album", byId.id, byId.title);
+    await db.album.update({ where: { id: byId.id }, data: { slug } }).catch(() => {});
+    return { ...byId, slug };
+  }
+  return byId;
+});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -32,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const approved = album.approved && album.published;
   const description = album.description || `${album.title} by ${artistName} — stream on TheUgMusic.`;
   const image = album.coverUrl || DEFAULT_SOCIAL_IMAGE;
-  const url = absoluteUrl(`/album/${album.id}`);
+  const url = absoluteUrl(`/album/${album.slug || album.id}`);
 
   return {
     title: { absolute: albumTitle(album.title, artistName) },
@@ -63,13 +71,14 @@ export default async function AlbumLayout({ children, params }: Props) {
 
   const artistName = album.artist?.artistName || album.artist?.user?.name || "Unknown Artist";
   const approved = album.approved && album.published;
+  const url = absoluteUrl(`/album/${album.slug || album.id}`);
 
   const jsonLd = approved
     ? [
         breadcrumbJsonLd([
           { name: "Home", url: absoluteUrl("/") },
           { name: artistName, url: absoluteUrl(`/artist/${album.artistId}`) },
-          { name: album.title, url: absoluteUrl(`/album/${album.id}`) },
+          { name: album.title, url },
         ]),
         musicAlbumJsonLd({
           id: album.id,

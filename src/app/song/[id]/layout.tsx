@@ -2,6 +2,7 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
+import { ensureSlug } from "@/lib/slugs";
 import {
   songTitle,
   absoluteUrl,
@@ -16,15 +17,22 @@ type Props = {
   children: React.ReactNode;
 };
 
-const getSong = cache(async (id: string) =>
-  db.song.findUnique({
-    where: { id },
-    include: {
-      artist: { include: { user: { select: { name: true } } } },
-      album: { select: { title: true } },
-    },
-  })
-);
+const getSong = cache(async (handle: string) => {
+  const include = {
+    artist: { include: { user: { select: { name: true } } } },
+    album: { select: { title: true } },
+  };
+  const bySlug = await db.song.findUnique({ where: { slug: handle }, include });
+  if (bySlug) return bySlug;
+  const byId = await db.song.findUnique({ where: { id: handle }, include });
+  if (!byId) return null;
+  if (!byId.slug) {
+    const slug = await ensureSlug("song", byId.id, byId.title);
+    await db.song.update({ where: { id: byId.id }, data: { slug } }).catch(() => {});
+    return { ...byId, slug };
+  }
+  return byId;
+});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -35,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const approved = song.approved && song.published;
   const description = song.description || `Listen to ${song.title} by ${artistName} on TheUgMusic.`;
   const image = song.coverUrl || DEFAULT_SOCIAL_IMAGE;
-  const url = absoluteUrl(`/song/${song.id}`);
+  const url = absoluteUrl(`/song/${song.slug || song.id}`);
 
   return {
     title: { absolute: songTitle(song.title, artistName) },
@@ -66,13 +74,14 @@ export default async function SongLayout({ children, params }: Props) {
 
   const artistName = song.artist?.artistName || song.artist?.user?.name || "Unknown Artist";
   const approved = song.approved && song.published;
+  const url = absoluteUrl(`/song/${song.slug || song.id}`);
 
   const jsonLd = approved
     ? [
         breadcrumbJsonLd([
           { name: "Home", url: absoluteUrl("/") },
           { name: artistName, url: absoluteUrl(`/artist/${song.artistId}`) },
-          { name: song.title, url: absoluteUrl(`/song/${song.id}`) },
+          { name: song.title, url },
         ]),
         musicRecordingJsonLd({
           id: song.id,

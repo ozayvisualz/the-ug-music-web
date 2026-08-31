@@ -19,7 +19,7 @@ export function AlbumCard({ album }: AlbumCardProps) {
     >
       <div className="aspect-square rounded-lg overflow-hidden bg-zinc-800 mb-3">
         {album.coverUrl ? (
-          <img src={album.coverUrl} alt={album.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+          <img src={album.coverUrl} alt={`${album.title} cover artwork`} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Disc3 className="w-12 h-12 text-zinc-700" />

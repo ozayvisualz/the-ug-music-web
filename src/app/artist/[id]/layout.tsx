@@ -2,6 +2,7 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
+import { ensureSlug } from "@/lib/slugs";
 import {
   artistTitle,
   absoluteUrl,
@@ -16,12 +17,20 @@ type Props = {
   children: React.ReactNode;
 };
 
-const getArtist = cache(async (id: string) =>
-  db.artist.findUnique({
-    where: { id },
-    include: { user: { select: { name: true, image: true } } },
-  })
-);
+const getArtist = cache(async (handle: string) => {
+  const include = { user: { select: { name: true, image: true } } };
+  const bySlug = await db.artist.findUnique({ where: { slug: handle }, include });
+  if (bySlug) return bySlug;
+  const byId = await db.artist.findUnique({ where: { id: handle }, include });
+  if (!byId) return null;
+  if (!byId.slug) {
+    const name = byId.artistName || byId.user?.name || "Artist";
+    const slug = await ensureSlug("artist", byId.id, name);
+    await db.artist.update({ where: { id: byId.id }, data: { slug } }).catch(() => {});
+    return { ...byId, slug };
+  }
+  return byId;
+});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -34,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     artist.bio ||
     `${name} is a Ugandan artist on TheUgMusic. Stream, download and discover their music.`;
   const image = artist.photoUrl || artist.user?.image || DEFAULT_SOCIAL_IMAGE;
-  const url = absoluteUrl(`/artist/${artist.id}`);
+  const url = absoluteUrl(`/artist/${artist.slug || artist.id}`);
 
   return {
     title: artistTitle(name),
@@ -65,15 +74,16 @@ export default async function ArtistLayout({ children, params }: Props) {
 
   const name = artist.artistName || artist.user?.name || "Artist";
   const approved = artist.verificationStatus === "approved";
+  const url = absoluteUrl(`/artist/${artist.slug || artist.id}`);
 
   const jsonLd = approved
     ? [
         breadcrumbJsonLd([
           { name: "Home", url: absoluteUrl("/") },
           { name: "Artists", url: absoluteUrl("/search") },
-          { name, url: absoluteUrl(`/artist/${artist.id}`) },
+          { name, url },
         ]),
-        musicGroupJsonLd(artist),
+        musicGroupJsonLd({ ...artist, id: artist.id }),
       ]
     : null;
 

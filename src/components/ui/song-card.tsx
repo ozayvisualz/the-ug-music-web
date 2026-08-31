@@ -63,7 +63,7 @@ export function SongCard({ song }: SongCardProps) {
     <div className="group flex items-center gap-3 p-2 rounded-lg transition cursor-pointer hover:bg-zinc-800/50 border border-transparent">
       <div className="relative flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-zinc-800">
         {song.coverUrl || song.album?.coverUrl ? (
-          <img src={song.coverUrl || song.album?.coverUrl || ""} alt={song.title} className="w-full h-full object-cover" />
+          <img src={song.coverUrl || song.album?.coverUrl || ""} alt={`${song.title} by ${getArtistName(song.artist)} cover artwork`} loading="lazy" className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <Play className="w-5 h-5 text-zinc-600" />
