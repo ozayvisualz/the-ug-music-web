@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Play } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
-import { formatDuration, getDisplayArtist } from "@/lib/utils";
+import { formatDuration, getDisplayArtist, artistHref } from "@/lib/utils";
 import { DownloadButton } from "@/components/ui/download-button";
 
 function Equalizer({ color = "#EAB308" }: { color?: string }) {
@@ -92,7 +92,9 @@ export function SongCard({ song }: SongCardProps) {
         <Link href={`/song/${song.id}`} className="text-sm font-medium hover:text-yellow-500 transition line-clamp-1">
           {song.title}
         </Link>
-        <p className="text-xs text-zinc-500">{getDisplayArtist(song)}</p>
+        <Link href={artistHref(song.artist, song.artistId)} className="text-xs text-zinc-500 hover:text-yellow-500 transition block">
+          {getDisplayArtist(song)}
+        </Link>
       </div>
 
       <DownloadButton songId={song.id} title={song.title} artist={getDisplayArtist(song)} coverUrl={song.coverUrl || song.album?.coverUrl || undefined} />
