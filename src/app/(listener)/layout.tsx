@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Music2, Search, Home, Compass } from "lucide-react";
+import { Search, Home, Compass } from "lucide-react";
 import { WebPlayer } from "@/components/layout/player";
 import { AppFooter } from "@/components/layout/footer";
+import { LogoMark } from "@/components/ui/logo";
 
 export default function ListenerLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +13,7 @@ export default function ListenerLayout({ children }: { children: React.ReactNode
         <aside className="hidden lg:flex flex-col w-64 h-full bg-zinc-900/80 border-r border-zinc-800">
           <div className="p-4">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center"><Music2 className="w-5 h-5 text-black" /></div>
+              <LogoMark size={32} />
               <span className="font-bold text-lg">TheUgMusic</span>
             </Link>
           </div>

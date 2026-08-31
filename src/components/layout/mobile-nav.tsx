@@ -9,6 +9,7 @@ import {
   Download, Clock, Shield, Mic2, HelpCircle,
 } from "lucide-react";
 import { useAuth, signOut as authSignOut } from "@/lib/client-auth";
+import { LogoMark } from "@/components/ui/logo";
 
 const navItems = [
   { href: "/", icon: <Home className="w-5 h-5" />, label: "Home" },
@@ -113,7 +114,7 @@ export function MobileNav() {
             <Menu className="w-5 h-5" />
           </button>
           <Link href="/" className="flex items-center gap-2">
-            <Music2 className="w-5 h-5 text-yellow-500" />
+            <LogoMark size={24} />
             <span className="font-bold text-base hidden sm:inline">TheUgMusic</span>
           </Link>
           {/* Desktop nav links */}
@@ -201,7 +202,7 @@ export function MobileNav() {
           <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#0B0B0D] border-r border-zinc-800 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-zinc-800">
               <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
-                <Music2 className="w-5 h-5 text-yellow-500" />
+                <LogoMark size={24} />
                 <span className="font-bold">TheUgMusic</span>
               </Link>
               <button onClick={() => setOpen(false)} className="p-1.5 hover:bg-zinc-800 rounded-lg"><X className="w-5 h-5" /></button>

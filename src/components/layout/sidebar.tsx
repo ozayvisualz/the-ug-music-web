@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth, signOut } from "@/lib/client-auth";
+import { LogoMark } from "@/components/ui/logo";
 
 const navItems = [
   { href: "/", icon: Home, label: "Home" },
@@ -38,9 +39,7 @@ export function Sidebar() {
     <aside className="hidden lg:flex flex-col w-64 h-full bg-zinc-900/80 border-r border-zinc-800 backdrop-blur-sm">
       <div className="p-4">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center">
-            <Music2 className="w-5 h-5 text-black" />
-          </div>
+          <LogoMark size={32} />
           <span className="font-bold text-lg">TheUgMusic</span>
         </Link>
       </div>

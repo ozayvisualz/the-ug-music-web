@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, Music2, Search, User, LogOut } from "lucide-react";
+import { Menu, Search, User, LogOut } from "lucide-react";
 import { useAuth, signOut } from "@/lib/client-auth";
+import { LogoMark } from "@/components/ui/logo";
 
 export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const { user } = useAuth();
@@ -15,7 +16,7 @@ export function Navbar({ onMenuClick }: { onMenuClick?: () => void }) {
           <Menu className="w-5 h-5" />
         </button>
         <Link href="/" className="flex items-center gap-2">
-          <Music2 className="w-5 h-5 text-yellow-500" />
+          <LogoMark size={24} />
           <span className="font-bold">TheUgMusic</span>
         </Link>
       </div>

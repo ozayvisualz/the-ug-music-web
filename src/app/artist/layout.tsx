@@ -5,10 +5,11 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Music2, Upload, Disc3, TrendingUp,
   DollarSign, Banknote, Users, MessageCircle, User,
-  Settings, Headphones, Mic2,   Menu, ChevronLeft, ChevronRight, LogOut, Lock,
+  Settings, Headphones,   Menu, ChevronLeft, ChevronRight, LogOut, Lock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth, signOut } from "@/lib/client-auth";
+import { LogoMark } from "@/components/ui/logo";
 
 const menuItems = [
   { href: "/artist/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -43,7 +44,7 @@ export default function ArtistLayout({ children }: { children: React.ReactNode }
   const sidebar = (
     <aside className={cn("flex flex-col h-full bg-[#0B0B0D] border-r border-zinc-800/60 transition-all duration-300", collapsed ? "w-16" : "w-56")}>
       <div className={cn("flex items-center gap-3 px-4 h-14 border-b border-zinc-800/60", collapsed && "justify-center px-2")}>
-        <div className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center flex-shrink-0"><Mic2 className="w-4 h-4 text-black" /></div>
+        <LogoMark size={32} />
         {!collapsed && <span className="font-bold text-sm text-white">Artist Portal</span>}
       </div>
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">

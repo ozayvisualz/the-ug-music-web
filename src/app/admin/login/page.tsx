@@ -1,8 +1,9 @@
 "use client";
 
-import { Shield, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { LogoMark } from "@/components/ui/logo";
 
 function AdminLoginForm() {
   const searchParams = useSearchParams();
@@ -13,8 +14,8 @@ function AdminLoginForm() {
     <div className="min-h-screen flex items-center justify-center bg-[#0B0B0D] px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-yellow-500/10 mb-4 border border-yellow-500/20">
-            <Shield className="w-7 h-7 text-yellow-500" />
+          <div className="inline-flex items-center justify-center mb-4">
+            <LogoMark size={56} />
           </div>
           <h1 className="text-xl font-bold text-white">Admin Login</h1>
           <p className="text-zinc-500 text-sm mt-1">TheUgMusic Administration</p>

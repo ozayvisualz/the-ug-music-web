@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth, signOut } from "@/lib/client-auth";
 import { AdminAudioPlayer } from "@/components/admin/AudioPlayer";
+import { LogoMark } from "@/components/ui/logo";
 
 interface MenuGroup {
   label: string;
@@ -95,9 +96,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
     >
       <div className={cn("flex items-center gap-3 px-4 h-14 border-b border-zinc-800/60", collapsed && "justify-center px-2")}>
-        <div className="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center flex-shrink-0">
-          <Shield className="w-4 h-4 text-black" />
-        </div>
+        <LogoMark size={32} />
         {!collapsed && <span className="font-bold text-sm text-white">TheUgMusic Admin</span>}
       </div>
 
