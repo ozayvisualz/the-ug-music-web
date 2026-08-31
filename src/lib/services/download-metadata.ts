@@ -4,6 +4,7 @@ import * as path from "path";
 import * as fs from "fs";
 import * as os from "os";
 import { uploadFile, downloadFile, fileExists } from "../minio";
+import { SITE_URL } from "../seo";
 
 const execFileAsync = promisify(execFile);
 
@@ -89,7 +90,7 @@ async function generateEnriched(song: EnrichableSong): Promise<Buffer> {
       ["artist", artist],
       ["album_artist", artist],
       ["publisher", BRAND],
-      ["comment", BRAND],
+      ["comment", `${BRAND} - ${SITE_URL}`],
     ];
     if (song.album?.title) meta.push(["album", song.album.title]);
     if (song.genre) meta.push(["genre", song.genre]);
