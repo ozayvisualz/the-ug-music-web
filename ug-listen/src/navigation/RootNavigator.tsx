@@ -21,6 +21,9 @@ import NotificationsScreen from "../screens/NotificationsScreen";
 import PremiumScreen from "../screens/PremiumScreen";
 import SupportScreen from "../screens/SupportScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import ArtistPortalScreen from "../screens/ArtistPortalScreen";
+import ArtistSongsScreen from "../screens/ArtistSongsScreen";
+import ArtistUploadScreen from "../screens/ArtistUploadScreen";
 import MiniPlayer from "../components/MiniPlayer";
 import FullPlayer from "../components/FullPlayer";
 import { useState } from "react";
@@ -76,6 +79,9 @@ function ProfileStack() {
     <Stack.Navigator screenOptions={{ headerShown: false, animation: "fade_from_bottom", animationDuration: 250 }}>
       <Stack.Screen name="ProfileMain" component={ProfileScreen} />
       <Stack.Screen name="Premium" component={PremiumScreen} />
+      <Stack.Screen name="ArtistPortal" component={ArtistPortalScreen} />
+      <Stack.Screen name="ArtistSongs" component={ArtistSongsScreen} />
+      <Stack.Screen name="ArtistUpload" component={ArtistUploadScreen} />
       <Stack.Screen name="Support" component={SupportScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>

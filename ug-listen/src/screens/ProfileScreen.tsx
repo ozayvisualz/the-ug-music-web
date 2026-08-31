@@ -24,6 +24,7 @@ import {
   HelpCircle,
   LogOut,
   ChevronRight,
+  Mic2,
 } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { logout } from "../api/auth";
@@ -116,6 +117,12 @@ export default function ProfileScreen() {
       label: "Premium Plans",
       color: COLORS.gold,
       onPress: () => navigation.navigate("Premium"),
+    },
+    {
+      icon: <Mic2 size={18} color={COLORS.gold} />,
+      label: "Artist Portal",
+      color: COLORS.gold,
+      onPress: () => navigation.navigate("ArtistPortal"),
     },
     {
       icon: <Clock size={18} color={COLORS.text} />,
