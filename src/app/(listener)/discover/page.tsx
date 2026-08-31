@@ -3,7 +3,7 @@
 import { trpc } from "@/trpc/client";
 import Link from "next/link";
 import { Flame, Sparkles, Search, Radio, Compass, TrendingUp, Mic2, Disc3 } from "lucide-react";
-import { getArtistName } from "@/lib/utils";
+import { getArtistName, artistHref } from "@/lib/utils";
 
 export default function DiscoverPage() {
   const { data: trending } = trpc.music.getTrending.useQuery({ limit: 20 });
@@ -108,7 +108,7 @@ export default function DiscoverPage() {
         <h2 className="text-lg font-bold mb-3 flex items-center gap-2"><Mic2 className="w-5 h-5 text-yellow-500" /> Top Artists</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
           {artists?.slice(0, 12).map((a: any) => (
-            <Link key={a.id} href={`/artist/${a.id}`} className="flex flex-col items-center p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-yellow-500/30 transition">
+            <Link key={a.id} href={artistHref(a)} className="flex flex-col items-center p-4 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-yellow-500/30 transition">
               <div className="w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center text-xl font-bold text-yellow-500 mb-2">
                 {getArtistName(a).charAt(0) || "?"}
               </div>

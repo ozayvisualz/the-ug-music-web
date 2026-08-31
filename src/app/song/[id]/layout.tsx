@@ -87,7 +87,7 @@ export default async function SongLayout({ children, params }: Props) {
           id: song.id,
           title: song.title,
           artistName,
-          artistId: song.artistId,
+          artistId: song.artist?.slug || song.artistId,
           coverUrl: song.coverUrl,
           duration: song.duration,
           albumTitle: song.album?.title,

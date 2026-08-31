@@ -84,7 +84,7 @@ export default async function AlbumLayout({ children, params }: Props) {
           id: album.id,
           title: album.title,
           artistName,
-          artistId: album.artistId,
+          artistId: album.artist?.slug || album.artistId,
           coverUrl: album.coverUrl,
           releaseDate: album.releaseDate,
         }),
