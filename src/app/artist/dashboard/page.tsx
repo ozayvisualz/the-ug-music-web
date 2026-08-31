@@ -66,7 +66,7 @@ export default function ArtistDashboardPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-4">
       <div className="flex items-center justify-between"><div><h1 className="text-2xl font-bold text-white">Artist Dashboard</h1><p className="text-sm text-zinc-500">Welcome back, {user.name}</p></div>
         <div className="flex gap-2">{[7, 30, 90, 365].map(d => (<button key={d} onClick={() => setDays(d)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${days === d ? "bg-yellow-500 text-black" : "bg-[#18181D] text-zinc-400 border border-zinc-800 hover:text-white"}`}>{d}d</button>))}</div></div>
 

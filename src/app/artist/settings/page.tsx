@@ -30,7 +30,7 @@ export default function ArtistSettingsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl">
+    <div className="p-6 space-y-4 max-w-2xl">
       <h1 className="text-2xl font-bold text-white">Settings</h1>
 
       <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-5 flex items-center justify-between">

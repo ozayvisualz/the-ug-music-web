@@ -54,10 +54,10 @@ export default function AdminNotificationsPage() {
   ];
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
+    <div className="p-6 space-y-4 max-w-3xl">
       <div><h1 className="text-2xl font-bold text-white">Notifications</h1><p className="text-sm text-zinc-500 mt-1">Send push notifications to targeted audiences</p></div>
 
-      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-6 space-y-5">
+      <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-6 space-y-4">
         <div>
           <label className="block text-sm text-zinc-400 mb-2">Audience</label>
           <div className="grid grid-cols-2 gap-2">

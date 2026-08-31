@@ -53,7 +53,7 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl">
+    <div className="p-6 space-y-4 max-w-2xl">
       <div><h1 className="text-2xl font-bold text-white">Settings</h1><p className="text-sm text-zinc-500 mt-1">Platform configuration</p></div>
 
       <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-6 space-y-4">

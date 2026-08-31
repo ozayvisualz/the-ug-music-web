@@ -18,7 +18,7 @@ function SearchContent() {
   const trendingSearches = ["Afrobeat", "Dancehall", "Gospel", "Eddy Kenzo", "Sheebah", "Bobi Wine", "Lugaflow"];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
       <h1 className="text-3xl font-bold">Search</h1>
 
       <form className="relative">

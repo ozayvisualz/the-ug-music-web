@@ -12,7 +12,7 @@ export default function AdminFinancePage() {
   const { data: taxRules } = trpc.business.getTaxRules.useQuery();
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-4">
       <div className="flex items-center justify-between"><h1 className="text-2xl font-bold text-white">Finance</h1>
         <div className="flex gap-2">{[7,30,90,365].map(d=>(<button key={d} onClick={()=>setDays(d)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${days===d?"bg-yellow-500 text-black":"bg-[#18181D] text-zinc-400 border border-zinc-800"}`}>{d}d</button>))}</div></div>
 

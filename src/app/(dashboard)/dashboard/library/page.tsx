@@ -12,7 +12,7 @@ export default function LibraryPage() {
   const { data } = trpc.music.getSongs.useQuery({ genre: genre || undefined, search: search || undefined, limit: 50 });
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Music Library</h1>

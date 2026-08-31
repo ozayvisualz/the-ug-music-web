@@ -64,7 +64,7 @@ export default async function GenrePage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto pb-24">
+        <main className="flex-1 overflow-y-auto pb-20">
           <div className="max-w-7xl mx-auto px-4 py-6">
             <h1 className="text-2xl md:text-3xl font-bold">{genre} Music</h1>
             <p className="text-zinc-400 text-sm mt-1">

@@ -26,7 +26,7 @@ export default function ArtistWithdrawalsPage() {
   const alreadyWithdrawn = withdrawalStatus?.alreadyWithdrawn;
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
+    <div className="p-6 space-y-4 max-w-3xl">
       <h1 className="text-2xl font-bold text-white">Withdrawals</h1>
 
       {wallet && (

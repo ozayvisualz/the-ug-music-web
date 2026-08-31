@@ -10,7 +10,7 @@ export default function AdminReportsPage() {
   if (isLoading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-yellow-500" /></div>;
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-4 max-w-4xl">
       <div>
         <h1 className="text-2xl font-bold">Revenue Reports</h1>
         <p className="text-sm text-zinc-400">30-day platform financial overview</p>

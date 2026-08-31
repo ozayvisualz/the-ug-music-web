@@ -12,7 +12,7 @@ export default function TrendingPage() {
   if (isLoading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-yellow-500" /></div>;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 pt-6 pb-24 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 pt-6 pb-20 space-y-4">
       <section>
         <div className="flex items-center gap-2 mb-4">
           <Flame className="w-6 h-6 text-yellow-500" />

@@ -9,7 +9,7 @@ export default function CommentsPage() {
   const comments = (data as any)?.comments ?? (Array.isArray(data) ? data : []);
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
+    <div className="p-6 space-y-4 max-w-3xl">
       <div><h1 className="text-2xl font-bold text-white">Comments</h1><p className="text-sm text-zinc-500 mt-1">Manage comments on your songs.</p></div>
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-5">

@@ -161,14 +161,14 @@ export default function UploadMusicPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-3xl mx-auto px-4 py-6 space-y-4">
       <div>
         <h1 className="text-2xl font-bold">Upload Music</h1>
         <p className="text-sm text-zinc-400">Share your music with the world</p>
       </div>
 
       {step === "form" && (
-        <form onSubmit={(e) => { e.preventDefault(); handlePublish(); }} className="space-y-6">
+        <form onSubmit={(e) => { e.preventDefault(); handlePublish(); }} className="space-y-4">
           <div {...getAudioProps()} className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition ${
             audioFile ? "border-green-500/50 bg-green-500/5" : "border-zinc-700 hover:border-yellow-500/50"
           }`}>
@@ -403,7 +403,7 @@ export default function UploadMusicPage() {
       {step === "uploading" && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#111115] border border-zinc-700/60 rounded-2xl w-full max-w-md shadow-2xl">
-            <div className="p-6 space-y-5">
+            <div className="p-6 space-y-4">
               <div className="text-center">
                 <Loader2 className="w-10 h-10 text-yellow-500 animate-spin mx-auto mb-2" />
                 <h2 className="text-lg font-bold text-white">Uploading Your Song</h2>

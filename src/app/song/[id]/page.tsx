@@ -102,7 +102,7 @@ export default function SongPage() {
   if (!song) return <div className="text-center py-20 text-zinc-500">Song not found</div>;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pt-8 pb-24 space-y-6">
+    <div className="max-w-3xl mx-auto px-4 pt-8 pb-20 space-y-4">
       <nav aria-label="Breadcrumb" className="text-xs text-zinc-500">
         <ol className="flex items-center gap-1.5 flex-wrap">
           <li><Link href="/" className="hover:text-yellow-500">Home</Link></li>

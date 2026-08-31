@@ -27,13 +27,13 @@ export default function SettingsPage() {
   if (!user) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-yellow-500" /></div>;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-8">
+    <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
       <div>
         <h1 className="text-2xl font-bold">Settings</h1>
         <p className="text-sm text-zinc-400">Manage your account</p>
       </div>
 
-      <div className="space-y-6 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+      <div className="space-y-4 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
         <div className="flex items-center justify-between bg-zinc-800/50 rounded-lg p-3">
           <div>
             <p className="text-xs text-zinc-500 uppercase tracking-wider">Listener ID</p>

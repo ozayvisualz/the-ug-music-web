@@ -7,7 +7,7 @@ export default function FollowersPage() {
   const { data, isLoading } = trpc.artist.getMyFollowers.useQuery();
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
+    <div className="p-6 space-y-4 max-w-3xl">
       <div><h1 className="text-2xl font-bold text-white">Followers</h1><p className="text-sm text-zinc-500 mt-1">Track your fan growth and top followers.</p></div>
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-5">

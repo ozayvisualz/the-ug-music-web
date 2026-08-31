@@ -17,7 +17,7 @@ export default function ArtistProfilePage() {
   useEffect(() => { if (me?.artist) { setBio(me.artist.bio || ""); setGenre(me.artist.genre || ""); setLocation(me.artist.location || ""); } }, [me]);
 
   return (
-    <div className="p-6 space-y-6 max-w-2xl">
+    <div className="p-6 space-y-4 max-w-2xl">
       <h1 className="text-2xl font-bold text-white">Profile</h1>
       <div className="flex items-center gap-4 p-6 bg-[#18181D] border border-zinc-800/60 rounded-xl">
         <div className="w-16 h-16 rounded-full bg-yellow-500/10 flex items-center justify-center text-2xl font-bold text-yellow-500">{user?.name?.charAt(0) || "?"}</div>

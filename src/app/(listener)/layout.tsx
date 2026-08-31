@@ -26,7 +26,7 @@ export default function ListenerLayout({ children }: { children: React.ReactNode
             ))}
           </nav>
         </aside>
-        <main className="flex-1 overflow-y-auto pb-24">{children}<AppFooter /></main>
+        <main className="flex-1 overflow-y-auto pb-20">{children}<AppFooter /></main>
       </div>
       <WebPlayer />
     </div>

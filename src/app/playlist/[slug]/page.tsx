@@ -90,7 +90,7 @@ export default async function PlaylistPage({ params }: Props) {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 pt-8 pb-24 space-y-6">
+    <div className="max-w-4xl mx-auto px-4 pt-8 pb-20 space-y-4">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(jsonLd) }} />
       <div>
         <p className="text-xs font-bold text-zinc-500 uppercase">Playlist</p>

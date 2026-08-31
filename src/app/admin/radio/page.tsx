@@ -110,7 +110,7 @@ export default function AdminRadioPage() {
   const live = list.filter((s) => s.active).length;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Radio Stations</h1>

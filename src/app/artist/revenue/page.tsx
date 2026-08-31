@@ -10,7 +10,7 @@ export default function ArtistRevenuePage() {
   const wallet = earnings?.wallet;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-4">
       <h1 className="text-2xl font-bold text-white">Revenue</h1>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         <RevenueCard label="Available Balance" value={formatUGX(wallet?.availableBalance || 0)} icon={<DollarSign className="w-5 h-5 text-yellow-500"/>} />
