@@ -18,6 +18,7 @@ export default function ArtistPage() {
   if (!artist) return <div className="text-center py-20 text-zinc-500">Artist not found</div>;
 
   const songs = artist.songs || [];
+  const featuredSongs = (artist as any).featuredSongs || [];
   const name = getArtistName(artist);
 
   const handlePlay = () => {
@@ -99,6 +100,26 @@ export default function ArtistPage() {
           {songs.length === 0 && <p className="text-zinc-600 text-sm py-8 text-center">No songs yet</p>}
         </div>
       </section>
+
+      {featuredSongs.length > 0 && (
+        <section>
+          <h2 className="text-lg font-bold mb-3">Songs featuring {name}</h2>
+          <div className="space-y-1">
+            {featuredSongs.map((s: any, i: number) => (
+              <Link key={s.id} href={`/song/${s.id}`} className="flex items-center gap-4 p-3 hover:bg-zinc-800/50 rounded-xl transition group">
+                <span className="text-zinc-600 text-sm w-6 text-center">{i + 1}</span>
+                <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-sm">🎵</div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate">{s.title}</p>
+                  <p className="text-xs text-zinc-500">{getArtistName(s.artist)}</p>
+                </div>
+                <span className="text-xs text-zinc-600">{Math.floor((s.duration || 0) / 60)}:{(s.duration || 0) % 60}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       <WebPlayer />
     </div>
   );

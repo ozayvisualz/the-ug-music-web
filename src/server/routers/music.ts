@@ -154,6 +154,11 @@ export const musicRouter = router({
         include: {
           user: { select: { id: true, name: true, image: true, createdAt: true } },
           songs: { where: { approved: true }, orderBy: { createdAt: "desc" } },
+          featuredSongs: {
+            where: { approved: true, published: true },
+            include: { artist: { select: { artistName: true, user: { select: { name: true } } } } },
+            orderBy: { createdAt: "desc" },
+          },
           albums: { where: { approved: true }, include: { songs: { select: { id: true } } } },
         },
       });
