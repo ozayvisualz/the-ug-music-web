@@ -8,6 +8,7 @@ export type Track = {
   duration: number;
   coverUrl?: string;
   artistId?: string;
+  featuredArtistId?: string;
   albumId?: string;
   startPosition?: number;
 };

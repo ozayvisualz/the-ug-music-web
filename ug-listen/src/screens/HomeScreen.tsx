@@ -305,6 +305,7 @@ export default function HomeScreen() {
     duration: s.duration || 0,
     coverUrl: getCoverUrl(s),
     artistId: s.artistId,
+    featuredArtistId: s.featuredArtistId,
     albumId: s.albumId,
     startPosition: typeof s.position === "number" && s.position > 0 ? s.position : undefined,
   });

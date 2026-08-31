@@ -57,6 +57,7 @@ type Song = {
   coverUrl?: string;
   genre?: string;
   artistId?: string;
+  featuredArtistId?: string;
 };
 
 type Artist = {
@@ -127,6 +128,7 @@ export default function SearchScreen() {
           duration: song.duration || 180,
           coverUrl: song.coverUrl,
           artistId: song.artistId,
+          featuredArtistId: song.featuredArtistId,
         },
       ]);
     },

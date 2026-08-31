@@ -23,7 +23,7 @@ import { useTheme } from "../theme/ThemeContext";
 
 const SW = Dimensions.get("window").width;
 
-type Song = { id: string; title: string; artist: string; duration: number; url: string; coverUrl?: string; artistId?: string };
+type Song = { id: string; title: string; artist: string; duration: number; url: string; coverUrl?: string; artistId?: string; featuredArtistId?: string };
 type Playlist = { id: string; name: string; songCount?: number; songs?: Song[] };
 
 const TABS = ["Playlists", "Liked", "Downloads", "History"] as const;
@@ -46,6 +46,7 @@ function toSong(x: any): Song {
     url: s?.fileUrl || s?.hlsUrl || s?.url || "",
     coverUrl: s?.coverUrl,
     artistId: s?.artistId,
+    featuredArtistId: s?.featuredArtistId,
   };
 }
 
@@ -217,7 +218,7 @@ export default function LibraryScreen() {
 
   const handlePlaySong = useCallback(
     (song: Song) => {
-      setQueue([{ id: song.id, title: song.title, artist: song.artist, url: song.url, duration: song.duration, coverUrl: song.coverUrl, artistId: song.artistId }]);
+      setQueue([{ id: song.id, title: song.title, artist: song.artist, url: song.url, duration: song.duration, coverUrl: song.coverUrl, artistId: song.artistId, featuredArtistId: song.featuredArtistId }]);
     },
     [setQueue],
   );
@@ -232,6 +233,7 @@ export default function LibraryScreen() {
         duration: s.duration,
         coverUrl: s.coverUrl,
         artistId: s.artistId,
+        featuredArtistId: s.featuredArtistId,
       }));
       setQueue(tracks);
     },

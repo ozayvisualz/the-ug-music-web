@@ -194,6 +194,7 @@ export const SmartSearchEngine = {
         title: song.title,
         artist: displayArtist || "Unknown",
         artistId: song.artistId,
+        featuredArtistId: song.featuredArtistId,
         genre: song.genre,
         coverUrl: song.coverUrl,
         duration: song.duration,

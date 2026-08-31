@@ -272,9 +272,21 @@ export default function FullPlayer({ onCollapse }: Props) {
             <Heart size={20} color={liked ? colors.red : colors.textMuted} fill={liked ? colors.red : "none"} />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => currentTrack.artistId && navigate("Artist", { artistId: currentTrack.artistId })}>
-          <Text style={[styles.trackArtist, { color: colors.gold }]}>{currentTrack.artist}</Text>
-        </TouchableOpacity>
+        {currentTrack.featuredArtistId ? (
+          <View style={styles.artistRow}>
+            <TouchableOpacity onPress={() => currentTrack.artistId && navigate("Artist", { artistId: currentTrack.artistId })}>
+              <Text style={[styles.trackArtistLink, { color: colors.gold }]}>{currentTrack.artist.split(" feat. ")[0]}</Text>
+            </TouchableOpacity>
+            <Text style={[styles.trackArtistLink, { color: colors.gold }]}> feat. </Text>
+            <TouchableOpacity onPress={() => navigate("Artist", { artistId: currentTrack.featuredArtistId })}>
+              <Text style={[styles.trackArtistLink, { color: colors.gold }]}>{currentTrack.artist.split(" feat. ")[1]}</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity onPress={() => currentTrack.artistId && navigate("Artist", { artistId: currentTrack.artistId })}>
+            <Text style={[styles.trackArtist, { color: colors.gold }]}>{currentTrack.artist}</Text>
+          </TouchableOpacity>
+        )}
 
         {/* Seek Bar - interactive */}
         <View style={styles.seekArea}>
@@ -448,6 +460,8 @@ const styles = StyleSheet.create({
   infoArea: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 4, minWidth: 0 },
   trackTitle: { fontSize: isSmall ? 16 : 20, fontWeight: "700", flexShrink: 1 },
   trackArtist: { fontSize: isSmall ? 13 : 15, textAlign: "center", marginBottom: 16, fontWeight: "600" },
+  artistRow: { flexDirection: "row", justifyContent: "center", alignItems: "center", marginBottom: 16, flexWrap: "wrap" },
+  trackArtistLink: { fontSize: isSmall ? 13 : 15, textAlign: "center", fontWeight: "600" },
   seekArea: { marginBottom: 20, position: "relative" },
   seekBg: { height: 4, borderRadius: 2, marginBottom: 4, position: "relative" },
   seekFill: { height: 4, borderRadius: 2, position: "absolute", left: 0, top: 0 },
