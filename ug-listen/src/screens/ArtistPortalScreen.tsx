@@ -28,6 +28,7 @@ import {
   Disc3,
   Banknote,
   Bell,
+  CreditCard,
 } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { useAuthStore } from "../store/authStore";
@@ -211,14 +212,29 @@ export default function ArtistPortalScreen() {
                   <Text style={[styles.menuLabel, { color: colors.white }]}>Albums</Text>
                   <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistAlbumCreate")}>
+                  <View style={styles.menuIcon}><Plus size={18} color={COLORS.gold} /></View>
+                  <Text style={[styles.menuLabel, { color: colors.white }]}>Create Album</Text>
+                  <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistEarnings")}>
                   <View style={styles.menuIcon}><Wallet size={18} color={COLORS.gold} /></View>
                   <Text style={[styles.menuLabel, { color: colors.white }]}>Earnings</Text>
                   <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
                 </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistRequestPayout")}>
+                  <View style={styles.menuIcon}><Banknote size={18} color={COLORS.gold} /></View>
+                  <Text style={[styles.menuLabel, { color: colors.white }]}>Request Withdrawal</Text>
+                  <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
+                </TouchableOpacity>
                 <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistWithdrawals")}>
                   <View style={styles.menuIcon}><Banknote size={18} color={COLORS.gold} /></View>
                   <Text style={[styles.menuLabel, { color: colors.white }]}>Withdrawals</Text>
+                  <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistPaymentMethods")}>
+                  <View style={styles.menuIcon}><CreditCard size={18} color={COLORS.gold} /></View>
+                  <Text style={[styles.menuLabel, { color: colors.white }]}>Payment Methods</Text>
                   <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistFollowers")}>
