@@ -93,7 +93,7 @@ export default function PlaylistScreen() {
         duration: s.duration,
         coverUrl: s.coverUrl,
       }));
-      setQueue(tracks);
+      setQueue(tracks, index);
     },
     [songs, setQueue],
   );

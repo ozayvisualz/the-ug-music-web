@@ -76,7 +76,7 @@ export default function CategoryPlaylistScreen() {
       id: s.id, title: s.title, artist: getArtistName(s.artist),
       url: s.fileUrl || s.hlsUrl || "", duration: s.duration || 180, coverUrl: s.coverUrl,
     }));
-    setQueue(tracks);
+    setQueue(tracks, index);
   };
 
   const formatDuration = (d: number) => {

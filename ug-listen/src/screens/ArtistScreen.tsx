@@ -106,7 +106,7 @@ export default function ArtistScreen() {
         duration: s.duration,
         coverUrl: s.coverUrl,
       }));
-      setQueue(tracks);
+      setQueue(tracks, index);
     },
     [artist, setQueue],
   );
