@@ -33,12 +33,12 @@ export async function GET(req: NextRequest) {
     const [trending, newReleases, artists] = await Promise.all([
       db.song.findMany({
         where: { approved: true, published: true },
-        include: { artist: { select: { artistName: true, user: { select: { name: true, image: true } } } }, album: { select: { id: true, title: true, coverUrl: true } } },
+        include: { artist: { select: { artistName: true, user: { select: { name: true, image: true } } } }, featuredArtist: { select: { artistName: true, user: { select: { name: true } } } }, album: { select: { id: true, title: true, coverUrl: true } } },
         orderBy: { playCount: "desc" }, take: 10,
       }),
       db.song.findMany({
         where: newReleasesWhere,
-        include: { artist: { select: { artistName: true, user: { select: { name: true, image: true } } } }, album: { select: { id: true, title: true, coverUrl: true } } },
+        include: { artist: { select: { artistName: true, user: { select: { name: true, image: true } } } }, featuredArtist: { select: { artistName: true, user: { select: { name: true } } } }, album: { select: { id: true, title: true, coverUrl: true } } },
         orderBy: { createdAt: "desc" }, take: 10,
       }),
       db.artist.findMany({

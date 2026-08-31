@@ -60,10 +60,9 @@ function getGreeting(): string {
 }
 
 function getArtistName(song: any): string {
-  if (song?.artist?.artistName) return song.artist.artistName;
-  if (song?.artist?.user?.name) return song.artist.user.name;
-  if (typeof song?.artist === "string") return song.artist;
-  return "Unknown";
+  const primary = song?.artist?.artistName || song?.artist?.user?.name || (typeof song?.artist === "string" ? song.artist : "Unknown");
+  const featured = song?.featuredArtist?.artistName || song?.featuredArtist?.user?.name;
+  return featured ? `${primary} feat. ${featured}` : primary;
 }
 
 function getCoverUrl(song: any): string | undefined {
