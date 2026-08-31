@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useAuth, signOut as authSignOut } from "@/lib/client-auth";
 import { LogoMark } from "@/components/ui/logo";
+import { NotificationBell } from "@/components/layout/notification-bell";
 
 const navItems = [
   { href: "/", icon: <Home className="w-5 h-5" />, label: "Home" },
@@ -155,6 +156,8 @@ export function MobileNav() {
           <Link href="/premium" className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-full bg-yellow-500/10 text-yellow-500 text-xs font-semibold hover:bg-yellow-500/20 transition">
             <Crown className="w-3.5 h-3.5" />Premium
           </Link>
+
+          <NotificationBell />
 
           {user ? (
             <div className="relative">
