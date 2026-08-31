@@ -382,7 +382,7 @@ export default function HomeScreen() {
   const onHeroTouchStart = () => (heroAutoAdvance.current = false);
   const onHeroTouchEnd = () => (heroAutoAdvance.current = true);
 
-  const displayName = user?.role === "ARTIST" && user.artist?.artistName ? user.artist.artistName : user?.name;
+  const displayName = user?.name;
   const avatarLetter = displayName?.charAt(0)?.toUpperCase() ?? "L";
 
   return (

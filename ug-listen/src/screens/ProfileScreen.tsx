@@ -47,7 +47,7 @@ export default function ProfileScreen() {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const { colors } = useTheme();
-  const displayName = user?.role === "ARTIST" && user.artist?.artistName ? user.artist.artistName : user?.name ?? "";
+  const displayName = user?.name ?? "";
 
   const likedCount = useLikedStore((s) => s.likedIds.size);
   const downloadCount = useDownloadStore((s) => Object.keys(s.downloaded).length);
