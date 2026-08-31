@@ -7,7 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import ErrorBoundary from "./src/components/ErrorBoundary";
-import { getStoredToken, getStoredUser } from "./src/api/auth";
+import { getStoredToken, getStoredUser, refreshUser } from "./src/api/auth";
 import { ThemeProvider, useTheme } from "./src/theme/ThemeContext";
 import { PlayerProvider } from "./src/components/PlayerContext";
 import { registerPushToken, setupNotificationListeners } from "./src/lib/notifications";
@@ -25,6 +25,9 @@ function AppContent() {
         if (token) {
           const stored = await getStoredUser();
           if (stored) { setUser(stored); }
+          // Refresh role/artist from the server (e.g. after an admin changes role).
+          const fresh = await refreshUser();
+          if (fresh) setUser(fresh);
         }
       } catch {}
       setLoading(false);

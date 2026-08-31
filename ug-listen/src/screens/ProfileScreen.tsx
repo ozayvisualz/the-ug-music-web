@@ -27,7 +27,7 @@ import {
   Mic2,
 } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
-import { logout } from "../api/auth";
+import { logout, refreshUser } from "../api/auth";
 import { useAuthStore } from "../store/authStore";
 import { useTheme } from "../theme/ThemeContext";
 import { trpc } from "../api/client";
@@ -66,6 +66,15 @@ export default function ProfileScreen() {
         .then((data: any[]) => setPlaylistCount(Array.isArray(data) ? data.length : 0))
         .catch(() => {});
     }, [user])
+  );
+
+  // Refresh the user's role/artist state from the server so admin role changes reflect immediately.
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      refreshUser().then((fresh) => { if (active && fresh) setUser(fresh); }).catch(() => {});
+      return () => { active = false; };
+    }, [setUser])
   );
 
   const handleLogout = useCallback(() => {

@@ -52,7 +52,7 @@ export default function ArtistPortalScreen() {
 
   const loadStatus = useCallback(async () => {
     if (!user) { setStatus("listener"); return; }
-    const isArtist = user.role === "ARTIST" || !!user.artist;
+    const isArtist = user.role === "ARTIST";
     if (!isArtist) { setStatus("listener"); return; }
     try {
       const token = await getStoredToken();
