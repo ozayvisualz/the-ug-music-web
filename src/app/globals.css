@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  --spacing: 0.22rem;
   --color-yellow-500: #eab308;
   --color-yellow-400: #facc15;
   --color-zinc-950: #09090b;
