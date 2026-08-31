@@ -79,7 +79,7 @@ export const DownloadEngine = {
       hlsUrl: song.hlsUrl,
       duration: song.duration,
       coverUrl: song.coverUrl,
-      fileName: `${artistName} - ${song.title}.mp3`.replace(/[\\/:*?"<>|]/g, ""),
+      fileName: `${song.title} - ${artistName}.mp3`.replace(/[\\/:*?"<>|]/g, ""),
     };
   },
 

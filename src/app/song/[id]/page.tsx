@@ -47,8 +47,8 @@ export default function SongPage() {
     try {
       const res = await fetch(`/api/mobile/download?songId=${encodeURIComponent(songId)}`);
       const auth = await res.json();
-      if (auth?.authorized && auth?.fileUrl) {
-        const fileRes = await fetch(auth.fileUrl);
+      if (auth?.authorized) {
+        const fileRes = await fetch(`/api/download/${encodeURIComponent(songId)}`);
         if (!fileRes.ok) throw new Error("Download failed");
         const blob = await fileRes.blob();
         const blobUrl = URL.createObjectURL(blob);

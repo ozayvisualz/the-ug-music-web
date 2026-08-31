@@ -87,6 +87,29 @@ export async function getPresignedUrl(key: string, expirySeconds = 3600) {
   return client.presignedGetObject(bucket, key, expirySeconds);
 }
 
+export async function fileExists(key: string): Promise<boolean> {
+  try {
+    const client = getClient();
+    const bucket = getBucket();
+    await client.statObject(bucket, key);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function downloadFile(key: string): Promise<Buffer> {
+  const client = getClient();
+  const bucket = getBucket();
+  const stream = await client.getObject(bucket, key);
+  return new Promise<Buffer>((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    stream.on("data", (c) => chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c)));
+    stream.on("end", () => resolve(Buffer.concat(chunks)));
+    stream.on("error", reject);
+  });
+}
+
 export async function testConnection(): Promise<{ ok: boolean; endpoint: string; port: number; bucket: string; error?: string }> {
   try {
     const cfg = getConfig();

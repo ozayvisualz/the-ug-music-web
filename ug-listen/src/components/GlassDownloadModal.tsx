@@ -158,7 +158,7 @@ export default function GlassDownloadModal({ song, onClose }: Props) {
         setDownloadProgress(0);
         await downloadStore.download(
           song.id,
-          auth.fileUrl,
+          `https://www.theugmusic.com/api/download/${encodeURIComponent(song.id)}?token=${encodeURIComponent(token)}`,
           {
             songId: song.id,
             title: auth.title || song.title,
