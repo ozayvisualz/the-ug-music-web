@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Download, Send, Loader2 } from "lucide-react";
 import { formatDuration, getArtistName } from "@/lib/utils";
+import { slugify } from "@/lib/seo";
 import { usePlayerStore } from "@/store/player";
 import { WebPlayer } from "@/components/layout/player";
 
@@ -117,7 +118,9 @@ export default function SongPage() {
         <h1 className="text-2xl sm:text-3xl font-bold break-words px-2">{song.title}</h1>
         <Link href={`/artist/${(song as any).artistId}`} className="text-zinc-400 hover:text-yellow-500 transition">{getArtistName(song.artist)}</Link>
         <div className="flex items-center justify-center gap-4 text-sm text-zinc-500">
-          <span>{(song as any).genre}</span>
+          {(song as any).genre ? (
+            <Link href={`/genre/${slugify((song as any).genre)}`} className="hover:text-yellow-500 transition">{(song as any).genre}</Link>
+          ) : null}
           <span>{formatDuration((song as any).duration || 0)}</span>
           <span>{(song as any).playCount || 0} plays</span>
         </div>

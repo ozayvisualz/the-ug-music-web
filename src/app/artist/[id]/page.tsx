@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { BadgeCheck, Music2, Play, Users, MapPin, Heart } from "lucide-react";
 import { formatNumber, getArtistName } from "@/lib/utils";
+import { slugify } from "@/lib/seo";
 import { usePlayerStore } from "@/store/player";
 import { WebPlayer } from "@/components/layout/player";
 
@@ -56,7 +57,7 @@ export default function ArtistPage() {
             <h1 className="text-2xl sm:text-3xl font-bold break-words">{name}</h1>
           </div>
           <div className="flex items-center justify-center sm:justify-start gap-4 mt-2 text-sm text-zinc-400">
-            {artist.genre && <span>{artist.genre}</span>}
+            {artist.genre && <Link href={`/genre/${slugify(artist.genre)}`} className="hover:text-yellow-500 transition">{artist.genre}</Link>}
             {artist.location && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{artist.location}</span>}
           </div>
           <div className="flex items-center justify-center sm:justify-start gap-4 mt-2 text-sm">
