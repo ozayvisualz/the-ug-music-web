@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import { StreamingEngine } from "@/lib/services/streaming";
+import { getServerUser } from "@/lib/server-auth";
 
-function getUser(req: NextRequest) {
-  const token = req.nextUrl.searchParams.get("token") || (req.headers.get("authorization")?.startsWith("Bearer ") ? req.headers.get("authorization")!.slice(7) : null);
-  if (!token) return null;
-  try { return jwt.verify(token, process.env.AUTH_SECRET || "default-secret") as any; } catch { return null; }
+async function getUser(req: NextRequest) {
+  return getServerUser(req);
 }
 
 export async function GET(req: NextRequest) {
   try {
-    const user = getUser(req);
+    const user = await getUser(req);
     const songId = req.nextUrl.searchParams.get("songId");
     const durationListened = parseInt(req.nextUrl.searchParams.get("duration") || "0");
 

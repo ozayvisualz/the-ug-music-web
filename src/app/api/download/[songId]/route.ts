@@ -1,21 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import { db } from "@/lib/db";
 import { DownloadEngine } from "@/lib/services/downloads";
 import { getOrCreateEnrichedDownload, buildDownloadFilename } from "@/lib/services/download-metadata";
+import { getServerUser } from "@/lib/server-auth";
 
-function getUser(req: NextRequest) {
-  const auth = req.headers.get("authorization");
-  let token: string | null = null;
-  if (auth?.startsWith("Bearer ")) token = auth.slice(7);
-  if (!token) {
-    const cookie = req.headers.get("cookie") || "";
-    const match = cookie.match(/(?:^|;\s*)auth-token=([^;]*)/);
-    if (match) token = match[1];
-  }
-  if (!token) token = req.nextUrl.searchParams.get("token");
-  if (!token) return null;
-  try { return jwt.verify(token, process.env.AUTH_SECRET || "default-secret") as any; } catch { return null; }
+async function getUser(req: NextRequest) {
+  return getServerUser(req);
 }
 
 export async function GET(
@@ -23,7 +13,7 @@ export async function GET(
   { params }: { params: Promise<{ songId: string }> }
 ) {
   try {
-    const user = getUser(req);
+    const user = await getUser(req);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { songId } = await params;

@@ -1,30 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import { DownloadEngine } from "@/lib/services/downloads";
-import { auth } from "@/lib/auth";
+import { getServerUser } from "@/lib/server-auth";
 
 async function getUser(req: NextRequest) {
-  // 1. next-auth session (web).
-  try {
-    const session = await auth();
-    if (session?.user) {
-      const u = session.user as any;
-      if (u.id) return { id: u.id, role: u.role || "LISTENER" };
-    }
-  } catch {}
-
-  // 2. Custom auth-token cookie / Authorization header / token query param.
-  let token: string | null = null;
-  const authHeader = req.headers.get("authorization");
-  if (authHeader?.startsWith("Bearer ")) token = authHeader.slice(7);
-  if (!token) {
-    const cookie = req.headers.get("cookie") || "";
-    const match = cookie.match(/(?:^|;\s*)auth-token=([^;]*)/);
-    if (match) token = match[1];
-  }
-  if (!token) token = req.nextUrl.searchParams.get("token");
-  if (!token) return null;
-  try { return jwt.verify(token, process.env.AUTH_SECRET || "default-secret") as any; } catch { return null; }
+  return getServerUser(req);
 }
 
 // Authorize a song download. Returns the download URL only when the listener
