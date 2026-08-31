@@ -42,6 +42,23 @@ export async function createTRPCContext(opts: { headers: Headers }) {
     }
   }
 
+  // Server-side authorization hardening: resolve the user's CURRENT role and
+  // account status from the database. This makes role changes (promote/demote)
+  // and bans take effect immediately instead of waiting for token expiry, and
+  // ensures deleted/banned/suspended users are denied across both auth paths.
+  const userId = (session?.user as any)?.id;
+  if (userId) {
+    const dbUser = await db.user.findUnique({
+      where: { id: userId },
+      select: { role: true, accountStatus: true },
+    });
+    if (!dbUser || dbUser.accountStatus !== "active") {
+      session = null;
+    } else if (session) {
+      (session.user as any).role = dbUser.role;
+    }
+  }
+
   return {
     db,
     session,
