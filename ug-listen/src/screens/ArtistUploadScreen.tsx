@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -76,7 +76,23 @@ export default function ArtistUploadScreen() {
   const [featuredArtistId, setFeaturedArtistId] = useState("");
   const [featuredArtistName, setFeaturedArtistName] = useState("");
   const [featuredSearch, setFeaturedSearch] = useState("");
-  const featuredQuery = trpc.music.getArtists.useQuery({ search: featuredSearch, limit: 6 }, { enabled: featuredSearch.trim().length > 0 });
+  const [featuredResults, setFeaturedResults] = useState<any[]>([]);
+  const featuredTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (featuredTimer.current) clearTimeout(featuredTimer.current);
+    const q = featuredSearch.trim();
+    if (!q) { setFeaturedResults([]); return; }
+    featuredTimer.current = setTimeout(async () => {
+      try {
+        const data = await trpc.music.getArtists.query({ search: q, limit: 6 });
+        setFeaturedResults(Array.isArray(data) ? data : []);
+      } catch {
+        setFeaturedResults([]);
+      }
+    }, 250);
+    return () => { if (featuredTimer.current) clearTimeout(featuredTimer.current); };
+  }, [featuredSearch]);
 
   const [submitting, setSubmitting] = useState(false);
 
@@ -198,9 +214,9 @@ export default function ArtistUploadScreen() {
             <>
               <Text style={styles.label}>Featured Artist</Text>
               <TextInput value={featuredSearch} onChangeText={setFeaturedSearch} placeholder="Search artist to feature..." placeholderTextColor={colors.textMuted} style={[styles.input, { color: colors.white, borderColor: colors.border }]} />
-              {featuredQuery.data && featuredQuery.data.length > 0 && (
+              {featuredResults.length > 0 && (
                 <View style={[styles.featuredResults, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-                  {featuredQuery.data.map((a: any) => (
+                  {featuredResults.map((a: any) => (
                     <TouchableOpacity key={a.id} onPress={() => { setFeaturedArtistId(a.id); setFeaturedArtistName(a.artistName || a.user?.name || "Artist"); setFeaturedSearch(""); }} style={styles.featuredItem}>
                       <Text style={[styles.featuredResultText, { color: colors.white }]}>{a.artistName || a.user?.name || "Artist"}</Text>
                     </TouchableOpacity>
