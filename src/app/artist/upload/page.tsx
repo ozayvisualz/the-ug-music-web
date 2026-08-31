@@ -15,7 +15,7 @@ export default function UploadMusicPage() {
   const router = useRouter();
   const [form, setForm] = useState({
     title: "",
-    genre: "",
+    genres: [] as string[],
     description: "",
     coverUrl: "",
     story: "",
@@ -139,7 +139,8 @@ export default function UploadMusicPage() {
       await uploadSongMut.mutateAsync({
         title: form.title,
         featuredArtistId: featuredArtistId || undefined,
-        genre: form.genre || undefined,
+        genre: form.genres[0] || undefined,
+        genres: form.genres.length > 0 ? JSON.stringify(form.genres) : undefined,
         description: form.description || undefined,
         duration,
         fileUrl,
@@ -242,13 +243,23 @@ export default function UploadMusicPage() {
                 </>
               )}
             </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">Genre</label>
-              <select value={form.genre} onChange={(e) => setForm({ ...form, genre: e.target.value })}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500">
-                <option value="">Select genre</option>
-                {GENRES.map((g) => <option key={g} value={g}>{g}</option>)}
-              </select>
+            <div className="md:col-span-2">
+              <label className="block text-sm text-zinc-400 mb-1.5">Genres (up to 2)</label>
+              <div className="flex flex-wrap gap-2">
+                {GENRES.map((g) => {
+                  const active = form.genres.includes(g);
+                  return (
+                    <button
+                      key={g}
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, genres: active ? f.genres.filter((x) => x !== g) : f.genres.length < 2 ? [...f.genres, g] : f.genres }))}
+                      className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${active ? "bg-yellow-500 text-black" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}
+                    >
+                      {g}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm text-zinc-400 mb-1.5">Description (optional)</label>
@@ -376,7 +387,7 @@ export default function UploadMusicPage() {
 
               <div className="space-y-2 bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-4">
                 <div className="flex justify-between text-sm"><span className="text-zinc-500">Title</span><span className="text-white font-medium">{form.title}</span></div>
-                {form.genre && <div className="flex justify-between text-sm"><span className="text-zinc-500">Genre</span><span className="text-white">{form.genre}</span></div>}
+                {form.genres.length > 0 && <div className="flex justify-between text-sm"><span className="text-zinc-500">Genres</span><span className="text-white">{form.genres.join(", ")}</span></div>}
                 {form.releaseDate && <div className="flex justify-between text-sm"><span className="text-zinc-500">Release Date</span><span className="text-white">{form.releaseDate}</span></div>}
                 {audioFile && <div className="flex justify-between text-sm"><span className="text-zinc-500">Audio File</span><span className="text-white truncate max-w-[200px]">{audioFile.name}</span></div>}
                 {coverFile && <div className="flex justify-between text-sm"><span className="text-zinc-500">Cover Art</span><span className="text-white truncate max-w-[200px]">{coverFile.name}</span></div>}

@@ -59,7 +59,7 @@ export default function ArtistUploadScreen() {
   const { colors } = useTheme();
 
   const [title, setTitle] = useState("");
-  const [genre, setGenre] = useState("");
+  const [genres, setGenres] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [moods, setMoods] = useState<string[]>([]);
   const [story, setStory] = useState("");
@@ -112,6 +112,10 @@ export default function ArtistUploadScreen() {
     setMoods((m) => (m.includes(id) ? m.filter((x) => x !== id) : m.length < 5 ? [...m, id] : m));
   };
 
+  const toggleGenre = (g: string) => {
+    setGenres((cur) => (cur.includes(g) ? cur.filter((x) => x !== g) : cur.length < 2 ? [...cur, g] : cur));
+  };
+
   const pickAudio = async () => {
     try {
       const res = await DocumentPicker.getDocumentAsync({ type: ["audio/*"], copyToCacheDirectory: true });
@@ -147,7 +151,8 @@ export default function ArtistUploadScreen() {
       const duration = (await readDuration(audio.uri)) || 180;
       await trpc.artist.uploadSong.mutate({
         title: title.trim(),
-        genre: genre || undefined,
+        genre: genres[0] || undefined,
+        genres: genres.length > 0 ? JSON.stringify(genres) : undefined,
         description: description || undefined,
         duration,
         fileUrl,
@@ -227,11 +232,11 @@ export default function ArtistUploadScreen() {
           )}
 
           {/* Genre */}
-          <Text style={styles.label}>Genre</Text>
+          <Text style={styles.label}>Genres (up to 2)</Text>
           <View style={styles.genreWrap}>
             {GENRE_LIST.map((g) => (
-              <TouchableOpacity key={g} onPress={() => setGenre(g)} style={[styles.genrePill, { backgroundColor: genre === g ? COLORS.gold : colors.surface, borderColor: colors.border }]}>
-                <Text style={{ color: genre === g ? COLORS.bg : colors.text, fontSize: 12, fontWeight: "600" }}>{g}</Text>
+              <TouchableOpacity key={g} onPress={() => toggleGenre(g)} style={[styles.genrePill, { backgroundColor: genres.includes(g) ? COLORS.gold : colors.surface, borderColor: colors.border }]}>
+                <Text style={{ color: genres.includes(g) ? COLORS.bg : colors.text, fontSize: 12, fontWeight: "600" }}>{g}</Text>
               </TouchableOpacity>
             ))}
           </View>
