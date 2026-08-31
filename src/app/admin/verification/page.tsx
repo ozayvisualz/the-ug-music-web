@@ -106,23 +106,11 @@ export default function AdminVerificationPage() {
               {a.socialLinks && <p className="text-xs text-zinc-500 mb-2">Social: {a.socialLinks}</p>}
               {a.musicLinks && <p className="text-xs text-zinc-500 mb-2">Music: {a.musicLinks}</p>}
 
-              {(a.photoUrl || a.idDocument || a.selfieDocument) && (
+              {a.photoUrl && (
                 <div className="flex gap-2 mb-3 overflow-x-auto">
-                  {a.photoUrl && (
-                    <a href={a.photoUrl} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
-                      <img src={a.photoUrl} alt="Artist Photo" className="w-16 h-16 rounded-lg object-cover border border-zinc-700" />
-                    </a>
-                  )}
-                  {a.idDocument && (
-                    <a href={a.idDocument} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
-                      <img src={a.idDocument} alt="ID Document" className="w-16 h-16 rounded-lg object-cover border border-zinc-700" />
-                    </a>
-                  )}
-                  {a.selfieDocument && (
-                    <a href={a.selfieDocument} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
-                      <img src={a.selfieDocument} alt="Selfie with ID" className="w-16 h-16 rounded-lg object-cover border border-zinc-700" />
-                    </a>
-                  )}
+                  <a href={a.photoUrl} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
+                    <img src={a.photoUrl} alt="Artist Photo" className="w-16 h-16 rounded-lg object-cover border border-zinc-700" />
+                  </a>
                 </div>
               )}
 

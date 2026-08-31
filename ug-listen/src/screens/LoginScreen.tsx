@@ -133,8 +133,6 @@ export default function LoginScreen() {
   const [recordLabel, setRecordLabel] = useState("");
   const [managementContact, setManagementContact] = useState("");
   const [photoFile, setPhotoFile] = useState<{ uri: string; name: string; mimeType: string } | null>(null);
-  const [idFile, setIdFile] = useState<{ uri: string; name: string; mimeType: string } | null>(null);
-  const [selfieFile, setSelfieFile] = useState<{ uri: string; name: string; mimeType: string } | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -189,8 +187,6 @@ export default function LoginScreen() {
     if (tab === "register" && password !== confirmPassword) { setError("Passwords do not match"); return; }
     if (tab === "register" && role === "ARTIST" && !artistName.trim()) { setError("Please enter your artist name"); return; }
     if (tab === "register" && role === "ARTIST" && !photoFile) { setError("Artist photo is required"); return; }
-    if (tab === "register" && role === "ARTIST" && !idFile) { setError("ID document is required"); return; }
-    if (tab === "register" && role === "ARTIST" && !selfieFile) { setError("Selfie (holding ID) is required"); return; }
     if (tab === "register" && role === "ARTIST" && !accepted) { setError("You must accept the artist terms"); return; }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     setLoading(true);
@@ -203,13 +199,7 @@ export default function LoginScreen() {
       if (tab === "register" && role === "ARTIST") {
         try {
           const token = await getStoredToken();
-          const upload = async (file: { uri: string; name: string; mimeType: string } | null) =>
-            file ? await uploadFile(file.uri, file.name, file.mimeType) : undefined;
-          const [uploadedPhoto, uploadedId, uploadedSelfie] = await Promise.all([
-            upload(photoFile),
-            upload(idFile),
-            upload(selfieFile),
-          ]);
+          const uploadedPhoto = photoFile ? await uploadFile(photoFile.uri, photoFile.name, photoFile.mimeType) : undefined;
           await fetch("https://www.theugmusic.com/api/artist/apply", {
             method: "POST",
             headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
@@ -226,8 +216,6 @@ export default function LoginScreen() {
               recordLabel: recordLabel.trim(),
               managementContact: managementContact.trim(),
               photoUrl: uploadedPhoto || undefined,
-              idDocument: uploadedId || undefined,
-              selfieDocument: uploadedSelfie || undefined,
             }),
           });
         } catch (e: any) {
@@ -247,45 +235,38 @@ export default function LoginScreen() {
     setUser({ id: "guest", email: "", name: "Guest", role: "LISTENER" });
   };
 
-  const selectFile = (kind: "photo" | "id" | "selfie", file: { uri: string; name: string; mimeType: string }) => {
-    if (kind === "photo") setPhotoFile(file);
-    else if (kind === "id") setIdFile(file);
-    else setSelfieFile(file);
-  };
-
-  const pickFromLibrary = async (kind: "photo" | "selfie") => {
+  const pickFromLibrary = async () => {
     try {
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!perm.granted) { Alert.alert("Permission", "Photo library access is required."); return; }
       const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8 });
       if (result.canceled || !result.assets?.length) return;
       const a = result.assets[0];
-      selectFile(kind, { uri: a.uri, name: a.fileName || `${kind}.jpg`, mimeType: a.mimeType || "image/jpeg" });
+      setPhotoFile({ uri: a.uri, name: a.fileName || "photo.jpg", mimeType: a.mimeType || "image/jpeg" });
     } catch (e: any) {
       Alert.alert("Error", e?.message || "Could not open the photo library.");
     }
   };
 
-  const takePhoto = async (kind: "photo" | "id" | "selfie") => {
+  const takePhoto = async () => {
     try {
       const perm = await ImagePicker.requestCameraPermissionsAsync();
       if (!perm.granted) { Alert.alert("Permission", "Camera access is required."); return; }
       const result = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], quality: 0.8 });
       if (result.canceled || !result.assets?.length) return;
       const a = result.assets[0];
-      selectFile(kind, { uri: a.uri, name: a.fileName || `${kind}.jpg`, mimeType: a.mimeType || "image/jpeg" });
+      setPhotoFile({ uri: a.uri, name: a.fileName || "photo.jpg", mimeType: a.mimeType || "image/jpeg" });
     } catch (e: any) {
       Alert.alert("Error", e?.message || "Could not open the camera.");
     }
   };
 
-  const pickFile = async (kind: "photo" | "id" | "selfie") => {
+  const pickFile = async () => {
     try {
-      const types = kind === "id" ? ["image/*", "application/pdf"] : ["image/*"];
-      const result = await DocumentPicker.getDocumentAsync({ type: types, copyToCacheDirectory: true });
+      const result = await DocumentPicker.getDocumentAsync({ type: ["image/*"], copyToCacheDirectory: true });
       if (result.canceled || !result.assets?.length) return;
       const a = result.assets[0];
-      selectFile(kind, { uri: a.uri, name: a.name || `${kind}-file`, mimeType: a.mimeType || (kind === "id" ? "application/pdf" : "image/jpeg") });
+      setPhotoFile({ uri: a.uri, name: a.name || "photo-file", mimeType: a.mimeType || "image/jpeg" });
     } catch (e: any) {
       Alert.alert("Error", e?.message || "Could not open the file picker.");
     }
@@ -293,26 +274,9 @@ export default function LoginScreen() {
 
   const pickPhoto = () => {
     Alert.alert("Artist Photo", "Choose a source", [
-      { text: "Take Photo", onPress: () => takePhoto("photo") },
-      { text: "Choose from Library", onPress: () => pickFromLibrary("photo") },
-      { text: "Choose from Files", onPress: () => pickFile("photo") },
-      { text: "Cancel", style: "cancel" },
-    ]);
-  };
-
-  const pickSelfie = () => {
-    Alert.alert("Selfie", "Choose a source", [
-      { text: "Take Photo", onPress: () => takePhoto("selfie") },
-      { text: "Choose from Library", onPress: () => pickFromLibrary("selfie") },
-      { text: "Choose from Files", onPress: () => pickFile("selfie") },
-      { text: "Cancel", style: "cancel" },
-    ]);
-  };
-
-  const pickId = () => {
-    Alert.alert("ID Document", "Choose a source", [
-      { text: "Take Photo", onPress: () => takePhoto("id") },
-      { text: "Choose from Files", onPress: () => pickFile("id") },
+      { text: "Take Photo", onPress: () => takePhoto() },
+      { text: "Choose from Library", onPress: () => pickFromLibrary() },
+      { text: "Choose from Files", onPress: () => pickFile() },
       { text: "Cancel", style: "cancel" },
     ]);
   };
@@ -477,14 +441,6 @@ export default function LoginScreen() {
                         <TouchableOpacity style={styles.uploadBtn} onPress={pickPhoto} activeOpacity={0.7}>
                           {photoFile ? <Check size={16} color={COLORS.green} /> : <Upload size={16} color={COLORS.gold} />}
                           <Text style={[styles.uploadBtnText, { color: photoFile ? COLORS.green : COLORS.text }]}>{photoFile ? "Artist Photo Selected ✓" : "Upload Artist Photo"}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.uploadBtn} onPress={pickId} activeOpacity={0.7}>
-                          {idFile ? <Check size={16} color={COLORS.green} /> : <Upload size={16} color={COLORS.gold} />}
-                          <Text style={[styles.uploadBtnText, { color: idFile ? COLORS.green : COLORS.text }]}>{idFile ? "ID Document Selected ✓" : "Upload ID Document"}</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.uploadBtn} onPress={pickSelfie} activeOpacity={0.7}>
-                          {selfieFile ? <Check size={16} color={COLORS.green} /> : <Upload size={16} color={COLORS.gold} />}
-                          <Text style={[styles.uploadBtnText, { color: selfieFile ? COLORS.green : COLORS.text }]}>{selfieFile ? "Selfie Selected ✓" : "Upload Selfie (holding ID)"}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={styles.termsRow} onPress={() => setAccepted((v) => !v)} activeOpacity={0.7}>

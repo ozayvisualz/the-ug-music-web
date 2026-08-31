@@ -14,8 +14,6 @@ export default function RegisterPage() {
     musicLinks: "", recordLabel: "", managementContact: "", accepted: false,
   });
   const [photoUrl, setPhotoUrl] = useState("");
-  const [idUrl, setIdUrl] = useState("");
-  const [selfieUrl, setSelfieUrl] = useState("");
   const [uploading, setUploading] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +36,6 @@ export default function RegisterPage() {
               dateOfBirth: form.dateOfBirth, bio: form.bio, genre: form.genre,
               socialLinks: form.socialLinks.split(",").map((s) => s.trim()).filter(Boolean),
               musicLinks: form.musicLinks, recordLabel: form.recordLabel, managementContact: form.managementContact,
-              idDocument: idUrl || undefined, selfieDocument: selfieUrl || undefined,
               photoUrl: photoUrl || undefined,
             }),
           });
@@ -55,18 +52,16 @@ export default function RegisterPage() {
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
-  const handleUpload = async (field: "photo" | "id" | "selfie", file: File) => {
+  const handleUpload = async (field: "photo", file: File) => {
     if (!file) return;
     setUploading(field);
     try {
       const ext = file.name.split(".").pop() || "jpg";
       const path = `verification/${Date.now()}-${field}.${ext}`;
       const url = await uploadToFirebase(file, path);
-      if (field === "photo") setPhotoUrl(url);
-      else if (field === "id") setIdUrl(url);
-      else setSelfieUrl(url);
+      setPhotoUrl(url);
     } catch {
-      setError(`Failed to upload ${field === "id" ? "ID document" : field}`);
+      setError("Failed to upload artist photo");
     } finally {
       setUploading("");
     }
@@ -81,8 +76,6 @@ export default function RegisterPage() {
       if (!form.country.trim()) { setError("Country is required"); return; }
       if (!form.genre.trim()) { setError("Genre is required"); return; }
       if (!photoUrl) { setError("Artist photo is required"); return; }
-      if (!idUrl) { setError("ID document is required"); return; }
-      if (!selfieUrl) { setError("Selfie (holding ID) is required"); return; }
       if (!form.accepted) { setError("You must accept the artist terms"); return; }
     }
     registerMut.mutate({
@@ -232,20 +225,6 @@ export default function RegisterPage() {
                 <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload("photo", e.target.files[0])}
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2 px-3 text-white text-sm file:mr-2 file:bg-zinc-700 file:text-white file:rounded file:px-2 file:py-1 file:border-0" />
                 {photoUrl && <p className="text-xs text-emerald-400 mt-1">Photo uploaded ✓</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm text-zinc-400 mb-1.5">National ID / Passport / Driver's License</label>
-                <input type="file" accept="image/*,.pdf" onChange={(e) => e.target.files?.[0] && handleUpload("id", e.target.files[0])}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2 px-3 text-white text-sm file:mr-2 file:bg-zinc-700 file:text-white file:rounded file:px-2 file:py-1 file:border-0" />
-                {idUrl && <p className="text-xs text-emerald-400 mt-1">ID uploaded ✓</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm text-zinc-400 mb-1.5">Selfie Holding ID</label>
-                <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload("selfie", e.target.files[0])}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg py-2 px-3 text-white text-sm file:mr-2 file:bg-zinc-700 file:text-white file:rounded file:px-2 file:py-1 file:border-0" />
-                {selfieUrl && <p className="text-xs text-emerald-400 mt-1">Selfie uploaded ✓</p>}
               </div>
 
               <div>
