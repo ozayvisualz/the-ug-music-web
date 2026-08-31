@@ -56,7 +56,7 @@ export const merchRouter = router({
 
       const ref = `ORD_${Date.now()}`;
       await ctx.db.transaction.create({
-        data: { userId, type: "MERCH", amount: total, reference: ref, paymentMethod: "FLUTTERWAVE" },
+        data: { userId, type: "MERCH", amount: total, reference: ref },
       });
 
       return { txRef: ref, amount: total, currency: "UGX", items: orderItems };

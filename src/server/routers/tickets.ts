@@ -61,7 +61,7 @@ export const ticketsRouter = router({
       const ref = `TIX_${Date.now()}`;
 
       await ctx.db.transaction.create({
-        data: { userId, type: "TICKET", amount: total, reference: ref, paymentMethod: "FLUTTERWAVE" },
+        data: { userId, type: "TICKET", amount: total, reference: ref },
       });
 
       return { txRef: ref, amount: total, currency: "UGX", eventId: event.id, quantity: input.quantity };
