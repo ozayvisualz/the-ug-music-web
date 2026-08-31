@@ -35,7 +35,7 @@ function formatDuration(d: number): string {
 
 function toSong(x: any): Song {
   const s = x?.song ?? x;
-  const artist = s?.artist?.user?.name || s?.artist?.artistName || (typeof s?.artist === "string" ? s.artist : "Unknown");
+  const artist = s?.artist?.artistName || s?.artist?.user?.name || (typeof s?.artist === "string" ? s.artist : "Unknown");
   return {
     id: s?.id,
     title: s?.title || "Unknown",

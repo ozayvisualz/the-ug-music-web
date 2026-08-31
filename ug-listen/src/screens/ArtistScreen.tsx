@@ -39,7 +39,8 @@ type Album = {
 
 type Artist = {
   id: string;
-  name: string;
+  name?: string;
+  artistName?: string;
   verified: boolean;
   genre?: string;
   location?: string;
@@ -100,7 +101,7 @@ export default function ArtistScreen() {
       const tracks = artist.songs.map((s) => ({
         id: s.id,
         title: s.title,
-        artist: (s as any).artist?.artistName || (s as any).artist?.user?.name || artist.name || "Unknown",
+        artist: (s as any).artist?.artistName || (s as any).artist?.user?.name || artist.artistName || artist.name || "Unknown",
         url: (s as any).fileUrl || (s as any).hlsUrl || (s as any).url || "",
         duration: s.duration,
         coverUrl: s.coverUrl,
@@ -143,7 +144,7 @@ export default function ArtistScreen() {
           </View>
 
           <View style={styles.nameRow}>
-            <Text style={[styles.artistName, { color: colors.white }]}>{artist.name}</Text>
+            <Text style={[styles.artistName, { color: colors.white }]}>{artist.artistName || artist.name}</Text>
             {artist.verified ? (
               <BadgeCheck size={18} color={COLORS.gold} />
             ) : null}
