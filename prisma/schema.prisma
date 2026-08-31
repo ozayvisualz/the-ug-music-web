@@ -334,6 +334,7 @@ model Playlist {
   id        String   @id @default(cuid())
   userId    String
   title     String
+  slug      String?  @unique
   coverUrl  String?
   isPublic  Boolean  @default(true)
   createdAt DateTime @default(now())

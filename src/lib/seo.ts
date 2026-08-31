@@ -177,6 +177,26 @@ export function musicAlbumJsonLd(album: {
 // JSON-LD render helper (server components only)
 // ---------------------------------------------------------------------------
 
+export function musicPlaylistJsonLd(playlist: {
+  id: string;
+  title: string;
+  numTracks: number;
+  trackIds?: string[];
+}) {
+  const url = absoluteUrl(`/playlist/${playlist.id}`);
+  return {
+    "@context": "https://schema.org",
+    "@type": "MusicPlaylist",
+    "@id": url,
+    name: playlist.title,
+    url,
+    numTracks: playlist.numTracks,
+    ...(playlist.trackIds && playlist.trackIds.length
+      ? { track: playlist.trackIds.map((id) => ({ "@id": absoluteUrl(`/song/${id}`) })) }
+      : {}),
+  };
+}
+
 export function jsonLdScript(data: unknown): string {
   return JSON.stringify(data).replace(/</g, "\\u003c");
 }

@@ -1,7 +1,7 @@
 import { db } from "./db";
 import { slugify } from "./seo";
 
-export type SlugKind = "artist" | "song" | "album";
+export type SlugKind = "artist" | "song" | "album" | "playlist";
 
 async function slugExists(kind: SlugKind, slug: string, excludeId?: string) {
   const found =
@@ -9,7 +9,9 @@ async function slugExists(kind: SlugKind, slug: string, excludeId?: string) {
       ? await db.artist.findUnique({ where: { slug }, select: { id: true } })
       : kind === "song"
         ? await db.song.findUnique({ where: { slug }, select: { id: true } })
-        : await db.album.findUnique({ where: { slug }, select: { id: true } });
+        : kind === "album"
+          ? await db.album.findUnique({ where: { slug }, select: { id: true } })
+          : await db.playlist.findUnique({ where: { slug }, select: { id: true } });
   if (!found) return null;
   return excludeId && found.id === excludeId ? null : found;
 }

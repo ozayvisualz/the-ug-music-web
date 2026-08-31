@@ -101,6 +101,15 @@ export default function SongPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 pt-8 pb-24 space-y-6">
+      <nav aria-label="Breadcrumb" className="text-xs text-zinc-500">
+        <ol className="flex items-center gap-1.5 flex-wrap">
+          <li><Link href="/" className="hover:text-yellow-500">Home</Link></li>
+          <li aria-hidden="true">/</li>
+          <li><Link href={`/artist/${(song as any).artistId}`} className="hover:text-yellow-500">{getArtistName(song.artist)}</Link></li>
+          <li aria-hidden="true">/</li>
+          <li className="text-zinc-300">{song.title}</li>
+        </ol>
+      </nav>
       <div className="text-center space-y-4">
         <div className="w-48 h-48 mx-auto rounded-2xl bg-yellow-500/10 flex items-center justify-center text-6xl overflow-hidden">
           {(song as any).coverUrl ? <img src={(song as any).coverUrl} alt={`${song.title} by ${getArtistName(song.artist)} cover artwork`} className="w-full h-full object-cover" /> : <span>🎵</span>}

@@ -24,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  const [artists, songs, albums] = await Promise.all([
+  const [artists, songs, albums, playlists] = await Promise.all([
     db.artist.findMany({
       where: { verificationStatus: "approved" },
       select: { id: true, slug: true, createdAt: true },
@@ -39,6 +39,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: { approved: true, published: true },
       select: { id: true, slug: true, createdAt: true },
       orderBy: { createdAt: "desc" },
+    }),
+    db.playlist.findMany({
+      where: { isPublic: true, songs: { some: {} } },
+      select: { id: true, slug: true, updatedAt: true },
+      orderBy: { updatedAt: "desc" },
     }),
   ]);
 
@@ -63,5 +68,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...genreEntries, ...artistEntries, ...songEntries, ...albumEntries];
+  const playlistEntries: MetadataRoute.Sitemap = playlists.map((p) => ({
+    url: `${base}/playlist/${p.slug || p.id}`,
+    lastModified: p.updatedAt,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+
+  return [
+    ...staticPages,
+    ...genreEntries,
+    ...artistEntries,
+    ...songEntries,
+    ...albumEntries,
+    ...playlistEntries,
+  ];
 }

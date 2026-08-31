@@ -37,6 +37,15 @@ export default function ArtistPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 pt-6 pb-24 space-y-6">
+      <nav aria-label="Breadcrumb" className="text-xs text-zinc-500">
+        <ol className="flex items-center gap-1.5 flex-wrap">
+          <li><Link href="/" className="hover:text-yellow-500">Home</Link></li>
+          <li aria-hidden="true">/</li>
+          <li><Link href="/search" className="hover:text-yellow-500">Artists</Link></li>
+          <li aria-hidden="true">/</li>
+          <li className="text-zinc-300">{name}</li>
+        </ol>
+      </nav>
       <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-6">
         <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-yellow-500/10 flex items-center justify-center text-6xl font-bold text-yellow-500 flex-shrink-0 mx-auto sm:mx-0">
           {name.charAt(0)}
