@@ -45,7 +45,13 @@ function SearchContent() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {artists.map((a: any) => (
                   <Link key={a.id} href={`/artist/${a.id}`} className="flex items-center gap-3 p-3 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-yellow-500/30 transition">
-                    <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-sm font-bold text-yellow-500">{getArtistName(a).charAt(0) || "?"}</div>
+                    <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-sm font-bold text-yellow-500 overflow-hidden">
+                      {a.photoUrl ? (
+                        <img src={a.photoUrl} alt={`${getArtistName(a)} profile photo`} loading="lazy" className="w-full h-full object-cover" />
+                      ) : (
+                        getArtistName(a).charAt(0) || "?"
+                      )}
+                    </div>
                     <div><p className="text-sm font-semibold">{getArtistName(a)}</p><p className="text-xs text-zinc-500">Artist</p></div>
                   </Link>
                 ))}

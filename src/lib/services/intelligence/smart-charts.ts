@@ -158,7 +158,7 @@ export const SmartChartsEngine = {
               rank: i + 1,
               id: a.id,
               name: a.artistName || a.user?.name || "Unknown",
-              image: a.user?.image,
+              image: a.photoUrl || a.user?.image,
               genre: a.genre,
               streams: r.streams,
               uniqueListeners: r.uniqueListeners,

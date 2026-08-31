@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Dimensions,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -147,9 +148,13 @@ export default function SearchScreen() {
         onPress={() => navigation.navigate("Artist", { artistId: item.id })}
       >
         <View style={styles.artistAvatar}>
-          <Text style={styles.artistAvatarText}>
-            {(item.artistName || item.user?.name || item.name || "?").charAt(0).toUpperCase()}
-          </Text>
+          {item.image ? (
+            <Image source={{ uri: item.image }} style={styles.artistAvatarImg} />
+          ) : (
+            <Text style={styles.artistAvatarText}>
+              {(item.artistName || item.user?.name || item.name || "?").charAt(0).toUpperCase()}
+            </Text>
+          )}
         </View>
         <Text style={[styles.resultName, { color: colors.white }]} numberOfLines={1}>{item.artistName || item.user?.name || item.name || "Unknown"}</Text>
       </TouchableOpacity>
@@ -418,6 +423,12 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.gold,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+  },
+  artistAvatarImg: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   artistAvatarText: {
     color: COLORS.bg,

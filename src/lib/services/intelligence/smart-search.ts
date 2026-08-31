@@ -214,7 +214,7 @@ export const SmartSearchEngine = {
         id: artist.id,
         name: artist.artistName || artist.user?.name || "Unknown",
         genre: artist.genre,
-        image: artist.user?.image,
+        image: artist.photoUrl || artist.user?.image,
       }));
 
     const rankedAlbums = albums

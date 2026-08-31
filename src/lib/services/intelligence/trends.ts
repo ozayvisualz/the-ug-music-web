@@ -66,7 +66,7 @@ export const TrendEngine = {
     return scored
       .map((s) => {
         const a = artists.find((x) => x.id === s.artistId);
-        return a ? { id: a.id, name: a.artistName || a.user?.name || "Unknown", genre: a.genre, image: a.user?.image, growth: s.growth, velocity: s.velocity } : null;
+        return a ? { id: a.id, name: a.artistName || a.user?.name || "Unknown", genre: a.genre, image: a.photoUrl || a.user?.image, growth: s.growth, velocity: s.velocity } : null;
       })
       .filter(Boolean);
   },
