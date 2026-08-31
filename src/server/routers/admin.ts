@@ -3,6 +3,7 @@ import { adminProcedure, router } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import { AnalyticsEngine } from "@/lib/services/analytics";
 import { BusinessService } from "@/lib/services/business";
+import { getSeoSettings, updateSeoSettings } from "@/lib/settings";
 
 export const adminRouter = router({
   // === DASHBOARD ===
@@ -27,6 +28,20 @@ export const adminRouter = router({
     ]);
     return { totalUsers, totalArtists, totalSongs, totalAlbums, pendingSongs, pendingPayouts };
   }),
+
+  getSeoSettings: adminProcedure.query(async () => getSeoSettings()),
+
+  updateSeoSettings: adminProcedure
+    .input(
+      z.object({
+        title: z.string().optional(),
+        description: z.string().optional(),
+        keywords: z.array(z.string()).optional(),
+        socialImage: z.string().optional(),
+        noindex: z.boolean().optional(),
+      })
+    )
+    .mutation(async ({ input }) => updateSeoSettings(input)),
 
   // === SONGS ===
   approveSong: adminProcedure.input(z.string()).mutation(async ({ input, ctx }) => {

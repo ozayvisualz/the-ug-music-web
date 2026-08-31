@@ -5,12 +5,11 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import {
   SITE_URL,
   SITE_NAME,
-  SITE_DESCRIPTION,
-  DEFAULT_SOCIAL_IMAGE,
   organizationJsonLd,
   websiteJsonLd,
   jsonLdScript,
 } from "@/lib/seo";
+import { getSeoSettings } from "@/lib/settings";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -19,45 +18,37 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: "TheUgMusic – Stream & Download Ugandan Music",
-    template: "%s | TheUgMusic",
-  },
-  description: SITE_DESCRIPTION,
-  keywords: [
-    "Ugandan music",
-    "Uganda music",
-    "Ugandan artists",
-    "stream Ugandan music",
-    "download Ugandan songs",
-    "Afrobeats",
-    "Dancehall",
-    "Lugaflow",
-    "Gospel music",
-    "Made in Uganda",
-  ],
-  manifest: "/manifest.json",
-  alternates: { canonical: SITE_URL },
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
-  openGraph: {
-    type: "website",
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    title: "TheUgMusic – Stream & Download Ugandan Music",
-    description: SITE_DESCRIPTION,
-    images: [DEFAULT_SOCIAL_IMAGE],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "TheUgMusic – Stream & Download Ugandan Music",
-    description: SITE_DESCRIPTION,
-    images: [DEFAULT_SOCIAL_IMAGE],
-  },
-  robots: { index: true, follow: true },
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "UgMusic" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getSeoSettings();
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: seo.title,
+      template: "%s | TheUgMusic",
+    },
+    description: seo.description,
+    keywords: seo.keywords,
+    manifest: "/manifest.json",
+    alternates: { canonical: SITE_URL },
+    icons: { icon: "/icon.svg", apple: "/icon.svg" },
+    openGraph: {
+      type: "website",
+      url: SITE_URL,
+      siteName: SITE_NAME,
+      title: seo.title,
+      description: seo.description,
+      images: [seo.socialImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seo.title,
+      description: seo.description,
+      images: [seo.socialImage],
+    },
+    robots: seo.noindex ? { index: false, follow: true } : { index: true, follow: true },
+    appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "UgMusic" },
+  };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

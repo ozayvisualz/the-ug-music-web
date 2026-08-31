@@ -884,3 +884,10 @@ model RadioStation {
 
   @@index([type])
 }
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String?
+  updatedAt DateTime @updatedAt
+}
