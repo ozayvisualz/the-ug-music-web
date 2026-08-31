@@ -28,7 +28,7 @@ export default function AdminModerationPage() {
             {filtered.map((s: any) => (
               <tr key={s.id} className="border-b border-zinc-800/30 hover:bg-zinc-800/20">
                 <td className="p-4"><p className="text-sm text-white">{s.title}</p></td>
-                <td className="p-4"><p className="text-sm text-zinc-400">{s.artist?.user?.name || "Unknown"}</p></td>
+                <td className="p-4"><p className="text-sm text-zinc-400">{s.artist?.artistName || s.artist?.user?.name || "Unknown"}</p></td>
                 <td className="p-4"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${s.approved ? "bg-emerald-500/20 text-emerald-400" : "bg-yellow-500/20 text-yellow-500"}`}>{s.approved ? "Approved" : "Pending"}</span></td>
                 <td className="p-4">
                   <div className="flex items-center justify-end gap-2">

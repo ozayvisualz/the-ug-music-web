@@ -22,7 +22,7 @@ export default function ContractsPage() {
         <div className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-6 space-y-4">
           <h3 className="font-bold text-white">Create Contract</h3>
           <div className="grid grid-cols-2 gap-3">
-            <select value={form.artistId} onChange={(e) => setForm({ ...form, artistId: e.target.value })} className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white"><option value="">Select Artist</option>{artists?.map((a:any) => <option key={a.id} value={a.id}>{a.user?.name}</option>)}</select>
+            <select value={form.artistId} onChange={(e) => setForm({ ...form, artistId: e.target.value })} className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white"><option value="">Select Artist</option>{artists?.map((a:any) => <option key={a.id} value={a.id}>{a.artistName || a.user?.name}</option>)}</select>
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Contract title" className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" />
             <input value={form.revenueSplit} onChange={(e) => setForm({ ...form, revenueSplit: parseInt(e.target.value) })} type="number" placeholder="Revenue split %" className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" />
             <input value={form.startDate} onChange={(e) => setForm({ ...form, startDate: e.target.value })} type="date" className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white" />
@@ -38,7 +38,7 @@ export default function ContractsPage() {
             {contracts?.map((c:any) => (
               <tr key={c.id} className="border-b border-zinc-800/30 hover:bg-zinc-800/20">
                 <td className="p-4"><div className="flex items-center gap-3"><FileText className="w-4 h-4 text-yellow-500"/><div><p className="text-sm font-medium text-white">{c.title}</p><p className="text-xs text-zinc-500 capitalize">{c.type}</p></div></div></td>
-                <td className="p-4"><span className="text-sm text-zinc-400">{c.artist?.user?.name}</span></td>
+                <td className="p-4"><span className="text-sm text-zinc-400">{c.artist?.artistName || c.artist?.user?.name}</span></td>
                 <td className="p-4 hidden md:table-cell"><span className="text-sm text-zinc-400">{c.revenueSplit}%</span></td>
                 <td className="p-4 hidden md:table-cell"><span className="text-xs text-zinc-500">{new Date(c.startDate).toLocaleDateString()} - {c.endDate ? new Date(c.endDate).toLocaleDateString() : "Ongoing"}</span></td>
                 <td className="p-4"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${c.status === "active" ? "bg-emerald-500/20 text-emerald-400" : c.status === "expired" ? "bg-red-500/20 text-red-400" : "bg-zinc-500/20 text-zinc-400"}`}>{c.status}</span></td>

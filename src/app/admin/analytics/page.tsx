@@ -101,7 +101,7 @@ export default function AdminAnalyticsPage() {
                 <div key={s.id} className="flex items-center gap-3 py-1.5 border-b border-zinc-800/30">
                   <span className="text-sm font-bold text-yellow-500 w-6">{i + 1}</span>
                   <span className="text-sm text-zinc-300 flex-1">{s.title}</span>
-                  <span className="text-xs text-zinc-500">{s.artist?.user?.name || "Unknown"}</span>
+                  <span className="text-xs text-zinc-500">{s.artist?.artistName || s.artist?.user?.name || "Unknown"}</span>
                   <span className="text-xs text-zinc-600">{formatNumber(s.playCount)} plays</span>
                 </div>
               ))}
@@ -119,7 +119,7 @@ export default function AdminAnalyticsPage() {
                 <div key={a.id} className="flex items-center gap-3 py-1.5 border-b border-zinc-800/30">
                   <span className="text-sm font-bold text-yellow-500 w-6">{i + 1}</span>
                   <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center text-xs text-zinc-400">{a.user?.name?.charAt(0)}</div>
-                  <span className="text-sm text-zinc-300 flex-1">{a.user?.name || "Unknown"}</span>
+                  <span className="text-sm text-zinc-300 flex-1">{a.artistName || a.user?.name || "Unknown"}</span>
                   <span className="text-xs text-zinc-600">{formatNumber(a.totalStreams)} streams</span>
                 </div>
               ))}

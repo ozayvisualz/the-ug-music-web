@@ -40,7 +40,7 @@ export default function MadeInUgandaPage() {
                     <div key={s.id} className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-zinc-800/30">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded bg-yellow-500/10 flex items-center justify-center text-xs">🎵</div>
-                        <div><p className="text-sm text-zinc-300">{s.title}</p><p className="text-xs text-zinc-600">{s.artist?.user?.name || "Unknown"}</p></div>
+                        <div><p className="text-sm text-zinc-300">{s.title}</p><p className="text-xs text-zinc-600">{s.artist?.artistName || s.artist?.user?.name || "Unknown"}</p></div>
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="text-xs text-zinc-500">{formatNumber(s.playCount)} plays</span>

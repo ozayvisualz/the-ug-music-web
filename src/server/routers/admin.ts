@@ -237,8 +237,8 @@ export const adminRouter = router({
     const auditLogs = await BusinessService.getAuditLogs(10);
 
     const activity: Array<{ type: string; message: string; time: string }> = [];
-    recentApprovals.forEach((s) => activity.push({ type: "approval", message: `Song "${s.title}" by ${s.artist?.user?.name || "Unknown"} approved`, time: s.updatedAt.toISOString() }));
-    recentArtists.forEach((a) => activity.push({ type: "artist", message: `New artist "${a.user?.name || "Unknown"}" joined`, time: a.createdAt.toISOString() }));
+    recentApprovals.forEach((s) => activity.push({ type: "approval", message: `Song "${s.title}" by ${s.artist?.artistName || s.artist?.user?.name || "Unknown"} approved`, time: s.updatedAt.toISOString() }));
+    recentArtists.forEach((a) => activity.push({ type: "artist", message: `New artist "${a.artistName || a.user?.name || "Unknown"}" joined`, time: a.createdAt.toISOString() }));
     if (recentStreams > 0) activity.push({ type: "streams", message: `${recentStreams} streams in the last 24 hours`, time: new Date().toISOString() });
     if (recentDownloads > 0) activity.push({ type: "downloads", message: `${recentDownloads} downloads in the last 24 hours`, time: new Date().toISOString() });
     auditLogs.forEach((l: any) => activity.push({ type: "audit", message: `${l.action}${l.details ? ": " + l.details : ""}`, time: l.createdAt.toISOString() }));
@@ -264,8 +264,8 @@ export const adminRouter = router({
         const songs = await ctx.db.song.findMany({ where: { approved: true }, orderBy: { updatedAt: "desc" }, take: 5, include: { artist: { include: { user: { select: { name: true } } } } } });
         const artists = await ctx.db.artist.findMany({ orderBy: { createdAt: "desc" }, take: 3, include: { user: { select: { name: true } } } });
         const activity: any[] = [];
-        songs.forEach((s: any) => activity.push({ type: "Song approved", message: `"${s.title}" by ${s.artist?.user?.name || "Unknown"}`, time: s.updatedAt }));
-        artists.forEach((a: any) => activity.push({ type: "New artist", message: `"${a.user?.name || "Unknown"}" joined`, time: a.createdAt }));
+        songs.forEach((s: any) => activity.push({ type: "Song approved", message: `"${s.title}" by ${s.artist?.artistName || s.artist?.user?.name || "Unknown"}`, time: s.updatedAt }));
+        artists.forEach((a: any) => activity.push({ type: "New artist", message: `"${a.artistName || a.user?.name || "Unknown"}" joined`, time: a.createdAt }));
         return activity.slice(0, 10);
       })(),
     ]);
@@ -289,8 +289,8 @@ export const adminRouter = router({
         lifetime: walletTotal._sum.lifetimeEarnings || 0,
         withdrawn: walletTotal._sum.totalWithdrawn || 0,
       },
-      topSongs: topSongs.map((s: any) => ({ id: s.id, title: s.title, artist: s.artist?.user?.name || "Unknown", playCount: s.playCount, fileUrl: s.fileUrl, hlsUrl: s.hlsUrl, duration: s.duration })),
-      topArtists: topArtists.map((a: any) => ({ id: a.id, name: a.user?.name || "Unknown", totalStreams: a.totalStreams, verified: a.verified })),
+      topSongs: topSongs.map((s: any) => ({ id: s.id, title: s.title, artist: s.artist?.artistName || s.artist?.user?.name || "Unknown", playCount: s.playCount, fileUrl: s.fileUrl, hlsUrl: s.hlsUrl, duration: s.duration })),
+      topArtists: topArtists.map((a: any) => ({ id: a.id, name: a.artistName || a.user?.name || "Unknown", totalStreams: a.totalStreams, verified: a.verified })),
       topGenres,
       recentActivity,
     };

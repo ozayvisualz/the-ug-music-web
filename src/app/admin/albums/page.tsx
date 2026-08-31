@@ -29,7 +29,7 @@ export default function AdminAlbumsPage() {
             {albums.map((a: any) => (
               <tr key={a.id} className="border-b border-zinc-800/30 hover:bg-zinc-800/20">
                 <td className="p-4"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center"><Disc3 className="w-5 h-5 text-zinc-600" /></div><div><p className="text-sm font-medium text-white">{a.title}</p>{a.genre && <p className="text-xs text-zinc-500">{a.genre}</p>}</div></div></td>
-                <td className="p-4 hidden md:table-cell"><span className="text-sm text-zinc-400">{a.artist?.user?.name}</span></td>
+                <td className="p-4 hidden md:table-cell"><span className="text-sm text-zinc-400">{a.artist?.artistName || a.artist?.user?.name}</span></td>
                 <td className="p-4 hidden lg:table-cell"><span className="text-sm text-zinc-400">{a.songs?.length || 0}</span></td>
                 <td className="p-4"><span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${a.approved ? "bg-emerald-500/20 text-emerald-400" : "bg-yellow-500/20 text-yellow-500"}`}>{a.approved ? "Live" : "Pending"}</span></td>
                 <td className="p-4"><div className="flex items-center justify-end gap-1">
