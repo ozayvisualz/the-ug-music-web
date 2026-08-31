@@ -149,8 +149,8 @@ export const musicRouter = router({
   getArtistById: publicProcedure
     .input(z.string())
     .query(async ({ input, ctx }) => {
-      return ctx.db.artist.findUnique({
-        where: { id: input },
+      return ctx.db.artist.findFirst({
+        where: { OR: [{ slug: input }, { id: input }] },
         include: {
           user: { select: { id: true, name: true, image: true, createdAt: true } },
           songs: { where: { approved: true }, orderBy: { createdAt: "desc" } },
