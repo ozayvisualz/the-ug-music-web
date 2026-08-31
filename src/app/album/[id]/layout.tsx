@@ -77,7 +77,7 @@ export default async function AlbumLayout({ children, params }: Props) {
     ? [
         breadcrumbJsonLd([
           { name: "Home", url: absoluteUrl("/") },
-          { name: artistName, url: absoluteUrl(`/artist/${album.artistId}`) },
+          { name: artistName, url: absoluteUrl(`/artist/${album.artist?.slug || album.artistId}`) },
           { name: album.title, url },
         ]),
         musicAlbumJsonLd({

@@ -80,7 +80,7 @@ export default async function SongLayout({ children, params }: Props) {
     ? [
         breadcrumbJsonLd([
           { name: "Home", url: absoluteUrl("/") },
-          { name: artistName, url: absoluteUrl(`/artist/${song.artistId}`) },
+          { name: artistName, url: absoluteUrl(`/artist/${song.artist?.slug || song.artistId}`) },
           { name: song.title, url },
         ]),
         musicRecordingJsonLd({

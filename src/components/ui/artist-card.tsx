@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { User, BadgeCheck } from "lucide-react";
-import { getArtistName } from "@/lib/utils";
+import { getArtistName, artistHref } from "@/lib/utils";
 
 interface ArtistCardProps {
   artist: {
@@ -18,7 +18,7 @@ export function ArtistCard({ artist }: ArtistCardProps) {
   const name = getArtistName(artist);
   return (
     <Link
-      href={`/artist/${artist.id}`}
+      href={artistHref(artist)}
       className="group flex flex-col items-center p-4 rounded-xl bg-zinc-900/50 hover:bg-zinc-800/50 border border-transparent hover:border-zinc-700/50 transition text-center"
     >
       <div className="w-24 h-24 rounded-full overflow-hidden bg-zinc-800 mb-3 ring-2 ring-transparent group-hover:ring-yellow-500/50 transition-all">

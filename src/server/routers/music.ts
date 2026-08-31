@@ -46,8 +46,8 @@ export const musicRouter = router({
       return ctx.db.song.findUnique({
         where: { id: input },
         include: {
-          artist: { select: { artistName: true, user: { select: { name: true, image: true } } } },
-          featuredArtist: { select: { artistName: true, user: { select: { name: true, image: true } } } },
+          artist: { select: { id: true, slug: true, artistName: true, user: { select: { name: true, image: true } } } },
+          featuredArtist: { select: { id: true, slug: true, artistName: true, user: { select: { name: true, image: true } } } },
           album: true,
           comments: {
             include: { user: { select: { id: true, name: true, image: true } } },
@@ -87,7 +87,7 @@ export const musicRouter = router({
       return ctx.db.album.findUnique({
         where: { id: input },
         include: {
-          artist: { select: { artistName: true, user: { select: { name: true, image: true } } } },
+          artist: { select: { id: true, slug: true, artistName: true, user: { select: { name: true, image: true } } } },
           songs: { where: { approved: true }, include: { artist: { include: { user: { select: { name: true } } } } } },
         },
       });

@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Download, Send, Loader2 } from "lucide-react";
-import { formatDuration, getArtistName, getDisplayArtist } from "@/lib/utils";
+import { formatDuration, getArtistName, getDisplayArtist, artistHref } from "@/lib/utils";
 import { slugify } from "@/lib/seo";
 import { usePlayerStore } from "@/store/player";
 import { WebPlayer } from "@/components/layout/player";
@@ -106,7 +106,7 @@ export default function SongPage() {
         <ol className="flex items-center gap-1.5 flex-wrap">
           <li><Link href="/" className="hover:text-yellow-500">Home</Link></li>
           <li aria-hidden="true">/</li>
-          <li><Link href={`/artist/${(song as any).artistId}`} className="hover:text-yellow-500">{getArtistName(song.artist)}</Link></li>
+          <li><Link href={artistHref(song.artist, (song as any).artistId)} className="hover:text-yellow-500">{getArtistName(song.artist)}</Link></li>
           <li aria-hidden="true">/</li>
           <li className="text-zinc-300">{song.title}</li>
         </ol>
@@ -117,9 +117,9 @@ export default function SongPage() {
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold break-words px-2">{song.title}</h1>
         <div className="text-zinc-400">
-          <Link href={`/artist/${(song as any).artistId}`} className="hover:text-yellow-500 transition">{getArtistName(song.artist)}</Link>
+          <Link href={artistHref(song.artist, (song as any).artistId)} className="hover:text-yellow-500 transition">{getArtistName(song.artist)}</Link>
           {song.featuredArtist && (
-            <span className="text-zinc-500"> feat. <Link href={`/artist/${(song as any).featuredArtistId}`} className="hover:text-yellow-500 transition">{getArtistName(song.featuredArtist)}</Link></span>
+            <span className="text-zinc-500"> feat. <Link href={artistHref(song.featuredArtist, (song as any).featuredArtistId)} className="hover:text-yellow-500 transition">{getArtistName(song.featuredArtist)}</Link></span>
           )}
         </div>
         <div className="flex items-center justify-center gap-4 text-sm text-zinc-500">

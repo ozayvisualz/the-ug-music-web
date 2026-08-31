@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { ensureSlug } from "@/lib/slugs";
@@ -72,6 +72,11 @@ export default async function ArtistLayout({ children, params }: Props) {
   const artist = await getArtist(id);
   if (!artist) notFound();
 
+  // Redirect legacy ID-based URLs to the canonical slug URL.
+  if (artist.slug && id !== artist.slug) {
+    permanentRedirect(`/artist/${artist.slug}`);
+  }
+
   const name = artist.artistName || artist.user?.name || "Artist";
   const approved = artist.verificationStatus === "approved";
   const url = absoluteUrl(`/artist/${artist.slug || artist.id}`);
@@ -83,7 +88,7 @@ export default async function ArtistLayout({ children, params }: Props) {
           { name: "Artists", url: absoluteUrl("/search") },
           { name, url },
         ]),
-        musicGroupJsonLd({ ...artist, id: artist.id }),
+        musicGroupJsonLd({ ...artist, id: artist.slug || artist.id }),
       ]
     : null;
 

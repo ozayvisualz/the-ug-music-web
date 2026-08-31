@@ -53,6 +53,12 @@ export function getDisplayArtist(song: any): string {
   return featured ? `${primary} feat. ${featured}` : primary;
 }
 
+export function artistHref(artist: any, fallbackId?: string): string {
+  const slug = artist?.slug;
+  const id = artist?.id || fallbackId;
+  return `/artist/${slug || id || ""}`;
+}
+
 export const GENRES = [
   "Afrobeat",
   "Dancehall",

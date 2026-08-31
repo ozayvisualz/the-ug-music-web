@@ -4,7 +4,7 @@ import { trpc } from "@/trpc/client";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Disc3, Play, Clock, Calendar } from "lucide-react";
-import { getArtistName } from "@/lib/utils";
+import { getArtistName, artistHref } from "@/lib/utils";
 import { usePlayerStore } from "@/store/player";
 import { WebPlayer } from "@/components/layout/player";
 
@@ -40,7 +40,7 @@ export default function AlbumPage() {
         <ol className="flex items-center gap-1.5 flex-wrap">
           <li><Link href="/" className="hover:text-yellow-500">Home</Link></li>
           <li aria-hidden="true">/</li>
-          <li><Link href={`/artist/${album.artistId}`} className="hover:text-yellow-500">{getArtistName(album.artist)}</Link></li>
+          <li><Link href={artistHref(album.artist, album.artistId)} className="hover:text-yellow-500">{getArtistName(album.artist)}</Link></li>
           <li aria-hidden="true">/</li>
           <li className="text-zinc-300">{album.title}</li>
         </ol>

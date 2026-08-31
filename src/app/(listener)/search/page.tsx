@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Music2, Mic2, Disc3, Search as SearchIcon } from "lucide-react";
-import { getArtistName } from "@/lib/utils";
+import { getArtistName, artistHref } from "@/lib/utils";
 
 function SearchContent() {
   const params = useSearchParams();
@@ -44,7 +44,7 @@ function SearchContent() {
               <h2 className="text-lg font-bold mb-3 flex items-center gap-2"><Mic2 className="w-5 h-5 text-yellow-500" /> Artists</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {artists.map((a: any) => (
-                  <Link key={a.id} href={`/artist/${a.id}`} className="flex items-center gap-3 p-3 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-yellow-500/30 transition">
+                  <Link key={a.id} href={artistHref(a)} className="flex items-center gap-3 p-3 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-yellow-500/30 transition">
                     <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-sm font-bold text-yellow-500 overflow-hidden">
                       {a.photoUrl ? (
                         <img src={a.photoUrl} alt={`${getArtistName(a)} profile photo`} loading="lazy" className="w-full h-full object-cover" />
