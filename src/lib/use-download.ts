@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useDownloadStore } from "@/store/downloadStore";
+import { triggerMonetagDirectLink } from "@/lib/monetag";
 
 export type DownloadState = "idle" | "downloading" | "completing" | "downloaded" | "error" | "cancelled";
 
@@ -58,6 +59,9 @@ export function useDownload(songId: string, title?: string, meta?: DownloadMeta)
           remove(songId);
           return;
         }
+        // User is authorized — open the Monetag Direct Link (ad) once per
+        // intentional download. Never blocks or breaks the actual download.
+        triggerMonetagDirectLink();
         const fileRes = await fetch(`/api/download/${encodeURIComponent(songId)}`, { signal: controller.signal });
         if (!fileRes.ok) throw new Error("Download failed");
 
