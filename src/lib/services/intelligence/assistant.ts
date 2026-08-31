@@ -106,7 +106,7 @@ export const AdminAssistant = {
         const s = byId.get(r.songId);
         if (!s) return null;
         const completion = s.duration ? Math.min(1, r.avgDuration / s.duration) : 0;
-        return { songId: r.songId, title: s.title, artist: s.artist?.user?.name || s.artist?.artistName || "Unknown", completionRate: Number(completion.toFixed(2)), streams: r.count };
+        return { songId: r.songId, title: s.title, artist: s.artist?.artistName || s.artist?.user?.name || "Unknown", completionRate: Number(completion.toFixed(2)), streams: r.count };
       })
       .filter(Boolean);
   },

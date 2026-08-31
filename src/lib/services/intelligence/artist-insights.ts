@@ -132,7 +132,7 @@ export const ArtistInsightsEngine = {
 
     return artists.map((a) => ({
       id: a.id,
-      name: a.user?.name || a.artistName || "Unknown",
+      name: a.artistName || a.user?.name || "Unknown",
       image: a.user?.image,
       genre: a.genre,
       sharedListeners: counts[a.id] || 0,

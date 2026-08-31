@@ -67,7 +67,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{like.song.title}</p>
-                  <p className="text-xs text-zinc-500">{like.song.artist?.user?.name}</p>
+                  <p className="text-xs text-zinc-500">{like.song.artist?.artistName || like.song.artist?.user?.name}</p>
                 </div>
               </Link>
             ))}

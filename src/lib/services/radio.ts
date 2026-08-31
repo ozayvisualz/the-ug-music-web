@@ -347,7 +347,7 @@ export const RadioService = {
     return {
       id: s.id,
       title: s.title,
-      artist: s.artist?.user?.name || s.artist?.artistName || "Unknown",
+      artist: s.artist?.artistName || s.artist?.user?.name || "Unknown",
       artistId: s.artistId,
       duration: s.duration,
       coverUrl: s.coverUrl,

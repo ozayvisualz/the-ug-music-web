@@ -162,7 +162,7 @@ export const RecommendationEngine = {
     return picks.map(({ song, score }) => ({
       id: song.id,
       title: song.title,
-      artist: song.artist?.user?.name || song.artist?.artistName || "Unknown",
+      artist: song.artist?.artistName || song.artist?.user?.name || "Unknown",
       artistId: song.artistId,
       genre: song.genre,
       duration: song.duration,
@@ -198,7 +198,7 @@ export const RecommendationEngine = {
     return songs.map((song) => ({
       id: song.id,
       title: song.title,
-      artist: song.artist?.user?.name || song.artist?.artistName || "Unknown",
+      artist: song.artist?.artistName || song.artist?.user?.name || "Unknown",
       artistId: song.artistId,
       genre: song.genre,
       duration: song.duration,

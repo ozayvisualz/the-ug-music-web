@@ -112,7 +112,7 @@ export const FraudEngine = {
     return suspicious.map((s) => ({
       songId: s.songId,
       title: byId.get(s.songId)?.title || "Unknown",
-      artist: byId.get(s.songId)?.artist?.user?.name || byId.get(s.songId)?.artist?.artistName || "Unknown",
+      artist: byId.get(s.songId)?.artist?.artistName || byId.get(s.songId)?.artist?.user?.name || "Unknown",
       streams: s.streams,
       uniqueListeners: s.uniqueListeners,
       ratio: Number(s.ratio.toFixed(1)),

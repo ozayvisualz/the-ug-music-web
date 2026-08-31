@@ -29,7 +29,7 @@ export default function TicketsPage() {
             </div>
             <div className="flex-1 space-y-2">
               <h3 className="text-lg font-bold">{event.title}</h3>
-              <p className="text-sm text-zinc-400">by {event.artist?.user?.name}</p>
+              <p className="text-sm text-zinc-400">by {event.artist?.artistName || event.artist?.user?.name}</p>
               <div className="flex items-center gap-4 text-sm text-zinc-500 flex-wrap">
                 <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {new Date(event.date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</span>
                 <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {event.venue}, {event.location}</span>

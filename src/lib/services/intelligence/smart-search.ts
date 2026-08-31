@@ -218,7 +218,7 @@ export const SmartSearchEngine = {
       }));
 
     const rankedAlbums = albums
-      .map((album) => ({ album, score: similarity(core, album.title) * 3 + similarity(core, album.artist?.user?.name || "") * 2 }))
+      .map((album) => ({ album, score: similarity(core, album.title) * 3 + similarity(core, album.artist?.artistName || album.artist?.user?.name || "") * 2 }))
       .filter((r) => r.score > 0.3)
       .sort((a, b) => b.score - a.score)
       .slice(0, 6)

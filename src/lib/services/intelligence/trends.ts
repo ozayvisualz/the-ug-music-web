@@ -66,7 +66,7 @@ export const TrendEngine = {
     return scored
       .map((s) => {
         const a = artists.find((x) => x.id === s.artistId);
-        return a ? { id: a.id, name: a.user?.name || a.artistName || "Unknown", genre: a.genre, image: a.user?.image, growth: s.growth, velocity: s.velocity } : null;
+        return a ? { id: a.id, name: a.artistName || a.user?.name || "Unknown", genre: a.genre, image: a.user?.image, growth: s.growth, velocity: s.velocity } : null;
       })
       .filter(Boolean);
   },
@@ -148,7 +148,7 @@ export const TrendEngine = {
         return {
           id: s.id,
           title: s.title,
-          artist: s.artist?.user?.name || s.artist?.artistName || "Unknown",
+          artist: s.artist?.artistName || s.artist?.user?.name || "Unknown",
           artistId: s.artistId,
           genre: s.genre,
           coverUrl: s.coverUrl,

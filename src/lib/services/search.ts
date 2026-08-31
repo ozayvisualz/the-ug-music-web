@@ -40,14 +40,19 @@ export const SearchEngine = {
       take: 8,
     });
     const artists = await db.artist.findMany({
-      where: { user: { name: { contains: query, mode: "insensitive" } } },
-      select: { user: { select: { name: true } } },
+      where: {
+        OR: [
+          { artistName: { contains: query, mode: "insensitive" } },
+          { user: { name: { contains: query, mode: "insensitive" } } },
+        ],
+      },
+      select: { artistName: true, user: { select: { name: true } } },
       take: 4,
     });
 
     const results = new Set<string>();
     songs.forEach((s) => results.add(s.title));
-    artists.forEach((a) => results.add(a.user?.name || ""));
+    artists.forEach((a) => results.add(a.artistName || a.user?.name || ""));
     return Array.from(results).slice(0, 10);
   },
 
@@ -66,7 +71,7 @@ export const SearchEngine = {
       }),
     ]);
     const names = new Set<string>();
-    topArtists.forEach((a) => { if (a.user?.name) names.add(a.user.name); });
+    topArtists.forEach((a) => { if (a.artistName || a.user?.name) names.add(a.artistName || a.user?.name || ""); });
     topSongs.forEach((s) => { if (s.title) names.add(s.title); });
     return Array.from(names).slice(0, 8);
   },

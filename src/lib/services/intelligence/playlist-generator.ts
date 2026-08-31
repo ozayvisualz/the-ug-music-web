@@ -78,7 +78,7 @@ export const PlaylistGenerator = {
       .map((s: any) => ({
         id: s.id,
         title: s.title,
-        artist: s.artist?.user?.name || s.artist?.artistName || "Unknown",
+        artist: s.artist?.artistName || s.artist?.user?.name || "Unknown",
         artistId: s.artistId,
         genre: s.genre,
         coverUrl: s.coverUrl,

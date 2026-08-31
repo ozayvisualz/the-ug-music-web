@@ -103,7 +103,7 @@ export const SmartChartsEngine = {
         return {
           id: song.id,
           title: song.title,
-          artist: song.artist?.user?.name || song.artist?.artistName || "Unknown",
+          artist: song.artist?.artistName || song.artist?.user?.name || "Unknown",
           artistId: song.artistId,
           genre: song.genre,
           coverUrl: song.coverUrl,
@@ -157,7 +157,7 @@ export const SmartChartsEngine = {
           ? {
               rank: i + 1,
               id: a.id,
-              name: a.user?.name || a.artistName || "Unknown",
+              name: a.artistName || a.user?.name || "Unknown",
               image: a.user?.image,
               genre: a.genre,
               streams: r.streams,

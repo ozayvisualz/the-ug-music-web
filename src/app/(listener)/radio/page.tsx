@@ -141,7 +141,7 @@ export default function RadioPage() {
               <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">🎵</div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold truncate">{s.title}</p>
-                <p className="text-xs text-zinc-500">{s.artist?.user?.name}</p>
+                <p className="text-xs text-zinc-500">{s.artist?.artistName || s.artist?.user?.name}</p>
               </div>
               <span className="text-xs text-zinc-600">{formatNumber(s.playCount || 0)} plays</span>
             </Link>

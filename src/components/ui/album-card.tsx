@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { Disc3 } from "lucide-react";
+import { getArtistName } from "@/lib/utils";
 
 interface AlbumCardProps {
   album: {
     id: string;
     title: string;
     coverUrl: string | null;
-    artist: { user: { name: string | null } };
+    artist: { artistName?: string | null; user: { name: string | null } };
     songs?: { id: string }[];
   };
 }
@@ -27,7 +28,7 @@ export function AlbumCard({ album }: AlbumCardProps) {
         )}
       </div>
       <p className="text-sm font-semibold truncate">{album.title}</p>
-      <p className="text-xs text-zinc-500 truncate">{album.artist.user.name}</p>
+      <p className="text-xs text-zinc-500 truncate">{getArtistName(album.artist)}</p>
       {album.songs && <p className="text-xs text-zinc-600 mt-0.5">{album.songs.length} songs</p>}
     </Link>
   );

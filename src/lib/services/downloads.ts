@@ -67,7 +67,7 @@ export const DownloadEngine = {
       return { authorized: false, reason: "payment_required", price: song.price };
     }
 
-    const artistName = song.artist?.user?.name || song.artist?.artistName || "Artist";
+    const artistName = song.artist?.artistName || song.artist?.user?.name || "Artist";
     return {
       authorized: true,
       songId: song.id,

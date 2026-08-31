@@ -73,7 +73,7 @@ export const SmartQueueEngine = {
     return {
       id: song.id,
       title: song.title,
-      artist: song.artist?.user?.name || song.artist?.artistName || "Unknown",
+      artist: song.artist?.artistName || song.artist?.user?.name || "Unknown",
       artistId: song.artistId,
       genre: song.genre,
       duration: song.duration,
