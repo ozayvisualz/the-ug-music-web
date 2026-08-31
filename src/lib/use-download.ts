@@ -34,6 +34,9 @@ export function useDownload(songId: string, title?: string, meta?: DownloadMeta)
 
   const download = useCallback(async () => {
     if (!songId || inFlight.current) return;
+    // Prevent a duplicate concurrent download of the same song (e.g. started
+    // from two different surfaces). The active record is authoritative.
+    if (useDownloadStore.getState().active[songId]) return;
     inFlight.current = true;
     setState("downloading");
     setProgress(null);
