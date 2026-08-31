@@ -121,6 +121,14 @@ export const StreamingEngine = {
         data: { totalStreams: { increment: 1 } },
       });
 
+      // Credit the featured artist (if any) for their collaboration.
+      if (song.featuredArtistId) {
+        await db.artist.update({
+          where: { id: song.featuredArtistId },
+          data: { totalStreams: { increment: 1 } },
+        }).catch(() => {});
+      }
+
       // Update album streams for eligible streams
       if (song.albumId) {
         await db.album.update({
@@ -173,14 +181,17 @@ export const StreamingEngine = {
     const since = new Date();
     since.setDate(since.getDate() - days);
 
+    // Include songs the artist is featured on as well as their own uploads.
+    const songWhere = { OR: [{ artistId }, { featuredArtistId: artistId }] };
+
     const [total, eligible, unique] = await Promise.all([
-      db.stream.count({ where: { song: { artistId }, createdAt: { gte: since } } }),
-      db.stream.count({ where: { song: { artistId }, revenueEligible: true, createdAt: { gte: since } } }),
-      db.stream.groupBy({ by: ["userId"], where: { song: { artistId }, createdAt: { gte: since } } }).then((r) => r.length),
+      db.stream.count({ where: { song: songWhere, createdAt: { gte: since } } }),
+      db.stream.count({ where: { song: songWhere, revenueEligible: true, createdAt: { gte: since } } }),
+      db.stream.groupBy({ by: ["userId"], where: { song: songWhere, createdAt: { gte: since } } }).then((r) => r.length),
     ]);
 
     const byDay = await db.$queryRawUnsafe<Array<{ date: string; count: bigint }>>(
-      `SELECT DATE("createdAt") as date, COUNT(*)::int as count FROM "Stream" WHERE "songId" IN (SELECT id FROM "Song" WHERE "artistId" = $1) AND "createdAt" >= $2 GROUP BY DATE("createdAt") ORDER BY date`,
+      `SELECT DATE("createdAt") as date, COUNT(*)::int as count FROM "Stream" WHERE "songId" IN (SELECT id FROM "Song" WHERE "artistId" = $1 OR "featuredArtistId" = $1) AND "createdAt" >= $2 GROUP BY DATE("createdAt") ORDER BY date`,
       artistId, since
     );
 

@@ -50,7 +50,7 @@ export const DownloadEngine = {
    * Never double-counts: a repeat call for the same user+song is a no-op.
    */
   async registerDownload(userId: string, songId: string, opts: { source?: string; platform?: string; device?: string } = {}) {
-    const song = await db.song.findUnique({ where: { id: songId }, select: { id: true, artistId: true, price: true } });
+    const song = await db.song.findUnique({ where: { id: songId }, select: { id: true, artistId: true, featuredArtistId: true, price: true } });
     if (!song) return null;
 
     const existing = await db.download.findFirst({ where: { songId, userId } });
@@ -75,6 +75,10 @@ export const DownloadEngine = {
     });
     await db.song.update({ where: { id: songId }, data: { downloadCount: { increment: 1 } } });
     await db.artist.update({ where: { id: song.artistId }, data: { totalDownloads: { increment: 1 } } });
+    // Credit the featured artist (if any) for their collaboration.
+    if (song.featuredArtistId) {
+      await db.artist.update({ where: { id: song.featuredArtistId }, data: { totalDownloads: { increment: 1 } } }).catch(() => {});
+    }
     return download;
   },
 
@@ -104,7 +108,7 @@ export const DownloadEngine = {
   async getDownloadAnalytics(artistId: string, days: number) {
     const since = new Date(); since.setDate(since.getDate() - days);
     const downloads = await db.download.findMany({
-      where: { song: { artistId }, createdAt: { gte: since } },
+      where: { song: { OR: [{ artistId }, { featuredArtistId: artistId }] }, createdAt: { gte: since } },
       include: { song: { select: { title: true } } },
       orderBy: { createdAt: "desc" },
     });

@@ -210,9 +210,12 @@ export const artistRouter = router({
       const since = new Date();
       since.setDate(since.getDate() - input.days);
 
+      // Include songs the artist is featured on as well as their own uploads.
+      const songWhere = { OR: [{ artistId: artist.id }, { featuredArtistId: artist.id }] };
+
       const [streams, downloads, revenue] = await Promise.all([
-        ctx.db.stream.count({ where: { song: { artistId: artist.id }, createdAt: { gte: since } } }),
-        ctx.db.download.count({ where: { song: { artistId: artist.id }, createdAt: { gte: since } } }),
+        ctx.db.stream.count({ where: { song: songWhere, createdAt: { gte: since } } }),
+        ctx.db.download.count({ where: { song: songWhere, createdAt: { gte: since } } }),
         ctx.db.revenueRecord.aggregate({
           where: { artistId: artist.id, createdAt: { gte: since } },
           _sum: { grossAmount: true, artistShare: true },
