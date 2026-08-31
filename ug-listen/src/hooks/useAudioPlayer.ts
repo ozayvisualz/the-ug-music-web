@@ -223,6 +223,7 @@ export function useAudioPlayer() {
 
         let crossfadeStarted = false;
         let finished = false;
+        let autoPlayed = false;
         statusSub = newPlayer.addListener("playbackStatusUpdate", (status: any) => {
           if (currentTrackId.current !== trackId) return;
 
@@ -230,11 +231,14 @@ export function useAudioPlayer() {
             setIsLoaded(true);
             setIsBuffering(false);
             setDuration(status.duration || currentTrack.duration);
-            if (currentTrack.startPosition && currentTrack.startPosition > 0) {
-              try { newPlayer.seekTo(currentTrack.startPosition); setPosition(currentTrack.startPosition); } catch {}
-            }
-            if (!status.playing) {
-              try { newPlayer.play(); } catch {}
+            if (!autoPlayed) {
+              autoPlayed = true;
+              if (currentTrack.startPosition && currentTrack.startPosition > 0) {
+                try { newPlayer.seekTo(currentTrack.startPosition); setPosition(currentTrack.startPosition); } catch {}
+              }
+              if (!status.playing) {
+                try { newPlayer.play(); } catch {}
+              }
             }
             if (shouldCrossfade && !crossfadeStarted) {
               crossfadeStarted = true;
