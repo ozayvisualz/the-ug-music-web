@@ -8,7 +8,7 @@ import { formatNumber, formatDuration, GENRES } from "@/lib/utils";
 export default function ArtistMusicPage() {
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<any>(null);
-  const [editForm, setEditForm] = useState({ title: "", genre: "", description: "", price: 1000 });
+  const [editForm, setEditForm] = useState({ title: "", genre: "", description: "" });
   const utils = trpc.useUtils();
   const { data: songs, isLoading } = trpc.artist.getMySongs.useQuery();
   const toggleMut = trpc.artist.togglePublish.useMutation({ onSuccess: () => { toast.success("Updated"); utils.artist.getMySongs.invalidate(); }, onError: (e) => toast.error(e.message) });
@@ -24,7 +24,7 @@ export default function ArtistMusicPage() {
 
   const startEdit = (song: any) => {
     setEditing(song);
-    setEditForm({ title: song.title, genre: song.genre || "", description: song.description || "", price: song.price || 1000 });
+    setEditForm({ title: song.title, genre: song.genre || "", description: song.description || "" });
     setFeaturedArtistId(song.featuredArtistId || null);
     setFeaturedArtistName(song.featuredArtist?.artistName || "");
     setFeaturedSearch("");
@@ -81,7 +81,6 @@ export default function ArtistMusicPage() {
               <div><label className="block text-xs text-zinc-500 mb-1">Title</label><input type="text" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-yellow-500/50" /></div>
               <div><label className="block text-xs text-zinc-500 mb-1">Genre</label><select value={editForm.genre} onChange={(e) => setEditForm({ ...editForm, genre: e.target.value })} className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-yellow-500/50"><option value="">Select genre</option>{GENRES.map((g) => <option key={g} value={g}>{g}</option>)}</select></div>
               <div><label className="block text-xs text-zinc-500 mb-1">Description</label><textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} rows={2} className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-yellow-500/50 resize-none" /></div>
-              <div><label className="block text-xs text-zinc-500 mb-1">Price (UGX)</label><input type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: parseInt(e.target.value) || 0 })} className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-yellow-500/50" /></div>
               <div><label className="block text-xs text-zinc-500 mb-1">Featured Artist (optional)</label>
                 {featuredArtistName ? (
                   <div className="flex items-center justify-between bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5">

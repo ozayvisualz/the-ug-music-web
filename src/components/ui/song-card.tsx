@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Play, Download, MoreVertical } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
-import { formatDuration, formatUGX, getDisplayArtist } from "@/lib/utils";
+import { formatDuration, getDisplayArtist } from "@/lib/utils";
 
 function Equalizer({ color = "#EAB308" }: { color?: string }) {
   return (
@@ -89,11 +89,6 @@ export function SongCard({ song }: SongCardProps) {
           {song.title}
         </Link>
         <p className="text-xs text-zinc-500">{getDisplayArtist(song)}</p>
-        {song.price && song.price > 0 && (
-          <span className="inline-flex items-center gap-1 text-xs text-yellow-500 mt-0.5">
-            {formatUGX(song.price)}
-          </span>
-        )}
       </div>
 
       <span className="text-xs text-zinc-600 w-10 text-right">{formatDuration(song.duration)}</span>

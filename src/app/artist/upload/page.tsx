@@ -17,7 +17,6 @@ export default function UploadMusicPage() {
     title: "",
     genre: "",
     description: "",
-    price: 1000,
     coverUrl: "",
     story: "",
     releaseDate: "",
@@ -145,7 +144,6 @@ export default function UploadMusicPage() {
         duration,
         fileUrl,
         coverUrl: coverUrl || undefined,
-        price: form.price,
         story: form.story || undefined,
         releaseDate: form.releaseDate || undefined,
         songwriters: form.songwriters || undefined,
@@ -251,12 +249,6 @@ export default function UploadMusicPage() {
                 <option value="">Select genre</option>
                 {GENRES.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
-            </div>
-            <div>
-              <label className="block text-sm text-zinc-400 mb-1.5">Price (UGX)</label>
-              <input type="number" value={form.price} onChange={(e) => setForm({ ...form, price: parseInt(e.target.value) || 0 })}
-                min={0} step={500}
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-yellow-500 transition" />
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm text-zinc-400 mb-1.5">Description (optional)</label>
@@ -385,7 +377,6 @@ export default function UploadMusicPage() {
               <div className="space-y-2 bg-zinc-900/50 border border-zinc-800/60 rounded-xl p-4">
                 <div className="flex justify-between text-sm"><span className="text-zinc-500">Title</span><span className="text-white font-medium">{form.title}</span></div>
                 {form.genre && <div className="flex justify-between text-sm"><span className="text-zinc-500">Genre</span><span className="text-white">{form.genre}</span></div>}
-                <div className="flex justify-between text-sm"><span className="text-zinc-500">Price</span><span className="text-white">UGX {form.price.toLocaleString()}</span></div>
                 {form.releaseDate && <div className="flex justify-between text-sm"><span className="text-zinc-500">Release Date</span><span className="text-white">{form.releaseDate}</span></div>}
                 {audioFile && <div className="flex justify-between text-sm"><span className="text-zinc-500">Audio File</span><span className="text-white truncate max-w-[200px]">{audioFile.name}</span></div>}
                 {coverFile && <div className="flex justify-between text-sm"><span className="text-zinc-500">Cover Art</span><span className="text-white truncate max-w-[200px]">{coverFile.name}</span></div>}

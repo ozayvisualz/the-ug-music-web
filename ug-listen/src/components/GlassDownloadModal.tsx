@@ -48,18 +48,8 @@ type Props = {
 
 const SPRING = { damping: 18, stiffness: 180, mass: 0.9 };
 
-function formatUGX(amount: number): string {
-  try {
-    return "UGX " + amount.toLocaleString();
-  } catch {
-    return "UGX " + amount;
-  }
-}
-
 export default function GlassDownloadModal({ song, onClose }: Props) {
   const { colors, isDark } = useTheme();
-  const [price, setPrice] = useState<number | null>(null);
-  const [priceLoading, setPriceLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
@@ -76,18 +66,6 @@ export default function GlassDownloadModal({ song, onClose }: Props) {
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
   }, []);
-
-  useEffect(() => {
-    // Fetch the song price (and details) for the purchase prompt.
-    (async () => {
-      try {
-        const res = await fetch(`https://www.theugmusic.com/api/mobile/song?id=${encodeURIComponent(song.id)}`);
-        const d = await res.json();
-        if (typeof d?.price === "number") setPrice(d.price);
-      } catch {}
-      setPriceLoading(false);
-    })();
-  }, [song.id]);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -261,11 +239,7 @@ export default function GlassDownloadModal({ song, onClose }: Props) {
 
                 <View style={styles.priceRow}>
                   <Text style={[styles.priceLabel, { color: colors.textMuted }]}>Price</Text>
-                  {priceLoading ? (
-                    <ActivityIndicator size="small" color={colors.gold} />
-                  ) : (
-                    <Text style={[styles.priceValue, { color: colors.gold }]}>{price != null ? formatUGX(price) : "—"}</Text>
-                  )}
+                  <Text style={[styles.priceValue, { color: colors.gold }]}>Free</Text>
                 </View>
 
                 <TouchableOpacity
@@ -274,7 +248,7 @@ export default function GlassDownloadModal({ song, onClose }: Props) {
                   activeOpacity={0.85}
                   disabled={purchasing || downloading}
                   accessibilityRole="button"
-                  accessibilityLabel="Buy and download"
+                  accessibilityLabel="Download"
                 >
                   <LinearGradient colors={downloadDone ? ["#10B981", "#059669"] : ["#F5C518", "#C89108"]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
                   <LinearGradient colors={["rgba(255,255,255,0.4)", "rgba(255,255,255,0)"]} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.btnGloss} pointerEvents="none" />
@@ -287,7 +261,7 @@ export default function GlassDownloadModal({ song, onClose }: Props) {
                   ) : downloadDone ? (
                     <Text style={styles.buyText}>Downloaded ✓</Text>
                   ) : (
-                    <Text style={styles.buyText}>Buy &amp; Download</Text>
+                    <Text style={styles.buyText}>Download</Text>
                   )}
                 </TouchableOpacity>
 

@@ -52,21 +52,7 @@ export const DownloadEngine = {
     });
     if (!song) return { authorized: false, reason: "not_found" };
 
-    const isFree = !song.price || song.price <= 0;
-    let authorized = isFree;
-
-    if (!authorized) {
-      const [purchased, premium] = await Promise.all([
-        this.hasPurchased(userId, songId),
-        db.subscription.findFirst({ where: { userId, status: "COMPLETED", endDate: { gte: new Date() } } }),
-      ]);
-      authorized = purchased || !!premium;
-    }
-
-    if (!authorized) {
-      return { authorized: false, reason: "payment_required", price: song.price };
-    }
-
+    // All songs are free to download.
     const artistName = song.artist?.artistName || song.artist?.user?.name || "Artist";
     return {
       authorized: true,
@@ -105,10 +91,7 @@ export const DownloadEngine = {
       return existing;
     }
 
-    // Only free songs reach here without a payment record.
-    const isFree = !song.price || song.price <= 0;
-    if (!isFree) return null;
-
+    // All songs are free — always record the download.
     const download = await db.download.create({
       data: {
         songId, userId,
