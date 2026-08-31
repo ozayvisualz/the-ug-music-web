@@ -8,6 +8,7 @@ interface Song {
   hlsUrl?: string;
   fileUrl?: string;
   duration: number;
+  artistId?: string;
 }
 
 export interface RadioContext {

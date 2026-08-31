@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
 import { Play, Pause, SkipBack, SkipForward, X, Music2 } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
 import { trpc } from "@/trpc/client";
@@ -97,7 +98,12 @@ export function WebPlayer() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold truncate">{currentSong.title}</p>
-          <p className="text-xs text-zinc-500 truncate">{radioContext ? `${radioContext.title} · ${currentSong.artist}` : currentSong.artist}</p>
+          <p className="text-xs text-zinc-500 truncate">
+            {radioContext ? <>{radioContext.title} · </> : null}
+            {currentSong.artistId ? (
+              <Link href={`/artist/${currentSong.artistId}`} className="hover:text-yellow-500 transition">{currentSong.artist}</Link>
+            ) : currentSong.artist}
+          </p>
           <p className="text-[10px] text-zinc-600">{fmt(currentPos)} / {fmt(dur)}</p>
         </div>
         <div className="flex items-center gap-1">

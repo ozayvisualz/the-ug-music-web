@@ -36,6 +36,8 @@ interface SongCardProps {
     duration: number;
     price?: number;
     playCount?: number;
+    artistId?: string;
+    featuredArtistId?: string;
   };
 }
 
@@ -57,6 +59,7 @@ export function SongCard({ song }: SongCardProps) {
       hlsUrl: song.hlsUrl || undefined,
       fileUrl: song.fileUrl || undefined,
       duration: song.duration,
+      artistId: song.artistId,
     });
   };
 

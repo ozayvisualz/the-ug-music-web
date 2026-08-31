@@ -31,6 +31,7 @@ export default function ArtistPage() {
       hlsUrl: s.hlsUrl || undefined,
       fileUrl: s.fileUrl || undefined,
       duration: s.duration,
+      artistId: artist.id,
     }));
     setQueue(queue);
     setRadioContext(null);

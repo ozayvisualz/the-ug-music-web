@@ -36,6 +36,7 @@ export default function SongPage() {
       hlsUrl: song.hlsUrl || undefined,
       fileUrl: song.fileUrl || undefined,
       duration: song.duration,
+      artistId: (song as any).artistId,
     };
     setCurrentSong(track);
     setQueue([track]);

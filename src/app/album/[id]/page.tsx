@@ -28,6 +28,7 @@ export default function AlbumPage() {
       hlsUrl: s.hlsUrl || undefined,
       fileUrl: s.fileUrl || undefined,
       duration: s.duration,
+      artistId: album.artistId,
     }));
     setQueue(queue);
     setRadioContext(null);
