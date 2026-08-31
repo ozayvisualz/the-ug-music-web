@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import jwt from "jsonwebtoken";
+import { getServerUser } from "@/lib/server-auth";
 
-function getUser(req: NextRequest) {
-  const token = req.nextUrl.searchParams.get("token") || (req.headers.get("authorization")?.startsWith("Bearer ") ? req.headers.get("authorization")!.slice(7) : null);
-  if (!token) return null;
-  try { return jwt.verify(token, process.env.AUTH_SECRET || "default-secret") as any; } catch { return null; }
+async function getUser(req: NextRequest) {
+  return getServerUser(req);
 }
 
 export async function GET(req: NextRequest) {
@@ -16,7 +14,7 @@ export async function GET(req: NextRequest) {
     if (!songId) return NextResponse.json({ error: "songId required" }, { status: 400 });
 
     if (action === "add") {
-      const user = getUser(req);
+      const user = await getUser(req);
       const content = req.nextUrl.searchParams.get("content");
       if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       if (!content || !content.trim()) return NextResponse.json({ error: "Comment content required" }, { status: 400 });
