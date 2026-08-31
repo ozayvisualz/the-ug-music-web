@@ -171,7 +171,7 @@ export const SmartSearchEngine = {
 
     const rankedSongs = songs
       .map((song) => {
-        const artistName = song.artist?.user?.name || song.artist?.artistName || "";
+        const artistName = song.artist?.artistName || song.artist?.user?.name || "";
         const titleSim = similarity(core, song.title);
         const artistSim = similarity(core, artistName);
         const genreSim = song.genre ? similarity(core, song.genre) : 0;
@@ -191,7 +191,7 @@ export const SmartSearchEngine = {
       .map(({ song }) => ({
         id: song.id,
         title: song.title,
-        artist: song.artist?.user?.name || song.artist?.artistName || "Unknown",
+        artist: song.artist?.artistName || song.artist?.user?.name || "Unknown",
         artistId: song.artistId,
         genre: song.genre,
         coverUrl: song.coverUrl,
@@ -202,7 +202,7 @@ export const SmartSearchEngine = {
 
     const rankedArtists = artists
       .map((artist) => {
-        const name = artist.user?.name || artist.artistName || "";
+        const name = artist.artistName || artist.user?.name || "";
         const sim = similarity(core, name);
         const genreSim = artist.genre ? similarity(core, artist.genre) : 0;
         return { artist, score: sim * 3 + genreSim * 1.5 + Math.log10((artist.totalStreams || 0) + 10) * 0.15 };
@@ -212,7 +212,7 @@ export const SmartSearchEngine = {
       .slice(0, 10)
       .map(({ artist }) => ({
         id: artist.id,
-        name: artist.user?.name || artist.artistName || "Unknown",
+        name: artist.artistName || artist.user?.name || "Unknown",
         genre: artist.genre,
         image: artist.user?.image,
       }));
@@ -222,7 +222,7 @@ export const SmartSearchEngine = {
       .filter((r) => r.score > 0.3)
       .sort((a, b) => b.score - a.score)
       .slice(0, 6)
-      .map(({ album }) => ({ id: album.id, title: album.title, coverUrl: album.coverUrl, artist: album.artist?.user?.name || "" }));
+      .map(({ album }) => ({ id: album.id, title: album.title, coverUrl: album.coverUrl, artist: album.artist?.artistName || album.artist?.user?.name || "" }));
 
     return { query, intent, songs: rankedSongs, artists: rankedArtists, albums: rankedAlbums };
   },
@@ -250,7 +250,7 @@ export const SmartSearchEngine = {
     const items: { text: string; score: number }[] = [];
     for (const s of songs) items.push({ text: s.title, score: similarity(q, s.title) });
     for (const a of artists) {
-      const name = a.user?.name || a.artistName;
+      const name = a.artistName || a.user?.name;
       if (name) items.push({ text: name, score: similarity(q, name) });
     }
     return items
