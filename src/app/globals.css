@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  font-size: 15px;
+}
+
 @theme {
   --spacing: 0.19rem;
   --color-yellow-500: #eab308;
