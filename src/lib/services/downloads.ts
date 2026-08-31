@@ -16,10 +16,13 @@ export const DownloadEngine = {
    * listener is not authorized to access.
    */
   async authorizeDownload(userId: string, songId: string) {
-    const song = await db.song.findUnique({
-      where: { id: songId },
-      include: { artist: { include: { user: { select: { name: true } } } }, album: { select: { id: true, title: true } } },
-    });
+    const [song, existingDownload] = await Promise.all([
+      db.song.findUnique({
+        where: { id: songId },
+        include: { artist: { include: { user: { select: { name: true } } } }, album: { select: { id: true, title: true } } },
+      }),
+      db.download.findFirst({ where: { songId, userId }, select: { id: true } }),
+    ]);
     if (!song) return { authorized: false, reason: "not_found" };
 
     // All songs are free to download.
@@ -36,6 +39,7 @@ export const DownloadEngine = {
       duration: song.duration,
       coverUrl: song.coverUrl,
       fileName: `${song.title} - ${artistName}.mp3`.replace(/[\\/:*?"<>|]/g, ""),
+      downloaded: !!existingDownload,
     };
   },
 

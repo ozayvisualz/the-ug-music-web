@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Play, Download, MoreVertical } from "lucide-react";
+import { Play } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
 import { formatDuration, getDisplayArtist } from "@/lib/utils";
+import { DownloadButton } from "@/components/ui/download-button";
 
 function Equalizer({ color = "#EAB308" }: { color?: string }) {
   return (
@@ -93,6 +94,8 @@ export function SongCard({ song }: SongCardProps) {
         </Link>
         <p className="text-xs text-zinc-500">{getDisplayArtist(song)}</p>
       </div>
+
+      <DownloadButton songId={song.id} title={song.title} />
 
       <span className="text-xs text-zinc-600 w-10 text-right">{formatDuration(song.duration)}</span>
     </div>

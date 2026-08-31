@@ -7,6 +7,7 @@ import { BadgeCheck, Music2, Play, Users, MapPin, Heart } from "lucide-react";
 import { formatNumber, getArtistName } from "@/lib/utils";
 import { slugify } from "@/lib/seo";
 import { usePlayerStore } from "@/store/player";
+import { DownloadButton } from "@/components/ui/download-button";
 import { WebPlayer } from "@/components/layout/player";
 
 export default function ArtistPage() {
@@ -95,6 +96,7 @@ export default function ArtistPage() {
                 <p className="text-sm font-semibold truncate">{s.title}</p>
                 <p className="text-xs text-zinc-500">{formatNumber(s.playCount || 0)} plays</p>
               </div>
+              <DownloadButton songId={s.id} title={s.title} />
               <span className="text-xs text-zinc-600">{Math.floor((s.duration || 0) / 60)}:{(s.duration || 0) % 60}</span>
             </Link>
           ))}
@@ -114,6 +116,7 @@ export default function ArtistPage() {
                   <p className="text-sm font-semibold truncate">{s.title}</p>
                   <p className="text-xs text-zinc-500">{getArtistName(s.artist)}</p>
                 </div>
+                <DownloadButton songId={s.id} title={s.title} />
                 <span className="text-xs text-zinc-600">{Math.floor((s.duration || 0) / 60)}:{(s.duration || 0) % 60}</span>
               </Link>
             ))}

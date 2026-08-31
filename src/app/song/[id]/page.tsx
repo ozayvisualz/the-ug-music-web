@@ -8,6 +8,7 @@ import { Download, Send, Loader2 } from "lucide-react";
 import { formatDuration, getArtistName, getDisplayArtist, artistHref } from "@/lib/utils";
 import { slugify } from "@/lib/seo";
 import { usePlayerStore } from "@/store/player";
+import { useDownload } from "@/lib/use-download";
 import { WebPlayer } from "@/components/layout/player";
 
 export default function SongPage() {
@@ -17,8 +18,8 @@ export default function SongPage() {
   const [comments, setComments] = useState<any[]>([]);
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
-  const [dlState, setDlState] = useState<"idle" | "downloading" | "downloaded" | "error">("idle");
   const { setCurrentSong, setQueue, setRadioContext, currentSong, isPlaying, togglePlay } = usePlayerStore();
+  const { state: dlState, download: handleDownload } = useDownload(songId || "", song?.title);
 
   const handlePlay = () => {
     if (!song) return;
@@ -40,41 +41,6 @@ export default function SongPage() {
     };
     setCurrentSong(track);
     setQueue([track]);
-  };
-
-  const handleDownload = async () => {
-    if (!songId || dlState === "downloading") return;
-    setDlState("downloading");
-    try {
-      const res = await fetch(`/api/mobile/download?songId=${encodeURIComponent(songId)}`);
-      const auth = await res.json();
-      if (auth?.authorized) {
-        const fileRes = await fetch(`/api/download/${encodeURIComponent(songId)}`);
-        if (!fileRes.ok) throw new Error("Download failed");
-        const blob = await fileRes.blob();
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = blobUrl;
-        a.download = auth.fileName || `${song?.title || "song"}.mp3`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
-        setDlState("downloaded");
-        // Register the completed download event (idempotent).
-        fetch(`/api/mobile/download`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ songId, source: "web", platform: "web" }) }).catch(() => {});
-      } else if (auth?.reason === "payment_required") {
-        setDlState("idle");
-        alert(`Purchase required — UGX ${(auth.price || 0).toLocaleString()}`);
-      } else if (auth?.reason === "unauthorized") {
-        setDlState("idle");
-        alert("Please sign in to download songs.");
-      } else {
-        setDlState("error");
-      }
-    } catch {
-      setDlState("error");
-    }
   };
 
   useEffect(() => {

@@ -4,6 +4,7 @@ import { trpc } from "@/trpc/client";
 import Link from "next/link";
 import { Flame, Sparkles, Search, Radio, Compass, TrendingUp, Mic2, Disc3 } from "lucide-react";
 import { getArtistName, artistHref } from "@/lib/utils";
+import { DownloadButton } from "@/components/ui/download-button";
 
 export default function DiscoverPage() {
   const { data: trending } = trpc.music.getTrending.useQuery({ limit: 20 });
@@ -69,12 +70,13 @@ export default function DiscoverPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {trending?.length ? trending.slice(0, 10).map((s: any) => (
             <Link key={s.id} href={`/song/${s.id}`} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 hover:border-yellow-500/30 transition group">
-              <div className="w-full aspect-square rounded-lg overflow-hidden bg-yellow-500/10 flex items-center justify-center mb-2">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-yellow-500/10 flex items-center justify-center mb-2">
                 {s.coverUrl || s.album?.coverUrl ? (
                   <img src={s.coverUrl || s.album?.coverUrl} alt={s.title} className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-3xl">🎵</span>
                 )}
+                <DownloadButton songId={s.id} title={s.title} className="absolute top-1 right-1 p-1.5 rounded-md bg-black/60 text-white hover:text-yellow-500 opacity-0 group-hover:opacity-100 transition" iconClassName="w-4 h-4" />
               </div>
               <p className="text-sm font-semibold truncate">{s.title}</p>
               <p className="text-xs text-zinc-500 truncate">{getArtistName(s.artist)}</p>
@@ -89,12 +91,13 @@ export default function DiscoverPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {newReleases?.length ? newReleases.slice(0, 10).map((s: any) => (
             <Link key={s.id} href={`/song/${s.id}`} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 hover:border-yellow-500/30 transition group">
-              <div className="w-full aspect-square rounded-lg overflow-hidden bg-yellow-500/10 flex items-center justify-center mb-2">
+              <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-yellow-500/10 flex items-center justify-center mb-2">
                 {s.coverUrl || s.album?.coverUrl ? (
                   <img src={s.coverUrl || s.album?.coverUrl} alt={s.title} className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-3xl">🎵</span>
                 )}
+                <DownloadButton songId={s.id} title={s.title} className="absolute top-1 right-1 p-1.5 rounded-md bg-black/60 text-white hover:text-yellow-500 opacity-0 group-hover:opacity-100 transition" iconClassName="w-4 h-4" />
               </div>
               <p className="text-sm font-semibold truncate">{s.title}</p>
               <p className="text-xs text-zinc-500 truncate">{getArtistName(s.artist)}</p>

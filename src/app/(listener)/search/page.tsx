@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Music2, Mic2, Disc3, Search as SearchIcon } from "lucide-react";
 import { getArtistName, artistHref } from "@/lib/utils";
+import { DownloadButton } from "@/components/ui/download-button";
 
 function SearchContent() {
   const params = useSearchParams();
@@ -67,6 +68,7 @@ function SearchContent() {
                   <Link key={s.id} href={`/song/${s.id}`} className="flex items-center gap-4 p-3 hover:bg-zinc-800/50 rounded-xl transition group">
                     <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center text-sm">🎵</div>
                     <div className="flex-1 min-w-0"><p className="text-sm font-semibold truncate">{s.title}</p><p className="text-xs text-zinc-500 truncate">{getArtistName(s.artist)}</p></div>
+                    <DownloadButton songId={s.id} title={s.title} />
                     <span className="text-xs text-zinc-600">{Math.floor((s.duration || 0) / 60)}:{(s.duration || 0) % 60}</span>
                   </Link>
                 ))}

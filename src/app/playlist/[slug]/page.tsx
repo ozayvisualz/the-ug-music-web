@@ -13,6 +13,7 @@ import {
   jsonLdScript,
 } from "@/lib/seo";
 import { getArtistName } from "@/lib/utils";
+import { DownloadButton } from "@/components/ui/download-button";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -109,6 +110,7 @@ export default async function PlaylistPage({ params }: Props) {
               <p className="text-sm font-semibold truncate">{s.title}</p>
               <p className="text-xs text-zinc-500 truncate">{getArtistName(s.artist)}</p>
             </div>
+            <DownloadButton songId={s.id} title={s.title} />
             <span className="text-xs text-zinc-600">
               {s.duration ? `${Math.floor(s.duration / 60)}:${(s.duration % 60).toString().padStart(2, "0")}` : ""}
             </span>
