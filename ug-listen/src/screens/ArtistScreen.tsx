@@ -107,6 +107,7 @@ export default function ArtistScreen() {
         url: (s as any).fileUrl || (s as any).hlsUrl || (s as any).url || "",
         duration: s.duration,
         coverUrl: s.coverUrl,
+        artistId: artist.id,
       }));
       setQueue(tracks, index);
     },

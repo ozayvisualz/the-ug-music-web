@@ -23,7 +23,7 @@ import { useTheme } from "../theme/ThemeContext";
 
 const SW = Dimensions.get("window").width;
 
-type Song = { id: string; title: string; artist: string; duration: number; url: string; coverUrl?: string };
+type Song = { id: string; title: string; artist: string; duration: number; url: string; coverUrl?: string; artistId?: string };
 type Playlist = { id: string; name: string; songCount?: number; songs?: Song[] };
 
 const TABS = ["Playlists", "Liked", "Downloads", "History"] as const;
@@ -45,6 +45,7 @@ function toSong(x: any): Song {
     duration: s?.duration || 0,
     url: s?.fileUrl || s?.hlsUrl || s?.url || "",
     coverUrl: s?.coverUrl,
+    artistId: s?.artistId,
   };
 }
 
@@ -216,7 +217,7 @@ export default function LibraryScreen() {
 
   const handlePlaySong = useCallback(
     (song: Song) => {
-      setQueue([{ id: song.id, title: song.title, artist: song.artist, url: song.url, duration: song.duration, coverUrl: song.coverUrl }]);
+      setQueue([{ id: song.id, title: song.title, artist: song.artist, url: song.url, duration: song.duration, coverUrl: song.coverUrl, artistId: song.artistId }]);
     },
     [setQueue],
   );
@@ -230,6 +231,7 @@ export default function LibraryScreen() {
         url: s.url,
         duration: s.duration,
         coverUrl: s.coverUrl,
+        artistId: s.artistId,
       }));
       setQueue(tracks);
     },

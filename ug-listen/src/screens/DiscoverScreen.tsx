@@ -24,7 +24,7 @@ const H_PAD = 16;
 const GAP = 10;
 const CARD_W = (SW - H_PAD * 2 - GAP * 3) / 4;
 
-type Song = { id: string; title: string; artist: any; duration: number; url: string; coverUrl?: string; fileUrl?: string; hlsUrl?: string };
+type Song = { id: string; title: string; artist: any; duration: number; url: string; coverUrl?: string; fileUrl?: string; hlsUrl?: string; artistId?: string };
 
 function getArtistName(a: any): string {
   if (!a) return "Unknown";
@@ -118,7 +118,7 @@ export default function DiscoverScreen() {
 
   const handlePlaySong = useCallback(
     (song: Song) => {
-      setQueue([{ id: song.id, title: song.title, artist: getArtistName(song.artist), url: song.fileUrl || song.hlsUrl || "", duration: song.duration || 180, coverUrl: song.coverUrl, artistId: song.artist?.id }]);
+      setQueue([{ id: song.id, title: song.title, artist: getArtistName(song.artist), url: song.fileUrl || song.hlsUrl || "", duration: song.duration || 180, coverUrl: song.coverUrl, artistId: song.artistId }]);
     },
     [setQueue],
   );

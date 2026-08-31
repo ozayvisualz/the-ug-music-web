@@ -31,6 +31,7 @@ type QueueSong = {
   fileUrl?: string;
   hlsUrl?: string;
   coverUrl?: string;
+  artistId?: string;
 };
 
 function formatDuration(d: number): string {
@@ -100,6 +101,7 @@ export default function RadioScreen() {
       url: s.fileUrl || s.hlsUrl || s.url || "",
       duration: s.duration,
       coverUrl: s.coverUrl,
+      artistId: s.artistId,
     }));
     setQueue(tracks);
     if (radioCtx) {
@@ -107,15 +109,19 @@ export default function RadioScreen() {
     }
   }, [generatedQueue, setQueue, setRadioContext, radioCtx]);
 
-  const renderStationCard = (station: Station, onPress: () => void) => (
+  const renderStationCard = (station: Station, onPress: () => void, selected: boolean) => (
     <TouchableOpacity
       key={station.id}
-      style={[styles.stationCard, { backgroundColor: colors.surface }]}
+      style={[
+        styles.stationCard,
+        { backgroundColor: selected ? colors.goldMuted : colors.surface },
+        selected && styles.stationCardSelected,
+      ]}
       activeOpacity={0.7}
       onPress={onPress}
     >
       <Text style={styles.stationEmoji}>{station.icon || "🎵"}</Text>
-      <Text style={[styles.stationName, { color: colors.white }]}>{station.name}</Text>
+      <Text style={[styles.stationName, { color: selected ? colors.gold : colors.white }]}>{station.name}</Text>
     </TouchableOpacity>
   );
 
@@ -167,7 +173,7 @@ export default function RadioScreen() {
                       snapToInterval={CARD_W + GAP}
                       decelerationRate="fast"
                       contentContainerStyle={styles.stationsList}
-                      renderItem={({ item }) => renderStationCard(item, () => handleStationPress("genre", item.id, item.name))}
+                      renderItem={({ item }) => renderStationCard(item, () => handleStationPress("genre", item.id, item.name), radioCtx?.stationId === item.id)}
                     />
                   </View>
 
@@ -181,7 +187,7 @@ export default function RadioScreen() {
                       snapToInterval={CARD_W + GAP}
                       decelerationRate="fast"
                       contentContainerStyle={styles.stationsList}
-                      renderItem={({ item }) => renderStationCard(item, () => handleStationPress("mood", item.id, item.name))}
+                      renderItem={({ item }) => renderStationCard(item, () => handleStationPress("mood", item.id, item.name), radioCtx?.stationId === item.id)}
                     />
                   </View>
 
@@ -195,7 +201,7 @@ export default function RadioScreen() {
                       snapToInterval={CARD_W + GAP}
                       decelerationRate="fast"
                       contentContainerStyle={styles.stationsList}
-                      renderItem={({ item }) => renderStationCard(item, () => handleStationPress("activity", item.id, item.name))}
+                      renderItem={({ item }) => renderStationCard(item, () => handleStationPress("activity", item.id, item.name), radioCtx?.stationId === item.id)}
                     />
                   </View>
 
@@ -236,7 +242,8 @@ const styles = StyleSheet.create({
   section: { marginBottom: 20 },
   sectionTitle: { fontSize: 15, fontWeight: "700", color: COLORS.white, marginBottom: 10 },
   stationsList: { paddingHorizontal: H_PAD, gap: GAP },
-  stationCard: { width: CARD_W, height: CARD_W, backgroundColor: COLORS.surface, borderRadius: 14, alignItems: "center", justifyContent: "center", gap: 5 },
+  stationCard: { width: CARD_W, height: CARD_W, backgroundColor: COLORS.surface, borderRadius: 14, borderWidth: 2, borderColor: "transparent", alignItems: "center", justifyContent: "center", gap: 5 },
+  stationCardSelected: { borderColor: COLORS.gold },
   stationEmoji: { fontSize: 22 },
   stationName: { color: COLORS.white, fontSize: 10, fontWeight: "600", textAlign: "center" },
   loader: { marginVertical: 16 },

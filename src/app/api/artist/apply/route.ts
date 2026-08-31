@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import jwt from "jsonwebtoken";
+import { ensureSlug } from "@/lib/slugs";
 
 function getUser(req: NextRequest) {
   const auth = req.headers.get("authorization");
@@ -25,10 +26,14 @@ export async function POST(req: NextRequest) {
     const artist = await db.artist.findUnique({ where: { userId: user.id } });
     if (!artist) return NextResponse.json({ error: "Artist profile not found" }, { status: 404 });
 
+    const name = body.artistName || artist.artistName;
+    const slug = artist.slug || (await ensureSlug("artist", artist.id, name));
+
     await db.artist.update({
       where: { id: artist.id },
       data: {
-        artistName: body.artistName || artist.artistName,
+        artistName: name,
+        slug,
         legalName: body.legalName,
         phone: body.phone,
         country: body.country,

@@ -115,6 +115,7 @@ export default function SongScreen() {
         url: song.fileUrl || song.hlsUrl || song.url || "",
         duration: song.duration,
         coverUrl: song.coverUrl,
+        artistId: song.artistId,
       },
     ]);
   }, [song, setQueue]);

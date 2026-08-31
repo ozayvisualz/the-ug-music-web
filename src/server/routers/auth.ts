@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { randomBytes } from "crypto";
 import { publicProcedure, protectedProcedure, router } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { ensureSlug } from "@/lib/slugs";
 
 function generateUserId(role: string): string {
   const prefix = role === "ARTIST" ? "ART" : "LST";
@@ -126,7 +127,9 @@ export const authRouter = router({
     if (existing) throw new TRPCError({ code: "CONFLICT", message: "Already an artist" });
 
     await ctx.db.user.update({ where: { id: userId }, data: { role: "ARTIST" } });
-    await ctx.db.artist.create({ data: { userId, artistName: input.artistName } });
+    const artist = await ctx.db.artist.create({ data: { userId, artistName: input.artistName } });
+    const slug = await ensureSlug("artist", artist.id, input.artistName);
+    await ctx.db.artist.update({ where: { id: artist.id }, data: { slug } });
     return { success: true, artistName: input.artistName };
   }),
 });

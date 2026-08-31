@@ -66,7 +66,7 @@ export default function CategoryPlaylistScreen() {
   const handlePlayAll = () => {
     const tracks = songs.map((s: any) => ({
       id: s.id, title: s.title, artist: getArtistName(s.artist),
-      url: s.fileUrl || s.hlsUrl || "", duration: s.duration || 180, coverUrl: s.coverUrl,
+      url: s.fileUrl || s.hlsUrl || "", duration: s.duration || 180, coverUrl: s.coverUrl, artistId: s.artistId,
     }));
     if (tracks.length > 0) setQueue(tracks);
   };
@@ -74,7 +74,7 @@ export default function CategoryPlaylistScreen() {
   const handlePlaySong = (song: any, index: number) => {
     const tracks = songs.map((s: any) => ({
       id: s.id, title: s.title, artist: getArtistName(s.artist),
-      url: s.fileUrl || s.hlsUrl || "", duration: s.duration || 180, coverUrl: s.coverUrl,
+      url: s.fileUrl || s.hlsUrl || "", duration: s.duration || 180, coverUrl: s.coverUrl, artistId: s.artistId,
     }));
     setQueue(tracks, index);
   };

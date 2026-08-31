@@ -126,6 +126,7 @@ export default function SearchScreen() {
           url: song.fileUrl || song.hlsUrl || "",
           duration: song.duration || 180,
           coverUrl: song.coverUrl,
+          artistId: song.artistId,
         },
       ]);
     },

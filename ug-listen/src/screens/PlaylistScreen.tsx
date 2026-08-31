@@ -24,6 +24,7 @@ type Song = {
   duration: number;
   url: string;
   coverUrl?: string;
+  artistId?: string;
 };
 
 type Playlist = {
@@ -52,6 +53,7 @@ export default function PlaylistScreen() {
       duration: s.duration || 0,
       url: s.fileUrl || s.hlsUrl || s.url || "",
       coverUrl: s.coverUrl,
+      artistId: s.artistId,
     };
   });
   const playlistName = playlist.name || playlist.title || "Playlist";
@@ -92,6 +94,7 @@ export default function PlaylistScreen() {
         url: s.url,
         duration: s.duration,
         coverUrl: s.coverUrl,
+        artistId: s.artistId,
       }));
       setQueue(tracks, index);
     },
