@@ -113,7 +113,7 @@ export function WebPlayer() {
             {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
           </button>
           <button onClick={playNext} className="p-2 hover:bg-zinc-800 rounded-lg" title="Next"><SkipForward className="w-4 h-4" /></button>
-          <DownloadButton songId={currentSong.id} title={currentSong.title} className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-500" iconClassName="w-4 h-4" />
+          <DownloadButton songId={currentSong.id} title={currentSong.title} artist={currentSong.artist} coverUrl={currentSong.coverUrl} className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-500" iconClassName="w-4 h-4" />
           <button onClick={() => { globalAudio?.pause(); globalAudio = null; setCurrentSong(null as any); setIsPlaying(false); setRadioContext(null); }} className="p-2 hover:bg-zinc-800 rounded-lg text-zinc-500" title="Close"><X className="w-4 h-4" /></button>
         </div>
       </div>

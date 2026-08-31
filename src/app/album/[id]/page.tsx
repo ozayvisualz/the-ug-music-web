@@ -62,7 +62,7 @@ export default function AlbumPage() {
           <Link key={s.id} href={`/song/${s.id}`} className="flex items-center gap-4 p-3 hover:bg-zinc-800/50 rounded-xl transition">
             <span className="text-xs text-zinc-600 w-6 text-center">{i + 1}</span>
             <div className="flex-1 min-w-0"><p className="text-sm font-semibold">{s.title}</p></div>
-            <DownloadButton songId={s.id} title={s.title} />
+            <DownloadButton songId={s.id} title={s.title} artist={getArtistName(album.artist)} />
             <span className="text-xs text-zinc-600">{Math.floor((s.duration||0)/60)}:{(s.duration||0)%60}</span>
           </Link>
         ))}

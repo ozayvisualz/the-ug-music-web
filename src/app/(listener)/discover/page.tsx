@@ -76,7 +76,7 @@ export default function DiscoverPage() {
                 ) : (
                   <span className="text-3xl">🎵</span>
                 )}
-                <DownloadButton songId={s.id} title={s.title} className="absolute top-1 right-1 p-1.5 rounded-md bg-black/60 text-white hover:text-yellow-500 opacity-0 group-hover:opacity-100 transition" iconClassName="w-4 h-4" />
+                <DownloadButton songId={s.id} title={s.title} artist={getArtistName(s.artist)} coverUrl={s.coverUrl || s.album?.coverUrl || undefined} className="absolute top-1 right-1 p-1.5 rounded-md bg-black/60 text-white hover:text-yellow-500 opacity-0 group-hover:opacity-100 transition" iconClassName="w-4 h-4" />
               </div>
               <p className="text-sm font-semibold truncate">{s.title}</p>
               <p className="text-xs text-zinc-500 truncate">{getArtistName(s.artist)}</p>
@@ -97,7 +97,7 @@ export default function DiscoverPage() {
                 ) : (
                   <span className="text-3xl">🎵</span>
                 )}
-                <DownloadButton songId={s.id} title={s.title} className="absolute top-1 right-1 p-1.5 rounded-md bg-black/60 text-white hover:text-yellow-500 opacity-0 group-hover:opacity-100 transition" iconClassName="w-4 h-4" />
+                <DownloadButton songId={s.id} title={s.title} artist={getArtistName(s.artist)} coverUrl={s.coverUrl || s.album?.coverUrl || undefined} className="absolute top-1 right-1 p-1.5 rounded-md bg-black/60 text-white hover:text-yellow-500 opacity-0 group-hover:opacity-100 transition" iconClassName="w-4 h-4" />
               </div>
               <p className="text-sm font-semibold truncate">{s.title}</p>
               <p className="text-xs text-zinc-500 truncate">{getArtistName(s.artist)}</p>

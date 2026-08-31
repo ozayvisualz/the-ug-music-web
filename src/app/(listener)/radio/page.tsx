@@ -144,7 +144,7 @@ export default function RadioPage() {
                 <p className="text-sm font-semibold truncate">{s.title}</p>
                 <p className="text-xs text-zinc-500">{s.artist?.artistName || s.artist?.user?.name}</p>
               </div>
-              <DownloadButton songId={s.id} title={s.title} />
+              <DownloadButton songId={s.id} title={s.title} artist={s.artist?.artistName || s.artist?.user?.name} />
               <span className="text-xs text-zinc-600">{formatNumber(s.playCount || 0)} plays</span>
             </Link>
           )) || <p className="text-zinc-600 text-sm py-8 text-center">No songs yet</p>}

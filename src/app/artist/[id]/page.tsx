@@ -96,7 +96,7 @@ export default function ArtistPage() {
                 <p className="text-sm font-semibold truncate">{s.title}</p>
                 <p className="text-xs text-zinc-500">{formatNumber(s.playCount || 0)} plays</p>
               </div>
-              <DownloadButton songId={s.id} title={s.title} />
+              <DownloadButton songId={s.id} title={s.title} artist={getArtistName(s.artist)} />
               <span className="text-xs text-zinc-600">{Math.floor((s.duration || 0) / 60)}:{(s.duration || 0) % 60}</span>
             </Link>
           ))}
@@ -116,7 +116,7 @@ export default function ArtistPage() {
                   <p className="text-sm font-semibold truncate">{s.title}</p>
                   <p className="text-xs text-zinc-500">{getArtistName(s.artist)}</p>
                 </div>
-                <DownloadButton songId={s.id} title={s.title} />
+                <DownloadButton songId={s.id} title={s.title} artist={getArtistName(s.artist)} />
                 <span className="text-xs text-zinc-600">{Math.floor((s.duration || 0) / 60)}:{(s.duration || 0) % 60}</span>
               </Link>
             ))}

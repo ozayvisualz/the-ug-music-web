@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Download, Send, Loader2 } from "lucide-react";
-import { formatDuration, getArtistName, getDisplayArtist, artistHref } from "@/lib/utils";
+import { formatDuration, getArtistName, getDisplayArtist, artistHref, formatBytes } from "@/lib/utils";
 import { slugify } from "@/lib/seo";
 import { usePlayerStore } from "@/store/player";
 import { useDownload } from "@/lib/use-download";
@@ -19,7 +19,7 @@ export default function SongPage() {
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
   const { setCurrentSong, setQueue, setRadioContext, currentSong, isPlaying, togglePlay } = usePlayerStore();
-  const { state: dlState, download: handleDownload } = useDownload(songId || "", song?.title);
+  const { state: dlState, download: handleDownload, progress, receivedBytes, totalBytes, cancel } = useDownload(songId || "", song?.title, { artist: song ? getDisplayArtist(song) : undefined, coverUrl: (song as any)?.coverUrl || (song as any)?.album?.coverUrl });
 
   const handlePlay = () => {
     if (!song) return;
@@ -99,16 +99,18 @@ export default function SongPage() {
         <div className="flex justify-center gap-3">
           <button onClick={handlePlay} className="px-6 py-2.5 rounded-full bg-yellow-500 text-black font-semibold text-sm hover:bg-yellow-400">{currentSong?.id === song.id && isPlaying ? "Pause" : "Play"}</button>
           <button
-            onClick={handleDownload}
-            disabled={dlState === "downloading"}
+            onClick={dlState === "downloading" ? cancel : handleDownload}
+            disabled={dlState === "completing"}
             className="px-6 py-2.5 rounded-full bg-zinc-800 text-white font-semibold text-sm hover:bg-zinc-700 disabled:opacity-50"
           >
             {dlState === "downloading" ? (
-              <><Loader2 className="w-4 h-4 inline mr-1 animate-spin"/>Downloading…</>
+              <><Loader2 className="w-4 h-4 inline mr-1 animate-spin"/>Downloading… {progress != null ? `${progress}%` : ""}{totalBytes != null ? ` · ${formatBytes(receivedBytes)} / ${formatBytes(totalBytes)}` : ""}</>
+            ) : dlState === "completing" ? (
+              <><Loader2 className="w-4 h-4 inline mr-1 animate-spin"/>Finalizing…</>
             ) : dlState === "downloaded" ? (
               "Downloaded ✓"
             ) : dlState === "error" ? (
-              <><Download className="w-4 h-4 inline mr-1"/>Retry Download</>
+              <><Download className="w-4 h-4 inline mr-1"/>Download failed · Retry</>
             ) : (
               <><Download className="w-4 h-4 inline mr-1"/>Download</>
             )}

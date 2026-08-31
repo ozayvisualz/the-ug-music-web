@@ -95,7 +95,7 @@ export function SongCard({ song }: SongCardProps) {
         <p className="text-xs text-zinc-500">{getDisplayArtist(song)}</p>
       </div>
 
-      <DownloadButton songId={song.id} title={song.title} />
+      <DownloadButton songId={song.id} title={song.title} artist={getDisplayArtist(song)} coverUrl={song.coverUrl || song.album?.coverUrl || undefined} />
 
       <span className="text-xs text-zinc-600 w-10 text-right">{formatDuration(song.duration)}</span>
     </div>

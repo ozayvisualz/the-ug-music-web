@@ -2,60 +2,88 @@
 
 import { trpc } from "@/trpc/client";
 import Link from "next/link";
-import { useState } from "react";
-import { Download, Music2 } from "lucide-react";
-import { formatDuration, getArtistName } from "@/lib/utils";
+import { Download, Music2, X } from "lucide-react";
+import { formatDuration, getArtistName, formatBytes } from "@/lib/utils";
+import { DownloadButton } from "@/components/ui/download-button";
+import { useDownloadStore } from "@/store/downloadStore";
 
-async function downloadFile(songId: string, fallbackName: string) {
-  const res = await fetch(`/api/mobile/download?songId=${encodeURIComponent(songId)}`);
-  const auth = await res.json();
-  if (!auth?.authorized || !auth?.fileUrl) throw new Error(auth?.reason === "payment_required" ? "Purchase required" : "Download unavailable");
-  const fileRes = await fetch(auth.fileUrl);
-  if (!fileRes.ok) throw new Error("Download failed");
-  const blob = await fileRes.blob();
-  const blobUrl = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = blobUrl;
-  a.download = auth.fileName || fallbackName;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(blobUrl);
-  // Register the completed download event (idempotent).
-  fetch(`/api/mobile/download`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ songId, source: "web", platform: "web" }) }).catch(() => {});
+function ActiveDownloads() {
+  const active = useDownloadStore((s) => s.active);
+  const entries = Object.values(active);
+  if (!entries.length) return null;
+
+  return (
+    <section className="space-y-3">
+      <h2 className="text-lg font-bold flex items-center gap-2">
+        <Download className="w-5 h-5 text-yellow-500" /> Downloading
+      </h2>
+      <div className="space-y-2">
+        {entries.map((d) => {
+          const indeterminate = d.progress == null;
+          const pct = d.progress ?? 0;
+          return (
+            <div key={d.songId} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-lg bg-yellow-500/10 flex items-center justify-center overflow-hidden flex-shrink-0">
+                {d.coverUrl ? (
+                  <img src={d.coverUrl} alt={d.title} className="w-full h-full object-cover" />
+                ) : (
+                  <Music2 className="w-5 h-5 text-yellow-500" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate">{d.title}</p>
+                <p className="text-xs text-zinc-500 truncate">{d.artist || "Unknown Artist"}</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <div className="flex-1 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full bg-yellow-500 transition-all ${indeterminate ? "animate-pulse" : ""}`}
+                      style={{ width: `${indeterminate ? 100 : pct}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-zinc-500 w-10 text-right">{indeterminate ? "…" : `${pct}%`}</span>
+                </div>
+                <p className="text-[10px] text-zinc-600 mt-1">
+                  {d.state === "completing"
+                    ? "Finalizing…"
+                    : d.totalBytes != null
+                    ? `${formatBytes(d.receivedBytes)} / ${formatBytes(d.totalBytes)}`
+                    : `${formatBytes(d.receivedBytes)}`}
+                </p>
+              </div>
+              <button
+                onClick={() => d.cancel()}
+                className="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-white transition"
+                title="Cancel download"
+                aria-label="Cancel download"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
 }
 
 export default function DownloadsPage() {
   const { data: downloads, isLoading } = trpc.payments.getMyDownloads.useQuery();
-  const [busyId, setBusyId] = useState<string | null>(null);
-  const [doneId, setDoneId] = useState<string | null>(null);
-
-  const handleDownload = async (song: any) => {
-    if (!song?.id || busyId) return;
-    setBusyId(song.id);
-    try {
-      await downloadFile(song.id, `${song.title || "song"}.mp3`);
-      setDoneId(song.id);
-    } catch (e: any) {
-      alert(e?.message || "Download failed");
-    } finally {
-      setBusyId(null);
-    }
-  };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
+    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Your Downloads</h1>
-        <p className="text-sm text-zinc-400">Songs you have purchased and can download</p>
+        <p className="text-sm text-zinc-400">Songs you have downloaded</p>
       </div>
+
+      <ActiveDownloads />
 
       {isLoading ? (
         <div className="flex justify-center py-20"><div className="w-8 h-8 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" /></div>
       ) : !downloads || downloads.length === 0 ? (
         <div className="text-center py-20">
           <Download className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
-          <p className="text-zinc-500">No downloads yet. Browse the library and purchase songs!</p>
+          <p className="text-zinc-500">No downloads yet. Browse the library and download songs!</p>
         </div>
       ) : (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl divide-y divide-zinc-800/50">
@@ -72,13 +100,7 @@ export default function DownloadsPage() {
                   <p className="text-xs text-zinc-500 truncate">{artistName}{song?.duration ? ` · ${formatDuration(song.duration)}` : ""}</p>
                   <p className="text-[10px] text-zinc-600">{d.createdAt ? new Date(d.createdAt).toLocaleDateString() : ""}</p>
                 </div>
-                <button
-                  onClick={() => handleDownload(song)}
-                  disabled={busyId === song?.id}
-                  className="px-3 py-1.5 rounded-lg bg-yellow-500 text-black text-xs font-semibold hover:bg-yellow-400 disabled:opacity-50 flex items-center gap-1"
-                >
-                  <Download className="w-3.5 h-3.5" /> {busyId === song?.id ? "Downloading…" : doneId === song?.id ? "Downloaded ✓" : "Download"}
-                </button>
+                <DownloadButton songId={song?.id} title={song?.title} artist={artistName} coverUrl={song?.coverUrl} />
               </div>
             );
           })}
