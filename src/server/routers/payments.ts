@@ -10,62 +10,6 @@ export const paymentsRouter = router({
     return DownloadEngine.getUserDownloads(userId);
   }),
 
-  initiateDownload: protectedProcedure
-    .input(z.object({ songId: z.string() }))
-    .mutation(async ({ input, ctx }) => {
-      const userId = (ctx.session!.user as any).id;
-      const song = await ctx.db.song.findUnique({
-        where: { id: input.songId },
-        include: { artist: true },
-      });
-      if (!song) throw new Error("Song not found");
-
-      const existing = await ctx.db.download.findFirst({
-        where: { songId: input.songId, userId },
-      });
-      if (existing) return { alreadyPurchased: true, downloadUrl: song.fileUrl };
-
-      const ref = generateRef("DL");
-      const { artistShare, platformShare } = calculateSplit(song.price, "DOWNLOAD");
-
-      const transaction = await ctx.db.transaction.create({
-        data: {
-          userId,
-          type: "PURCHASE",
-          amount: song.price,
-          reference: ref,
-          metadata: JSON.stringify({ songId: song.id }),
-        },
-      });
-
-      return {
-        txRef: ref,
-        amount: song.price,
-        currency: "UGX",
-        songId: song.id,
-        songTitle: song.title,
-        artistName: song.artist,
-      };
-    }),
-
-  confirmDownload: protectedProcedure
-    .input(
-      z.object({
-        transactionRef: z.string(),
-        songId: z.string(),
-      })
-    )
-    .mutation(async ({ input, ctx }) => {
-      const tx = await ctx.db.transaction.findUnique({ where: { reference: input.transactionRef } });
-      if (!tx) throw new Error("Transaction not found");
-      if (tx.status === "COMPLETED") {
-        const song = await ctx.db.song.findUnique({ where: { id: input.songId } });
-        return { downloadUrl: song?.fileUrl || "" };
-      }
-
-      throw new Error("Payment is currently unavailable");
-    }),
-
   getSubscriptionPlans: publicProcedure.query(async () => {
     return [
       {
