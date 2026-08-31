@@ -353,9 +353,8 @@ export function useAudioPlayer() {
   }, []);
 
   const skipNext = useCallback(() => {
-    const t = next();
-    if (!t) { setIsPlaying(false); stopPositionTimer(); }
-  }, [next, stopPositionTimer]);
+    next();
+  }, [next]);
 
   const skipPrev = useCallback(() => {
     if (position > 3) {

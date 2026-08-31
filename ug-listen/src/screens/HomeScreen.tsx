@@ -305,6 +305,8 @@ export default function HomeScreen() {
     url: s.fileUrl || s.hlsUrl || s.url || "",
     duration: s.duration || 0,
     coverUrl: getCoverUrl(s),
+    artistId: s.artistId,
+    albumId: s.albumId,
     startPosition: typeof s.position === "number" && s.position > 0 ? s.position : undefined,
   });
 

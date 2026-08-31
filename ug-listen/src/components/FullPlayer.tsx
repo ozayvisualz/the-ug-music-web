@@ -285,7 +285,7 @@ export default function FullPlayer({ onCollapse }: Props) {
             onMoveShouldSetResponder={() => true}
             onResponderGrant={(e) => { const ratio = Math.max(0, Math.min(1, e.nativeEvent.locationX / seekBarWidthRef.current)); setDragPos(ratio * duration); }}
             onResponderMove={(e) => { const ratio = Math.max(0, Math.min(1, e.nativeEvent.locationX / seekBarWidthRef.current)); setDragPos(ratio * duration); }}
-            onResponderRelease={() => { if (dragPos !== null) { handleSeek(dragPos / duration); } setDragPos(null); }}
+            onResponderRelease={(e) => { handleSeek(e.nativeEvent.locationX / seekBarWidthRef.current); setDragPos(null); }}
           >
             <View style={[styles.seekFill, { width: `${((dragPos ?? position) / (duration || 1)) * 100}%`, backgroundColor: colors.gold }]} />
             <View style={[styles.seekThumb, { left: `${((dragPos ?? position) / (duration || 1)) * 100}%`, backgroundColor: colors.gold }]} />
