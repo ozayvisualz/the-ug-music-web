@@ -20,6 +20,8 @@ export const streamingRouter = router({
         quality: input.quality,
         ipAddress: ctx.headers.get("x-forwarded-for") || undefined,
         userAgent: ctx.headers.get("user-agent") || undefined,
+        source: "web",
+        platform: "web",
       });
     }),
 

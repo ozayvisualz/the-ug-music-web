@@ -33,6 +33,8 @@ export async function GET(req: NextRequest) {
       language,
       ipAddress: req.headers.get("x-forwarded-for") || undefined,
       userAgent: req.headers.get("user-agent") || undefined,
+      source: "mobile",
+      platform: "mobile",
     });
 
     if (!result.streamId && result.reason === "Song not found") {

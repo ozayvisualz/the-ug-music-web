@@ -304,12 +304,17 @@ model Stream {
   isPremium       Boolean  @default(false)
   adServed        Boolean  @default(false)
   adId            String?
+  source          String? // "mobile" | "web"
+  platform        String? // "ios" | "android" | "web"
+  device          String?
   revenueEligible Boolean  @default(false)
   createdAt       DateTime @default(now())
 
   song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   ad   Ad?  @relation(fields: [adId], references: [id])
+
+  @@index([source])
 }
 
 model Download {

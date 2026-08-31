@@ -13,6 +13,8 @@ interface StreamParams {
   language?: string;
   adServed?: boolean;
   adId?: string;
+  source?: string;
+  platform?: string;
 }
 
 interface StreamResult {
@@ -42,7 +44,7 @@ export const StreamingEngine = {
    * determines revenue eligibility, and updates song play counts.
    */
   async recordStream(params: StreamParams): Promise<StreamResult> {
-    const { songId, userId, durationListened, deviceType, quality, ipAddress, userAgent, region, language, adServed, adId } = params;
+    const { songId, userId, durationListened, deviceType, quality, ipAddress, userAgent, region, language, adServed, adId, source, platform } = params;
 
     // 1. Validate song exists
     const song = await db.song.findUnique({ where: { id: songId } });
@@ -64,6 +66,9 @@ export const StreamingEngine = {
           revenueEligible: false,
           isPremium: false,
           adServed: false,
+          source,
+          platform,
+          device: deviceType,
         },
       });
       return { streamId: stream.id, eligible: false, reason: "Rate limited — suspicious activity" };
@@ -87,6 +92,9 @@ export const StreamingEngine = {
         isPremium: !!premium,
         adServed: adServed ?? !premium, // Show ads for free users unless explicitly provided
         adId: adId ?? null,
+        source,
+        platform,
+        device: deviceType,
       },
     });
 
@@ -186,13 +194,20 @@ export const StreamingEngine = {
     const since = new Date();
     since.setDate(since.getDate() - days);
 
-    const [total, eligible, todayTotal] = await Promise.all([
+    const [total, eligible, todayTotal, bySource] = await Promise.all([
       db.stream.count({ where: { createdAt: { gte: since } } }),
       db.stream.count({ where: { revenueEligible: true, createdAt: { gte: since } } }),
       db.stream.count({ where: { createdAt: { gte: new Date(new Date().setHours(0, 0, 0, 0)) } } }),
+      db.stream.groupBy({ by: ["source"], _count: true, where: { createdAt: { gte: since } } }),
     ]);
 
-    return { total, eligible, today: todayTotal, days };
+    return {
+      total,
+      eligible,
+      today: todayTotal,
+      days,
+      sources: Object.fromEntries(bySource.map((s) => [s.source || "unknown", s._count])),
+    };
   },
 
   /**
