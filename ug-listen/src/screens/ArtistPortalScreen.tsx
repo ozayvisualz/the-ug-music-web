@@ -20,6 +20,9 @@ import {
   ShieldCheck,
   ShieldAlert,
   Plus,
+  TrendingUp,
+  Wallet,
+  User,
 } from "lucide-react-native";
 import { COLORS } from "../constants/theme";
 import { useAuthStore } from "../store/authStore";
@@ -191,6 +194,21 @@ export default function ArtistPortalScreen() {
                 <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistSongs")}>
                   <View style={styles.menuIcon}><Music2 size={18} color={COLORS.gold} /></View>
                   <Text style={[styles.menuLabel, { color: colors.white }]}>My Songs</Text>
+                  <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistAnalytics")}>
+                  <View style={styles.menuIcon}><TrendingUp size={18} color={COLORS.gold} /></View>
+                  <Text style={[styles.menuLabel, { color: colors.white }]}>Analytics</Text>
+                  <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("ArtistEarnings")}>
+                  <View style={styles.menuIcon}><Wallet size={18} color={COLORS.gold} /></View>
+                  <Text style={[styles.menuLabel, { color: colors.white }]}>Earnings</Text>
+                  <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.menuItem, styles.menuItemLast]} onPress={() => navigation.navigate("ArtistProfileEdit")}>
+                  <View style={styles.menuIcon}><User size={18} color={COLORS.gold} /></View>
+                  <Text style={[styles.menuLabel, { color: colors.white }]}>Edit Profile</Text>
                   <ChevronLeft size={14} color={COLORS.textMuted} style={{ transform: [{ rotate: "180deg" }] }} />
                 </TouchableOpacity>
               </View>
