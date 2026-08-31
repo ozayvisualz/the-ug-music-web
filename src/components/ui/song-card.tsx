@@ -5,6 +5,8 @@ import { Play } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
 import { formatDuration, getDisplayArtist, artistHref } from "@/lib/utils";
 import { DownloadButton } from "@/components/ui/download-button";
+import { LikeButton } from "@/components/ui/like-button";
+import { SongActionsMenu } from "@/components/ui/song-actions-menu";
 
 function Equalizer({ color = "#EAB308" }: { color?: string }) {
   return (
@@ -97,7 +99,9 @@ export function SongCard({ song }: SongCardProps) {
         </Link>
       </div>
 
+      <LikeButton songId={song.id} />
       <DownloadButton songId={song.id} title={song.title} artist={getDisplayArtist(song)} coverUrl={song.coverUrl || song.album?.coverUrl || undefined} />
+      <SongActionsMenu songId={song.id} songTitle={song.title} />
 
       <span className="text-xs text-zinc-600 w-10 text-right">{formatDuration(song.duration)}</span>
     </div>
