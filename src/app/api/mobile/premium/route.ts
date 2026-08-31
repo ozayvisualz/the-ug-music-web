@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import jwt from "jsonwebtoken";
-import { generateRef } from "@/lib/utils";
-import { buildCheckoutUrl } from "@/lib/flutterwave";
 
 function getUser(req: NextRequest) {
   const token = req.nextUrl.searchParams.get("token") || (req.headers.get("authorization")?.startsWith("Bearer ") ? req.headers.get("authorization")!.slice(7) : null);
@@ -23,19 +21,7 @@ export async function GET(req: NextRequest) {
 
     if (action === "subscribe") {
       if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      const plan = req.nextUrl.searchParams.get("plan") || "MONTHLY";
-      const planData = PLANS.find((p) => p.id === plan) || PLANS[0];
-
-      const active = await db.subscription.findFirst({ where: { userId: user.id, status: "COMPLETED", endDate: { gte: new Date() } } });
-      if (active) return NextResponse.json({ error: "Already subscribed" }, { status: 400 });
-
-      const ref = generateRef("SUB");
-      await db.transaction.create({
-        data: { userId: user.id, type: "SUBSCRIPTION", amount: planData.price, reference: ref, paymentMethod: "FLUTTERWAVE", metadata: JSON.stringify({ plan }) },
-      });
-
-      const checkoutUrl = buildCheckoutUrl(planData.price, ref, user.email || "", user.name || "", planData.name);
-      return NextResponse.json({ txRef: ref, amount: planData.price, plan, checkoutUrl });
+      return NextResponse.json({ error: "Online payment is currently unavailable" }, { status: 503 });
     }
 
     // status action

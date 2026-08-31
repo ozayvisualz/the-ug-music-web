@@ -49,7 +49,7 @@ TheUgMusic is a full-stack Ugandan music streaming platform with:
 | Cache | Redis 7 |
 | Storage | MinIO (S3-compatible) |
 | Auth | JWT, NextAuth v5 |
-| Payments | Flutterwave |
+| Payments | Online payments currently unavailable |
 | Queue | Redis-based worker |
 | CDN | CloudFlare |
 | Monitoring | Docker logs, health checks |
@@ -61,7 +61,7 @@ TheUgMusic is a full-stack Ugandan music streaming platform with:
 3. Uploads → Next.js → MinIO Storage
 4. Streaming → CDN → User
 5. Revenue → Worker (nightly) → Artist Wallets
-6. Payments → Flutterwave → Webhooks → Backend
+6. Payments → (online payments currently unavailable)
 
 ## Security
 
@@ -71,4 +71,3 @@ TheUgMusic is a full-stack Ugandan music streaming platform with:
 - CORS allowlist
 - Security headers (HSTS, XSS, CSP)
 - Input validation (Zod)
-- API key for Flutterwave webhooks

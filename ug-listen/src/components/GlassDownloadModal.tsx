@@ -29,7 +29,6 @@ import * as Haptics from "expo-haptics";
 import { X, Download, Music2 } from "lucide-react-native";
 import { useTheme } from "../theme/ThemeContext";
 import { getStoredToken } from "../api/auth";
-import { trpc } from "../api/client";
 import { useDownloadStore } from "../store/downloadStore";
 import { registerDownload } from "../lib/downloads";
 
@@ -176,16 +175,7 @@ export default function GlassDownloadModal({ song, onClose }: Props) {
         registerDownload(song.id);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
       } else if (auth?.reason === "payment_required") {
-        // 3. Payment required — use the existing purchase system.
-        const result = await trpc.payments.initiateDownload.mutate({ songId: song.id });
-        if (result?.txRef) {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-          Alert.alert(
-            "Payment",
-            `Redirecting to Flutterwave to complete your download (${formatUGX(result.amount)}).`,
-            [{ text: "OK", onPress: () => onClose() }],
-          );
-        }
+        Alert.alert("Payment Unavailable", "This song requires purchase, but online payment is currently unavailable.");
       } else {
         Alert.alert("Download Unavailable", auth?.reason === "not_found" ? "Song not found." : "You are not authorized to download this song.");
       }

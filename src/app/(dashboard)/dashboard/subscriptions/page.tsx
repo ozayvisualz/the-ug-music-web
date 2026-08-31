@@ -2,7 +2,7 @@
 
 import { trpc } from "@/trpc/client";
 import { useState } from "react";
-import { Crown, Check, Loader2 } from "lucide-react";
+import { Crown, Check } from "lucide-react";
 import { formatUGX } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 
@@ -11,36 +11,11 @@ export default function SubscriptionsPage() {
   const { data: plans } = trpc.payments.getSubscriptionPlans.useQuery();
   const { data: activeSub } = trpc.payments.checkSubscription.useQuery(undefined, { enabled: !!session });
   const [selected, setSelected] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-  const [txRef, setTxRef] = useState("");
-  const [showFlutterwave, setShowFlutterwave] = useState(false);
-
-  const initiateMut = trpc.payments.initiateSubscription.useMutation({
-    onSuccess: (data) => {
-      setTxRef(data.txRef);
-      setShowFlutterwave(true);
-      setLoading(false);
-    },
-    onError: () => setLoading(false),
-  });
-
-  const confirmMut = trpc.payments.confirmSubscription.useMutation({
-    onSuccess: () => {
-      window.location.reload();
-    },
-  });
+  const [notice, setNotice] = useState("");
 
   const handleSubscribe = () => {
     if (!selected) return;
-    setLoading(true);
-    initiateMut.mutate({ plan: selected as "MONTHLY" | "QUARTERLY" | "ANNUAL" });
-  };
-
-  // Simulate Flutterwave payment
-  const handleFlutterwaveSuccess = () => {
-    if (txRef) {
-      confirmMut.mutate({ transactionRef: txRef, plan: selected as "MONTHLY" | "QUARTERLY" | "ANNUAL" });
-    }
+    setNotice("Online payment is currently unavailable. Please try again later.");
   };
 
   return (
@@ -88,42 +63,21 @@ export default function SubscriptionsPage() {
             ))}
           </div>
 
+          {notice && (
+            <p className="text-center text-sm text-yellow-500 bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-4 py-3">
+              {notice}
+            </p>
+          )}
+
           <div className="flex justify-center">
             <button
               onClick={handleSubscribe}
-              disabled={!selected || loading}
-              className="px-8 py-3 rounded-xl bg-yellow-500 text-black font-bold hover:bg-yellow-400 transition disabled:opacity-50 flex items-center gap-2"
+              disabled={!selected}
+              className="px-8 py-3 rounded-xl bg-yellow-500 text-black font-bold hover:bg-yellow-400 transition disabled:opacity-50"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              {loading ? "Processing..." : "Subscribe Now"}
+              Subscribe Now
             </button>
           </div>
-
-          {/* Flutterwave Payment Modal */}
-          {showFlutterwave && (
-            <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-              <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 w-full max-w-md space-y-4">
-                <h3 className="text-lg font-bold">Complete Payment</h3>
-                <p className="text-sm text-zinc-400">
-                  Select your payment method to complete the subscription. In production, this would integrate with Flutterwave.
-                </p>
-                <div className="space-y-2">
-                  <button onClick={handleFlutterwaveSuccess} className="w-full p-3 rounded-xl border border-zinc-700 hover:bg-zinc-800 text-left text-sm transition">
-                    MTN Mobile Money
-                  </button>
-                  <button onClick={handleFlutterwaveSuccess} className="w-full p-3 rounded-xl border border-zinc-700 hover:bg-zinc-800 text-left text-sm transition">
-                    Airtel Money
-                  </button>
-                  <button onClick={handleFlutterwaveSuccess} className="w-full p-3 rounded-xl border border-zinc-700 hover:bg-zinc-800 text-left text-sm transition">
-                    Visa / Mastercard
-                  </button>
-                </div>
-                <button onClick={() => setShowFlutterwave(false)} className="w-full p-2.5 rounded-xl text-sm text-zinc-500 hover:text-white transition">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
         </>
       )}
     </div>

@@ -34,7 +34,6 @@ export const paymentsRouter = router({
           type: "PURCHASE",
           amount: song.price,
           reference: ref,
-          paymentMethod: "FLUTTERWAVE",
           metadata: JSON.stringify({ songId: song.id }),
         },
       });
@@ -53,13 +52,10 @@ export const paymentsRouter = router({
     .input(
       z.object({
         transactionRef: z.string(),
-        flutterwaveRef: z.string(),
         songId: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const userId = (ctx.session!.user as any).id;
-
       const tx = await ctx.db.transaction.findUnique({ where: { reference: input.transactionRef } });
       if (!tx) throw new Error("Transaction not found");
       if (tx.status === "COMPLETED") {
@@ -67,75 +63,7 @@ export const paymentsRouter = router({
         return { downloadUrl: song?.fileUrl || "" };
       }
 
-      const { verifyTransaction } = await import("@/lib/flutterwave");
-      const verification = await verifyTransaction(input.flutterwaveRef);
-      if (verification?.status !== "success" || verification?.data?.status !== "successful") {
-        throw new Error("Payment verification failed");
-      }
-      if (verification.data.amount !== tx.amount) {
-        throw new Error("Payment amount mismatch");
-      }
-
-      await ctx.db.transaction.update({
-        where: { reference: input.transactionRef },
-        data: { status: "COMPLETED", completedAt: new Date(), verifiedAt: new Date(), flutterwaveId: input.flutterwaveRef },
-      });
-
-      const song = await ctx.db.song.findUnique({
-        where: { id: input.songId },
-        include: { artist: true },
-      });
-      if (!song) throw new Error("Song not found");
-
-      const { artistShare, platformShare } = calculateSplit(song.price, "DOWNLOAD");
-
-      await ctx.db.download.create({
-        data: {
-          songId: input.songId,
-          userId,
-          amountPaid: song.price,
-          artistShare,
-          platformShare,
-          transactionRef: input.flutterwaveRef,
-        },
-      });
-
-      await ctx.db.song.update({
-        where: { id: input.songId },
-        data: { downloadCount: { increment: 1 } },
-      });
-
-      let wallet = await ctx.db.artistWallet.findUnique({
-        where: { artistId: song.artistId },
-      });
-      if (!wallet) {
-        wallet = await ctx.db.artistWallet.create({
-          data: { artistId: song.artistId, availableBalance: 0, pendingBalance: 0, lifetimeEarnings: 0 },
-        });
-      }
-
-      await ctx.db.artistWallet.update({
-        where: { id: wallet.id },
-        data: {
-          availableBalance: { increment: artistShare },
-          lifetimeEarnings: { increment: artistShare },
-        },
-      });
-
-      await ctx.db.revenueRecord.create({
-        data: {
-          artistId: song.artistId,
-          walletId: wallet.id,
-          source: "DOWNLOAD",
-          sourceRefId: input.songId,
-          grossAmount: song.price,
-          artistShare,
-          platformShare,
-          status: "COMPLETED",
-        },
-      });
-
-      return { downloadUrl: song.fileUrl };
+      throw new Error("Payment is currently unavailable");
     }),
 
   getSubscriptionPlans: publicProcedure.query(async () => {
@@ -193,7 +121,6 @@ export const paymentsRouter = router({
           type: "SUBSCRIPTION",
           amount: prices[input.plan],
           reference: ref,
-          paymentMethod: "FLUTTERWAVE",
           metadata: JSON.stringify({ plan: input.plan }),
         },
       });
@@ -210,7 +137,6 @@ export const paymentsRouter = router({
     .input(
       z.object({
         transactionRef: z.string(),
-        flutterwaveRef: z.string().optional(),
         plan: z.enum(["MONTHLY", "QUARTERLY", "ANNUAL"]),
       })
     )
@@ -225,46 +151,7 @@ export const paymentsRouter = router({
         return { success: true, endDate: existing?.endDate || new Date() };
       }
 
-      if (input.flutterwaveRef) {
-        const { verifyTransaction } = await import("@/lib/flutterwave");
-        const verification = await verifyTransaction(input.flutterwaveRef);
-        if (verification?.status !== "success" || verification?.data?.status !== "successful") {
-          throw new Error("Payment verification failed");
-        }
-        if (verification.data.amount !== tx.amount) {
-          throw new Error("Payment amount mismatch");
-        }
-      }
-
-      await ctx.db.transaction.update({
-        where: { reference: input.transactionRef },
-        data: { status: "COMPLETED", completedAt: new Date(), verifiedAt: new Date() },
-      });
-
-      const durations: Record<string, number> = { MONTHLY: 30, QUARTERLY: 90, ANNUAL: 365 };
-      const prices: Record<string, number> = {
-        MONTHLY: parseInt(process.env.PLAN_MONTHLY || "10000"),
-        QUARTERLY: parseInt(process.env.PLAN_QUARTERLY || "25000"),
-        ANNUAL: parseInt(process.env.PLAN_ANNUAL || "80000"),
-      };
-
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setDate(endDate.getDate() + durations[input.plan]);
-
-      await ctx.db.subscription.create({
-        data: {
-          userId,
-          plan: input.plan,
-          status: "COMPLETED",
-          amountPaid: prices[input.plan],
-          startDate,
-          endDate,
-          autoRenew: false,
-        },
-      });
-
-      return { success: true, endDate };
+      throw new Error("Payment is currently unavailable");
     }),
 
   checkSubscription: protectedProcedure.query(async ({ ctx }) => {
@@ -296,7 +183,6 @@ export const paymentsRouter = router({
           type: "TIP",
           amount: input.amount,
           reference: ref,
-          paymentMethod: "FLUTTERWAVE",
           metadata: JSON.stringify({ artistId: input.artistId, songId: input.songId }),
         },
       });
