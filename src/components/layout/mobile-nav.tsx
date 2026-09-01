@@ -202,7 +202,7 @@ export function MobileNav() {
       {open && (
         <div className="fixed inset-0 z-[60] lg:hidden" onClick={() => setOpen(false)}>
           <div className="absolute inset-0 bg-black/60" />
-          <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#0B0B0D] border-r border-zinc-800 overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#0B0B0D] border-r border-zinc-800 overflow-y-auto pt-[env(safe-area-inset-top)]" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b border-zinc-800">
               <Link href="/" className="flex items-center gap-2" onClick={() => setOpen(false)}>
                 <LogoMark size={24} />
