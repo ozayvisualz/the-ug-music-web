@@ -19,7 +19,7 @@ const CATEGORIES = [
 
 export default function MadeInUgandaPage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
+    <div className="px-4 py-6 space-y-4">
       <div className="text-center mb-4">
         <p className="text-4xl mb-2">🇺🇬</p>
         <h1 className="text-3xl font-bold">Made in Uganda</h1>
