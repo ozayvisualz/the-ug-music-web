@@ -40,7 +40,7 @@ export default function ArtistPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 pt-6 pb-20 space-y-4">
+    <div className="px-4 pt-6 pb-20 space-y-4">
       <nav aria-label="Breadcrumb" className="text-xs text-zinc-500">
         <ol className="flex items-center gap-1.5 flex-wrap">
           <li><Link href="/" className="hover:text-yellow-500">Home</Link></li>

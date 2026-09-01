@@ -8,7 +8,7 @@ export default function LikedSongsPage() {
   const { data: liked } = trpc.social.getLikedSongs.useQuery();
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
+    <div className="px-4 py-6 space-y-4">
       <div>
         <h1 className="text-2xl font-bold">Liked Songs</h1>
         <p className="text-sm text-zinc-400">{liked?.length || 0} songs</p>

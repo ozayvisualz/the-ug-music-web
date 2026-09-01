@@ -10,7 +10,7 @@ export default function StorePage() {
   if (isLoading) return <div className="flex justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-yellow-500" /></div>;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-4">
+    <div className="px-4 py-6 space-y-4">
       <div>
         <h1 className="text-2xl font-bold">Merch Store</h1>
         <p className="text-sm text-zinc-400">Support artists by buying their merchandise</p>

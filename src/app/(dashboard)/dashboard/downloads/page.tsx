@@ -70,7 +70,7 @@ export default function DownloadsPage() {
   const { data: downloads, isLoading } = trpc.payments.getMyDownloads.useQuery();
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+    <div className="px-4 py-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Your Downloads</h1>
         <p className="text-sm text-zinc-400">Songs you have downloaded</p>
