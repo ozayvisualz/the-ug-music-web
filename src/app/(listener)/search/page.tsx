@@ -4,7 +4,7 @@ import { trpc } from "@/trpc/client";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
-import { Music2, Mic2, Disc3, Search as SearchIcon, Play, Sparkles } from "lucide-react";
+import { Music2, Mic2, Disc3, Search as SearchIcon, Play, Sparkles, Clock, X } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
 import { DownloadButton } from "@/components/ui/download-button";
 import { formatDuration } from "@/lib/utils";
@@ -27,6 +27,31 @@ function SearchContent() {
     const t = setTimeout(() => setDebounced(input), 250);
     return () => clearTimeout(t);
   }, [input]);
+
+  const [recent, setRecent] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("recent-searches");
+      if (saved) setRecent(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  const persistRecent = (items: string[]) => {
+    setRecent(items);
+    try { localStorage.setItem("recent-searches", JSON.stringify(items)); } catch {}
+  };
+
+  const submitSearch = (query: string) => {
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    const next = [trimmed, ...recent.filter((r) => r.toLowerCase() !== trimmed.toLowerCase())].slice(0, 8);
+    persistRecent(next);
+    router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+  };
+
+  const removeRecent = (query: string) => persistRecent(recent.filter((r) => r !== query));
+  const clearRecent = () => { setRecent([]); try { localStorage.removeItem("recent-searches"); } catch {} };
 
   const songs = data?.songs || [];
   const artists = data?.artists || [];
@@ -58,7 +83,7 @@ function SearchContent() {
         className="relative"
         onSubmit={(e) => {
           e.preventDefault();
-          router.push(`/search?q=${encodeURIComponent(input.trim())}`);
+          submitSearch(input);
         }}
       >
         <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500" />
@@ -68,6 +93,7 @@ function SearchContent() {
           onChange={(e) => setInput(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setTimeout(() => setFocused(false), 150)}
+          onKeyDown={(e) => { if (e.key === "Escape") setFocused(false); }}
           placeholder="Songs, artists, albums, moods..."
           className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder-zinc-500 focus:outline-none focus:border-yellow-500/50 transition"
           autoFocus
@@ -92,14 +118,32 @@ function SearchContent() {
       </form>
 
       {!q && (
-        <div>
-          <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider mb-3">Trending Searches</h3>
-          <div className="flex flex-wrap gap-2">
-            {["Afrobeat", "Dancehall", "Gospel", "Lugaflow", "Amapiano", "Party", "Chill"].map((t) => (
-              <Link key={t} href={`/search?q=${encodeURIComponent(t)}`} className="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-sm text-zinc-400 hover:text-white hover:border-zinc-600 transition">{t}</Link>
-            ))}
+        <>
+          {recent.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider">Recent</h3>
+                <button onClick={clearRecent} className="text-xs text-zinc-500 hover:text-zinc-300 flex items-center gap-1"><X className="w-3.5 h-3.5" /> Clear</button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {recent.map((r) => (
+                  <span key={r} className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-sm text-zinc-400">
+                    <Link href={`/search?q=${encodeURIComponent(r)}`} className="hover:text-white transition flex items-center gap-1"><Clock className="w-3.5 h-3.5" />{r}</Link>
+                    <button onClick={() => removeRecent(r)} className="text-zinc-600 hover:text-zinc-300" aria-label={`Remove ${r} from recent searches`}><X className="w-3.5 h-3.5" /></button>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          <div>
+            <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-wider mb-3">Trending Searches</h3>
+            <div className="flex flex-wrap gap-2">
+              {["Afrobeat", "Dancehall", "Gospel", "Lugaflow", "Amapiano", "Party", "Chill"].map((t) => (
+                <Link key={t} href={`/search?q=${encodeURIComponent(t)}`} className="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-sm text-zinc-400 hover:text-white hover:border-zinc-600 transition">{t}</Link>
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {q && (
