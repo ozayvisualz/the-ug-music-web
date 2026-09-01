@@ -141,7 +141,7 @@ const ACTIVITY_TO_GENRES: Record<string, string[]> = {
 
 export const SmartSearchEngine = {
   async search(query: string, userId?: string, limit = 20) {
-    if (!query || normalize(query).length < 2) return { query, intent: {}, songs: [], artists: [], albums: [] };
+    if (!query || normalize(query).length < 2) return { query, intent: {}, songs: [], artists: [], albums: [], playlists: [] };
 
     const intent = parseIntent(query);
     const core = intent.core || query;
@@ -151,7 +151,7 @@ export const SmartSearchEngine = {
     const profileGenres: Record<string, number> = (profile?.genres as Record<string, number>) || {};
 
     // Fetch candidate pool.
-    const [songs, artists, albums] = await Promise.all([
+    const [songs, artists, albums, playlists] = await Promise.all([
       db.song.findMany({
         where: { approved: true, published: true },
         include: { artist: { include: { user: { select: { name: true, image: true } } } }, featuredArtist: { select: { artistName: true, user: { select: { name: true } } } } },
@@ -166,6 +166,11 @@ export const SmartSearchEngine = {
         where: { approved: true },
         include: { artist: { include: { user: { select: { name: true } } } } },
         take: 100,
+      }),
+      db.playlist.findMany({
+        where: { isPublic: true },
+        include: { user: { select: { name: true } }, songs: { select: { id: true } } },
+        take: 50,
       }),
     ]);
 
@@ -228,7 +233,14 @@ export const SmartSearchEngine = {
       .slice(0, 6)
       .map(({ album }) => ({ id: album.id, slug: album.slug || null, title: album.title, coverUrl: album.coverUrl, artist: album.artist?.artistName || album.artist?.user?.name || "" }));
 
-    return { query, intent, songs: rankedSongs, artists: rankedArtists, albums: rankedAlbums };
+    const rankedPlaylists = playlists
+      .map((pl) => ({ pl, score: similarity(core, pl.title) * 3 + Math.log10((pl.songs?.length || 0) + 1) * 0.1 }))
+      .filter((r) => r.score > 0.3)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .map(({ pl }) => ({ id: pl.id, slug: pl.slug || null, title: pl.title, coverUrl: pl.coverUrl || null, songCount: pl.songs?.length || 0, owner: pl.user?.name || null }));
+
+    return { query, intent, songs: rankedSongs, artists: rankedArtists, albums: rankedAlbums, playlists: rankedPlaylists };
   },
 
   _moodSimilarity(mood: string, moodsJson: string | null): number {

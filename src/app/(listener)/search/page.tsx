@@ -4,7 +4,7 @@ import { trpc } from "@/trpc/client";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
-import { Music2, Mic2, Disc3, Search as SearchIcon, Play, Sparkles, Clock, X } from "lucide-react";
+import { Music2, Mic2, Disc3, ListMusic, Search as SearchIcon, Play, Sparkles, Clock, X } from "lucide-react";
 import { usePlayerStore } from "@/store/player";
 import { DownloadButton } from "@/components/ui/download-button";
 import { formatDuration } from "@/lib/utils";
@@ -56,8 +56,9 @@ function SearchContent() {
   const songs = data?.songs || [];
   const artists = data?.artists || [];
   const albums = data?.albums || [];
+  const playlists = data?.playlists || [];
   const hasQuery = q.length >= 2;
-  const noResults = hasQuery && songs.length === 0 && artists.length === 0 && albums.length === 0;
+  const noResults = hasQuery && songs.length === 0 && artists.length === 0 && albums.length === 0 && playlists.length === 0;
 
   const playSong = (song: any) => {
     const queue = songs.map((x: any) => ({
@@ -179,6 +180,23 @@ function SearchContent() {
                     </div>
                     <p className="text-sm font-semibold truncate">{a.title}</p>
                     <p className="text-xs text-zinc-500 truncate">{a.artist}</p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {playlists.length > 0 && (
+            <section>
+              <h2 className="text-lg font-bold mb-3 flex items-center gap-2"><ListMusic className="w-5 h-5 text-yellow-500" /> Playlists</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {playlists.map((p: any) => (
+                  <Link key={p.id} href={`/playlist/${p.slug || p.id}`} className="p-3 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-yellow-500/30 transition">
+                    <div className="w-full aspect-square rounded-lg overflow-hidden bg-yellow-500/10 flex items-center justify-center mb-2">
+                      {p.coverUrl ? <img src={p.coverUrl} alt={p.title} loading="lazy" className="w-full h-full object-cover" /> : <ListMusic className="w-6 h-6 text-zinc-600" />}
+                    </div>
+                    <p className="text-sm font-semibold truncate">{p.title}</p>
+                    <p className="text-xs text-zinc-500 truncate">{p.songCount} songs{p.owner ? ` · ${p.owner}` : ""}</p>
                   </Link>
                 ))}
               </div>
