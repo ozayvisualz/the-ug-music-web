@@ -82,7 +82,7 @@ export default function ArtistLayout({ children }: { children: React.ReactNode }
         {mobileOpen && (
           <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setMobileOpen(false)}>
             <div className="absolute inset-0 bg-black/60" />
-            <div className="absolute left-0 top-0 bottom-0 w-56 bg-[#0B0B0D]" onClick={(e) => e.stopPropagation()}>{sidebar}</div>
+            <div className="absolute left-0 top-0 bottom-0 w-56 bg-[#0B0B0D] pt-[env(safe-area-inset-top)]" onClick={(e) => e.stopPropagation()}>{sidebar}</div>
           </div>
         )}
         <main className="flex-1 overflow-y-auto">
