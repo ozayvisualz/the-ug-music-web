@@ -19,7 +19,7 @@ function SearchContent() {
   const [focused, setFocused] = useState(false);
   const { setCurrentSong, setQueue, setRadioContext } = usePlayerStore();
 
-  const { data } = trpc.intelligence.search.useQuery({ query: q, limit: 30 }, { enabled: q.length >= 2 });
+  const { data, error, refetch } = trpc.intelligence.search.useQuery({ query: q, limit: 30 }, { enabled: q.length >= 2 });
   const { data: suggestions } = trpc.intelligence.suggest.useQuery({ query: debounced, limit: 8 }, { enabled: debounced.length >= 2 });
   const { data: trending } = trpc.music.getTrending.useQuery({ limit: 8 });
 
@@ -149,7 +149,14 @@ function SearchContent() {
 
       {q && (
         <>
-          {artists.length > 0 && (
+          {error && (
+            <div className="text-center py-8">
+              <p className="text-zinc-400 text-sm">Couldn&apos;t load search results.</p>
+              <button onClick={() => refetch()} className="mt-3 px-4 py-2 rounded-full bg-yellow-500 text-black text-sm font-semibold hover:bg-yellow-400 transition">Retry</button>
+            </div>
+          )}
+
+          {!error && artists.length > 0 && (
             <section>
               <h2 className="text-lg font-bold mb-3 flex items-center gap-2"><Mic2 className="w-5 h-5 text-yellow-500" /> Artists</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -203,7 +210,7 @@ function SearchContent() {
             </section>
           )}
 
-          <section>
+          {!error && <section>
             <h2 className="text-lg font-bold mb-3 flex items-center gap-2"><Music2 className="w-5 h-5 text-yellow-500" /> Songs {songs.length > 0 ? `(${songs.length})` : ""}</h2>
             {songs.length > 0 ? (
               <div className="space-y-1">
@@ -231,9 +238,9 @@ function SearchContent() {
             ) : (
               <p className="text-zinc-600 text-sm py-8 text-center">{q ? `No results for "${q}"` : "Search for music"}</p>
             )}
-          </section>
+          </section>}
 
-          {noResults && trending && trending.length > 0 && (
+          {!error && noResults && trending && trending.length > 0 && (
             <section>
               <h2 className="text-lg font-bold mb-3 flex items-center gap-2"><Sparkles className="w-5 h-5 text-yellow-500" /> Popular right now</h2>
               <div className="space-y-1">
