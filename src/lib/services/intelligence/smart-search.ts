@@ -194,6 +194,7 @@ export const SmartSearchEngine = {
         title: song.title,
         artist: displayArtist || "Unknown",
         artistId: song.artistId,
+        artistSlug: song.artist?.slug || null,
         featuredArtistId: song.featuredArtistId,
         genre: song.genre,
         coverUrl: song.coverUrl,
@@ -214,6 +215,7 @@ export const SmartSearchEngine = {
       .slice(0, 10)
       .map(({ artist }) => ({
         id: artist.id,
+        slug: artist.slug || null,
         name: artist.artistName || artist.user?.name || "Unknown",
         genre: artist.genre,
         image: artist.photoUrl || artist.user?.image,
@@ -224,7 +226,7 @@ export const SmartSearchEngine = {
       .filter((r) => r.score > 0.3)
       .sort((a, b) => b.score - a.score)
       .slice(0, 6)
-      .map(({ album }) => ({ id: album.id, title: album.title, coverUrl: album.coverUrl, artist: album.artist?.artistName || album.artist?.user?.name || "" }));
+      .map(({ album }) => ({ id: album.id, slug: album.slug || null, title: album.title, coverUrl: album.coverUrl, artist: album.artist?.artistName || album.artist?.user?.name || "" }));
 
     return { query, intent, songs: rankedSongs, artists: rankedArtists, albums: rankedAlbums };
   },
