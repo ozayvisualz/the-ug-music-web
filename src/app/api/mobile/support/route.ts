@@ -1,16 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import jwt from "jsonwebtoken";
-
-function getUser(req: NextRequest) {
-  const token = req.nextUrl.searchParams.get("token") || (req.headers.get("authorization")?.startsWith("Bearer ") ? req.headers.get("authorization")!.slice(7) : null);
-  if (!token) return null;
-  try { return jwt.verify(token, process.env.AUTH_SECRET || "default-secret") as any; } catch { return null; }
-}
+import { getServerUser } from "@/lib/server-auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const user = getUser(req);
+    const user = await getServerUser(req);
     const action = req.nextUrl.searchParams.get("action");
 
     if (action === "create") {
@@ -35,8 +29,8 @@ export async function GET(req: NextRequest) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const tickets = await db.supportTicket.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" }, take: 50 });
     return NextResponse.json(tickets);
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Failed" }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: "Failed" }, { status: 500 });
   }
 }
 

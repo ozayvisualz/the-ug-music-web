@@ -33,7 +33,7 @@ const menuItems = [
 
 const profileItems = [
   { href: "/dashboard/settings", icon: <Settings className="w-5 h-5" />, label: "Settings" },
-  { href: "/dashboard/library", icon: <Clock className="w-5 h-5" />, label: "Listening History" },
+  { href: "/dashboard/history", icon: <Clock className="w-5 h-5" />, label: "Listening History" },
   { href: "/dashboard/liked", icon: <Heart className="w-5 h-5" />, label: "Liked Songs" },
   { href: "/premium", icon: <Crown className="w-5 h-5" />, label: "Upgrade to Premium" },
 ];
