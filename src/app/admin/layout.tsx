@@ -155,7 +155,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="h-screen flex flex-col bg-[#0B0B0D]">
       {/* Top Bar */}
-      <header className="h-14 border-b border-zinc-800/60 flex items-center justify-between px-4 flex-shrink-0 bg-[#0B0B0D]">
+      <header className="min-h-14 border-b border-zinc-800/60 flex items-center justify-between px-4 pt-[env(safe-area-inset-top)] flex-shrink-0 bg-[#0B0B0D]">
         <div className="flex items-center gap-3">
           <button
             onClick={() => setMobileOpen(true)}
@@ -229,7 +229,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {mobileOpen && (
           <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setMobileOpen(false)}>
             <div className="absolute inset-0 bg-black/60" />
-            <div className="absolute left-0 top-0 bottom-0 w-60 bg-[#0B0B0D]" onClick={(e) => e.stopPropagation()}>
+            <div className="absolute left-0 top-0 bottom-0 w-60 bg-[#0B0B0D] pt-[env(safe-area-inset-top)]" onClick={(e) => e.stopPropagation()}>
               {sidebar}
             </div>
           </div>
