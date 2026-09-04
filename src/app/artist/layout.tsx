@@ -70,7 +70,7 @@ export default function ArtistLayout({ children }: { children: React.ReactNode }
       <header className="h-14 border-b border-zinc-800/60 flex items-center justify-between px-4 flex-shrink-0 bg-[#0B0B0D]">
         <div className="flex items-center gap-3">
           <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-zinc-800/40 text-zinc-400"><Menu className="w-5 h-5" /></button>
-          <Link href="/" className="text-sm text-zinc-500 hover:text-zinc-300">← Back to Site</Link>
+          <Link href="https://theugmusic.com" className="text-sm text-zinc-500 hover:text-zinc-300">← Back to Site</Link>
         </div>
         <div className="flex items-center gap-2">
           {user && <span className="text-sm text-zinc-400 hidden sm:block">{user.name || user.email}</span>}

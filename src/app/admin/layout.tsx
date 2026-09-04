@@ -26,7 +26,7 @@ const menuGroups: MenuGroup[] = [
     label: "Main",
     items: [
       { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-      { href: "/", icon: Home, label: "Back to Site" },
+      { href: "https://theugmusic.com", icon: Home, label: "Back to Site" },
     ],
   },
   {

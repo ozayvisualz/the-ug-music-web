@@ -22,7 +22,7 @@ function AdminLoginForm() {
         </div>
 
         <form method="POST" action="/api/auth/login-web" className="bg-[#18181D] border border-zinc-800/60 rounded-xl p-6 space-y-4">
-          <input type="hidden" name="redirect" value="/admin/dashboard" />
+          <input type="hidden" name="redirect" value="/dashboard" />
 
           {error === "invalid" && (
             <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg p-3">Invalid email or password</div>

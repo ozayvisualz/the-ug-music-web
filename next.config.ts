@@ -14,16 +14,6 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: { bodySizeLimit: "50mb" },
   },
-  async redirects() {
-    return [
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "artist.theugmusic.com" }],
-        destination: "https://theugmusic.com/artist/dashboard",
-        permanent: true,
-      },
-    ];
-  },
   async headers() {
     return [
       {
