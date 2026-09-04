@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/trpc/client";
@@ -20,6 +20,15 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isArtistHost, setIsArtistHost] = useState(false);
+
+  useEffect(() => {
+    const host = (window.location.hostname || "").toLowerCase();
+    if (host === "artist.theugmusic.com" || host === "artist.localhost") {
+      setIsArtistHost(true);
+      setForm((f) => ({ ...f, role: "ARTIST" }));
+    }
+  }, []);
   const router = useRouter();
   const registerMut = trpc.auth.register.useMutation({
     onSuccess: async (data: any) => {
@@ -103,15 +112,19 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm text-zinc-400 mb-1.5">Account Type</label>
-            <div className="grid grid-cols-2 gap-2">
-              {(["LISTENER", "ARTIST"] as const).map((role) => (
-                <button key={role} type="button"
-                  onClick={() => setForm({ ...form, role })}
-                  className={`py-2 px-3 rounded-lg text-sm font-medium transition ${form.role === role ? "bg-yellow-500 text-black" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}>
-                  {role === "LISTENER" ? "Listener" : "Artist"}
-                </button>
-              ))}
-            </div>
+            {isArtistHost ? (
+              <div className="py-2 px-3 rounded-lg bg-yellow-500 text-black text-sm font-medium text-center">Artist</div>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                {(["LISTENER", "ARTIST"] as const).map((role) => (
+                  <button key={role} type="button"
+                    onClick={() => setForm({ ...form, role })}
+                    className={`py-2 px-3 rounded-lg text-sm font-medium transition ${form.role === role ? "bg-yellow-500 text-black" : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"}`}>
+                    {role === "LISTENER" ? "Listener" : "Artist"}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {form.role === "ARTIST" && (
