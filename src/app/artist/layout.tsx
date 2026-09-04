@@ -71,7 +71,6 @@ export default function ArtistLayout({ children }: { children: React.ReactNode }
       <header className="min-h-14 border-b border-zinc-800/60 flex items-center justify-between px-4 pt-[env(safe-area-inset-top)] flex-shrink-0 bg-[#0B0B0D]">
         <div className="flex items-center gap-3">
           <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 rounded-lg hover:bg-zinc-800/40 text-zinc-400"><Menu className="w-5 h-5" /></button>
-          <Link href="https://theugmusic.com" className="text-sm text-zinc-500 hover:text-zinc-300">← Back to Site</Link>
         </div>
         <div className="relative">
           {user ? (
