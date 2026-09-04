@@ -87,6 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   const sidebar = (
     <aside
@@ -167,18 +168,44 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="relative">
           {user ? (
             <>
-              <span className="text-sm text-zinc-400 hidden sm:block">
-                {user.name || user.email}
-              </span>
-              <button
-                onClick={() => signOut()}
-                className="p-2 rounded-lg hover:bg-zinc-800/40 text-zinc-400 hover:text-zinc-200 transition"
-              >
-                <LogOut className="w-4 h-4" />
+              <button onClick={() => setProfileOpen(!profileOpen)} className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-zinc-800/40 transition">
+                <div className="w-7 h-7 rounded-full bg-yellow-500/20 flex items-center justify-center text-xs font-bold text-yellow-500">
+                  {(user.name || "A").charAt(0)}
+                </div>
+                <span className="hidden sm:inline text-sm text-zinc-400 max-w-[100px] truncate">{user.name?.split(" ")[0] || "Admin"}</span>
               </button>
+              {profileOpen && (
+                <>
+                  <div className="fixed inset-0 z-[79]" onClick={() => setProfileOpen(false)} />
+                  <div className="absolute right-0 top-11 w-60 bg-[#18181D] border border-zinc-700 rounded-xl shadow-2xl overflow-hidden z-[80]">
+                    <div className="p-3 border-b border-zinc-700">
+                      <p className="text-sm font-semibold text-white truncate">{user.name || user.email}</p>
+                      <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+                    </div>
+                    <div className="py-1">
+                      {[
+                        { href: "/admin/dashboard", label: "Dashboard" },
+                        { href: "/admin/users", label: "Users" },
+                        { href: "/admin/artists", label: "Artists" },
+                        { href: "/admin/songs", label: "Songs" },
+                        { href: "/admin/notifications", label: "Notifications" },
+                        { href: "/admin/settings", label: "Settings" },
+                      ].map((item) => (
+                        <Link key={item.href} href={item.href} onClick={() => setProfileOpen(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 transition">
+                          {item.label}
+                        </Link>
+                      ))}
+                      <div className="border-t border-zinc-800 my-1" />
+                      <button onClick={() => { setProfileOpen(false); signOut(); }} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition">
+                        <LogOut className="w-4 h-4" />Sign Out
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </>
           ) : (
             <Link href="/login" className="text-sm px-4 py-2 rounded-lg bg-yellow-500 text-black font-semibold hover:bg-yellow-400 transition">

@@ -49,6 +49,15 @@ export function MobileNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
+  const [isPortalHost, setIsPortalHost] = useState(false);
+
+  useEffect(() => {
+    const h = (window.location.hostname || "").toLowerCase();
+    setIsPortalHost(
+      h === "artist.theugmusic.com" || h === "admin.theugmusic.com" ||
+      h === "artist.localhost" || h === "admin.localhost"
+    );
+  }, []);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -83,6 +92,10 @@ export function MobileNav() {
   const role = user?.role;
   const isArtist = role === "ARTIST";
   const isAdmin = role === "ADMIN";
+
+  // The artist portal and admin panel have their own headers — do not render
+  // the listener header on those subdomains.
+  if (isPortalHost) return null;
 
   return (
     <>
