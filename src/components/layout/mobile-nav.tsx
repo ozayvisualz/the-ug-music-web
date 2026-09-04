@@ -181,7 +181,9 @@ export function MobileNav() {
                 <span className="hidden sm:inline text-sm font-medium max-w-[80px] truncate">{user.name?.split(" ")[0]}</span>
               </button>
               {profileOpen && (
-                <div className="absolute right-0 top-12 w-56 bg-[#18181D] border border-zinc-700 rounded-xl shadow-2xl overflow-hidden z-[80]" onClick={(e) => e.stopPropagation()}>
+                <>
+                  <div className="fixed inset-0 z-[79]" onClick={() => setProfileOpen(false)} />
+                  <div className="absolute right-0 top-12 w-56 bg-[#18181D] border border-zinc-700 rounded-xl shadow-2xl overflow-hidden z-[80]" onClick={(e) => e.stopPropagation()}>
                   <div className="p-3 border-b border-zinc-700">
                     <p className="text-sm font-semibold text-white">{user.name}</p>
                     <p className="text-xs text-zinc-500 truncate">{user.email}</p>
@@ -199,7 +201,8 @@ export function MobileNav() {
                       <LogOut className="w-5 h-5" />Sign Out
                     </button>
                   </div>
-                </div>
+                  </div>
+                </>
               )}
             </div>
           ) : (
@@ -251,9 +254,6 @@ export function MobileNav() {
           </div>
         </div>
       )}
-
-      {/* Click-outside handler for profile dropdown */}
-      {profileOpen && <div className="fixed inset-0 z-[79]" onClick={() => setProfileOpen(false)} />}
     </>
   );
 }
