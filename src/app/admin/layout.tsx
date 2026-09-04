@@ -89,6 +89,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
+  // The admin login page should render without the sidebar/top bar.
+  if (pathname === "/admin/login" || pathname === "/login") {
+    return <>{children}</>;
+  }
+
   const sidebar = (
     <aside
       className={cn(
