@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
@@ -12,6 +12,12 @@ function LoginForm() {
   const error = searchParams.get("error");
   const redirectTo = searchParams.get("redirect") || "/dashboard";
   const [showPassword, setShowPassword] = useState(false);
+  const [isArtistHost, setIsArtistHost] = useState(false);
+
+  useEffect(() => {
+    const host = (window.location.hostname || "").toLowerCase();
+    setIsArtistHost(host === "artist.theugmusic.com" || host === "artist.localhost");
+  }, []);
 
   return (
     <div className="relative min-h-screen flex items-center justify-center bg-zinc-950 px-4 overflow-hidden">
@@ -22,7 +28,7 @@ function LoginForm() {
             <LogoMark size={64} />
           </div>
           <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-          <p className="text-zinc-400 mt-1">Sign in to TheUgMusic</p>
+          <p className="text-zinc-400 mt-1">{isArtistHost ? "Sign in to the Artist Portal" : "Sign in to TheUgMusic"}</p>
         </div>
 
         <form method="POST" action="/api/auth/login-web" className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-4">
